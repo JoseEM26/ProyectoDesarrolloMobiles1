@@ -13,6 +13,33 @@
         android:theme="@style/Theme.CompuTronica"
         tools:targetApi="31">
         <activity
+            android:name=".Perfil"
+            android:exported="false" />
+        <activity
+            android:name=".Presentacion"
+            android:exported="false" />
+        <activity
+            android:name=".Calificacion"
+            android:exported="false" />
+        <activity
+            android:name=".Asignatura"
+            android:exported="false" />
+        <activity
+            android:name=".Chat"
+            android:exported="false" />
+        <activity
+            android:name=".Login"
+            android:exported="false" />
+        <activity
+            android:name=".Register"
+            android:exported="false" />
+        <activity
+            android:name=".DashBoard"
+            android:exported="false" />
+        <activity
+            android:name=".Usuarios"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
