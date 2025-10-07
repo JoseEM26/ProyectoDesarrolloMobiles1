@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">CompuTronica</string>
+
+    <string name="txtReturnPerfil">Perfil</string>
+
+    <string name="txtPefilNombreApellido">Nombre y Apellido</string>
+    <string name="txtPerfilCodigo">Codigo Estudiante</string>
+    <string name="txtPerfilCorreo">Correo Institucional</string>
+    <string name="txtPerfilSede">Sede</string>
 </resources>

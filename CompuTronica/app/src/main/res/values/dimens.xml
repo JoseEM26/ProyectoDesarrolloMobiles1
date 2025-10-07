@@ -6,5 +6,8 @@
     <dimen name="space_12">12dp</dimen>
     <dimen name="space_16">16dp</dimen>
     <dimen name="thumb_size">56dp</dimen>
+    <dimen name="inputMinWith">350dp</dimen>
     <dimen name="btn_min_height">48dp</dimen>
+
+    <dimen name="Radious_100">1000dp</dimen>
 </resources>

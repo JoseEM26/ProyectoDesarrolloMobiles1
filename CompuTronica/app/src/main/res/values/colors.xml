@@ -2,6 +2,7 @@
 <resources>
     <color name="azul_profundo">#1D4E89</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="BackGround">#E0E0E0</color>
     <color name="azul_suave">#4A90E2</color>
     <color name="gris_claro">#A6A6A6</color>
     <color name="azul_oscuro">#0A2647</color>
