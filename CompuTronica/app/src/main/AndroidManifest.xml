@@ -37,7 +37,7 @@
             android:name=".DashBoard"
             android:exported="false" />
         <activity
-            android:name=".Usuarios"
+            android:name=".Usuarios_Activity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

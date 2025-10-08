@@ -8,8 +8,17 @@
     <string name="txtPerfilCodigo">Codigo Estudiante</string>
     <string name="txtPerfilCorreo">Correo Institucional</string>
     <string name="txtPerfilSede">Sede</string>
+    <string name="spnEstado">Estado</string>
+
+    <string name="hint_nombre">Nombre completo</string>
+    <string name="hint_Apellido">Apellido completo</string>
+    <string name="hint_CorreoInsti">Correo Institucional</string>
+    <string name="hint_Constrasena">Contraseña</string>
 
     <string name="btn_crear_nuevo_usuario">Crear usuario</string>
-    <!-- TODO: Remove or change this placeholder text -->
+    <string name="btn_agregar_usuario">Crear usuario</string>
+    <string name="btn_cancelar">Cancelar</string>
+
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_alert_create">Crear nuevo usuario</string>
 </resources>
