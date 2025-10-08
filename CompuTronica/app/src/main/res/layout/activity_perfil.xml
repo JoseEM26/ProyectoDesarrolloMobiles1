@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#E0E0E0"
-    tools:context=".Usuarios">
+    tools:context=".Usuarios_Activity">
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -187,7 +187,7 @@
         android:layout_marginTop="50dp"
         android:elevation="10dp"
         android:scaleType="centerCrop"
-        android:src="@tools:sample/avatars"
+        android:src="@drawable/baseline_people_24"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout"

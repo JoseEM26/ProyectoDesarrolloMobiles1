@@ -1,2 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+
+    <string-array name="tipoUsuario">
+        <item>Estudiante</item>
+        <item>Profesor</item>
+        <item>Administrador</item>
+    </string-array>
+</resources>
