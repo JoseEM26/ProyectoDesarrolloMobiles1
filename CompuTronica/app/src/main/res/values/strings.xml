@@ -14,6 +14,7 @@
     <string name="hint_Apellido">Apellido completo</string>
     <string name="hint_CorreoInsti">Correo Institucional</string>
     <string name="hint_Constrasena">Contraseña</string>
+    <string name="hint_codigoInsti">Codigo Institucional</string>
 
     <string name="btn_crear_nuevo_usuario">Crear usuario</string>
     <string name="btn_agregar_usuario">Crear usuario</string>
@@ -21,4 +22,9 @@
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_alert_create">Crear nuevo usuario</string>
+
+    <string name="msg_campo_requerido">Este campo es obligatorio</string>
+    <string name="msg_ocurrio_error">Corrige los errores antes de continuar</string>
+    <string name="msg_correo_invalido">Correo inválido</string>
+    <string name="msg_contrasena_invalida">La contraseña debe tener al menos 6 caracteres</string>
 </resources>

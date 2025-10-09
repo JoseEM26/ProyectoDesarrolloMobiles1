@@ -2,8 +2,15 @@
 <resources>
 
     <string-array name="tipoUsuario">
-        <item>Estudiante</item>
-        <item>Profesor</item>
-        <item>Administrador</item>
+        <item>Seleccionar...</item>
+        <item>estudiante</item>
+        <item>profesor</item>
+        <item>administrativo</item>
+    </string-array>
+    <string-array name="sedes">
+        <item>Seleccionar...</item>
+        <item>Lima Centro</item>
+        <item>SJL</item>
+        <item>Miraflores</item>
     </string-array>
 </resources>

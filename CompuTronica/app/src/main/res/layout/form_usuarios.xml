@@ -15,6 +15,19 @@
         tools:srcCompat="@tools:sample/avatars" />
 
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/titCodigoIns"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/rounded_background_white"
+        android:hint="@string/hint_codigoInsti">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etCodigoInst"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/titNombre"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -54,16 +67,17 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/titContraseña"
+        android:id="@+id/titContrasena"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:hint="@string/hint_Constrasena">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etContraseña"
+            android:id="@+id/etContrasena"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/rounded_background_white" />
+            android:background="@drawable/rounded_background_white"
+            android:inputType="textPassword" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <Spinner
@@ -74,16 +88,16 @@
         android:layout_marginBottom="5dp"
         android:background="@drawable/rounded_background_white" />
 
+    <Spinner
+        android:id="@+id/spn_sede"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rounded_background_white" />
+
     <Switch
         android:id="@+id/swtEstado"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/spnEstado" />
-
-    <Button
-        android:id="@+id/btnAgregarUsuario"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/btn_agregar_usuario" />
 
 </LinearLayout>
