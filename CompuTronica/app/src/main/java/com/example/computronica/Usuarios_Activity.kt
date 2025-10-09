@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,18 +23,21 @@ class Usuarios_Activity : AppCompatActivity() {
     private lateinit var binding: ActivityUsuariosBinding
 
     private var dialogBinding: FormUsuariosBinding? = null
-    private var pickedImageUri: Uri? = null
     private val usuarios= mutableListOf<Usuario>()
 
-    private var nextId = 1
-
+    private var pickedImageUri: Uri? = null
+    private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri != null) {
+            pickedImageUri = uri
+            dialogBinding?.imgPerfilForm?.setImageURI(uri)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityUsuariosBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // ✅ Inicializar el adapter y vincularlo al RecyclerView
         adapter = UsuarioAdapter(usuarios) {
             // Callback cuando cambia la lista, opcional
         }
@@ -41,12 +45,11 @@ class Usuarios_Activity : AppCompatActivity() {
         binding.rvUsuarios.adapter = adapter
         binding.rvUsuarios.layoutManager = LinearLayoutManager(this)
 
-        // Botón para abrir el formulario
         binding.btnUsuarioCrear.setOnClickListener { openNuevoUsuarioForm() }
     }
 
 
-
+   // @drawable/baseline_people_24
 
     private fun openNuevoUsuarioForm(){
         val b = FormUsuariosBinding.inflate(layoutInflater)
@@ -57,6 +60,7 @@ class Usuarios_Activity : AppCompatActivity() {
         val listAdapterSede = ArrayAdapter(this, android.R.layout.simple_selectable_list_item, resources.getStringArray(R.array.sedes))
         b.spnTipo.adapter = listAdapterTipo
         b.spnSede.adapter = listAdapterSede
+        b.imgPerfilForm.setOnClickListener { pickImage.launch("image/*") }
 
         // Crear el diálogo
         val dlg = AlertDialog.Builder(this)
@@ -87,8 +91,6 @@ class Usuarios_Activity : AppCompatActivity() {
                 b.titCorreoINstitucional.error = null
                 b.titCodigoIns.error = null
                 b.titContrasena.error = null
-                //(b.spnSede.selectedView as? TextView)?.setTextColor(Color.BLACK)
-                //(b.spnTipo.selectedView as? TextView)?.setTextColor(Color.BLACK)
 
                 var ok = true
 
@@ -118,13 +120,13 @@ class Usuarios_Activity : AppCompatActivity() {
                 }
 
                 if (sede == "Seleccionar..." || sede.isEmpty()) {
-                    (b.spnSede.selectedView as? TextView)?.setTextColor(Color.RED)
+                    (b.spnSede.selectedView as TextView).setTextColor(Color.RED)
                     Toast.makeText(this, "Debe seleccionar una sede válida", Toast.LENGTH_SHORT).show()
                     ok = false
                 }
 
                 if (tipoStr == "Seleccionar..." || tipoStr.isEmpty()) {
-                    (b.spnTipo.selectedView as? TextView)?.setTextColor(Color.RED)
+                    (b.spnTipo.selectedView as TextView).setTextColor(Color.RED)
                     Toast.makeText(this, "Debe seleccionar un tipo de usuario válido", Toast.LENGTH_SHORT).show()
                     ok = false
                 }

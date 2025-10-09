@@ -8,7 +8,9 @@
     <string name="txtPerfilCodigo">Codigo Estudiante</string>
     <string name="txtPerfilCorreo">Correo Institucional</string>
     <string name="txtPerfilSede">Sede</string>
+
     <string name="spnEstado">Estado</string>
+    <string name="contextDescripcionImgPErfil">Imagen perfil form</string>
 
     <string name="hint_nombre">Nombre completo</string>
     <string name="hint_Apellido">Apellido completo</string>

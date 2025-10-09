@@ -19,18 +19,18 @@ class UsuarioAdapter(private val items:MutableList<Usuario> , private val onList
 
     override fun onBindViewHolder(holder: UsuarioAdapter.VH, position: Int) {
         val context=holder.binding.root.context
-        val usuario =items[position]
-        val bindingItem=holder.binding
+        val u =items[position]
+        val b=holder.binding
 
-        if(usuario.imgURI != null){
-            bindingItem.imgUsuarioPhoto.setImageURI(usuario.imgURI)
+        if(u.imgURI != null){
+            b.imgUsuarioPhoto.setImageURI(u.imgURI)
         }else{
-            bindingItem.imgUsuarioPhoto.setImageResource(R.mipmap.ic_launcher)
+            b.imgUsuarioPhoto.setImageResource(R.mipmap.ic_launcher)
         }
 
-        bindingItem.txtUsuariosNombre.text=usuario.nombre+" "+usuario.apellido
-        bindingItem.txtUsuariosSede.text=usuario.sede
-        bindingItem.txtUsuariosActivo.text = if (usuario.estado) "Activo" else "Inactivo"
+        b.txtUsuariosNombre.text=u.nombre+" "+u.apellido
+        b.txtUsuariosSede.text=u.sede
+        b.txtUsuariosActivo.text = if (u.estado) "Activo" else "Inactivo"
 
     }
 
