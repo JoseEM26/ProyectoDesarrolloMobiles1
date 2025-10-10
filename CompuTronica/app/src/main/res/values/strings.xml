@@ -24,6 +24,8 @@
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_alert_create">Crear nuevo usuario</string>
+    <string name="title_alert_editar">Editar usuario</string>
+    <string name="title_alert_eliminar">Eliminar usuario</string>
 
     <string name="msg_campo_requerido">Este campo es obligatorio</string>
     <string name="msg_ocurrio_error">Corrige los errores antes de continuar</string>
