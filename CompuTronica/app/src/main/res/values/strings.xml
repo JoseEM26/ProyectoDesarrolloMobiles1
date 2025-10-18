@@ -31,4 +31,8 @@
     <string name="msg_ocurrio_error">Corrige los errores antes de continuar</string>
     <string name="msg_correo_invalido">Correo inválido</string>
     <string name="msg_contrasena_invalida">La contraseña debe tener al menos 6 caracteres</string>
+
+    <string name="tab_inicio">Inicio</string>
+    <string name="tab_chat">Chat</string>
+    <string name="tab_usuarios">Usuarios</string>
 </resources>
