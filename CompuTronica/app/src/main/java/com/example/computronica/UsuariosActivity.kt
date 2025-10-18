@@ -16,7 +16,7 @@ import com.example.computronica.Model.Usuario
 import com.example.computronica.databinding.ActivityUsuariosBinding
 import com.example.computronica.databinding.FormUsuariosBinding
 
-class Usuarios_Activity : AppCompatActivity() {
+class UsuariosActivity : AppCompatActivity() {
 
 
     private lateinit var adapter: UsuarioAdapter

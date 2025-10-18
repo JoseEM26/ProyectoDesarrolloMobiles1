@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "821260830773",
+    "project_id": "computronica-2206d",
+    "storage_bucket": "computronica-2206d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:821260830773:android:f6ab92056d6db892b6097c",
+        "android_client_info": {
+          "package_name": "com.example.computronica"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBt-LxmFPSnoHeU7kzu4ikPEgWC33bmG40"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity() {
         // Configurar el botón para redirigir
         binding.btnRedirigirUsuarios.setOnClickListener {
             // Crear el Intent para redirigir a Usuarios_Activity
-            val intent = Intent(this, Usuarios_Activity::class.java)
+            val intent = Intent(this, UsuariosActivity::class.java)
             startActivity(intent)  // Iniciar la actividad
         }
     }

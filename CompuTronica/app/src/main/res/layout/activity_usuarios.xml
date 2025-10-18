@@ -10,7 +10,7 @@
     android:paddingTop="10dp"
     android:paddingEnd="10dp"
     android:paddingBottom="10dp"
-    tools:context=".Perfil">
+    tools:context=".PerfilActivity">
 
     <LinearLayout
         android:id="@+id/linearLayout"
