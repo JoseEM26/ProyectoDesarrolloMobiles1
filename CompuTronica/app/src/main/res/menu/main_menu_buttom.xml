@@ -5,11 +5,15 @@
         android:icon="@drawable/vector_home"
         android:title="@string/tab_inicio" />
     <item
-        android:id="@+id/nav_chat"
+        android:id="@+id/nav_asignatura"
         android:icon="@drawable/vector_chat"
-        android:title="@string/tab_chat" />
+        android:title="@string/tabAsignatura" />
     <item
-        android:id="@+id/nav_usuarios"
+        android:id="@+id/nav_calificaoiones"
         android:icon="@drawable/vectotr_usuario"
-        android:title="@string/tab_usuarios" />
+        android:title="@string/tabCalificaciones" />
+    <item
+        android:id="@+id/nav_more"
+        android:icon="@drawable/baseline_dehaze_24"
+        android:title="@string/tab_more" />
 </menu>

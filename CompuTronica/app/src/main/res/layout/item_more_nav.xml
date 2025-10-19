@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="6dp"
+    app:cardCornerRadius="16dp"
+    app:cardUseCompatPadding="true"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/azul_profundo">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/azul_oscuro"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="8dp">
+
+        <!-- Columna de datos del usuario -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/txtUsuariosNombre"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Nombre Apellido"
+                android:textAppearance="?attr/textAppearanceSubtitle1"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                tools:ignore="HardcodedText" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/txtUsuariosSede"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Sede Lima"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="@color/white"
+                tools:ignore="HardcodedText" />
+        </LinearLayout>
+
+        <!-- Estado -->
+
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
