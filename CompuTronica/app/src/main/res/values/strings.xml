@@ -35,4 +35,6 @@
     <string name="tab_inicio">Inicio</string>
     <string name="tab_chat">Chat</string>
     <string name="tab_usuarios">Usuarios</string>
+
+    <string name="msg_error">Ocurrio un error</string>
 </resources>

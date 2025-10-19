@@ -1,18 +1,20 @@
 package com.example.computronica.Model
 
-import android.net.Uri
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.ServerTimestamp
 
 data class Usuario(
-    var id: Int,
-    var codigoInstitucional: String,
-    var sede: String,
-    var nombre: String,
-    var apellido: String,
-    var correoInstitucional: String,
-    var contrasena: String,
-    var tipo: TipoUsuario,
+    var id: String = "",
+    var codigoInstitucional: String = "",
+    var sede: String = "",
+    var nombre: String = "",
+    var apellido: String = "",
+    var correoInstitucional: String = "",
+    var contrasena: String = "",
+    var tipo: TipoUsuario = TipoUsuario.estudiante,
     var estado: Boolean = true,
-    var imgURI:Uri?=null
+    @ServerTimestamp var createdAt: Timestamp? = null,
+    var updatedAt: Timestamp? = null
 )
 
 enum class TipoUsuario {

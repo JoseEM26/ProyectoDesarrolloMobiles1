@@ -38,16 +38,6 @@
             android:textSize="24sp"
             android:textStyle="bold" />
 
-        <com.makeramen.roundedimageview.RoundedImageView
-            android:id="@+id/ivUsuariosPerfil"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginRight="5dp"
-            android:elevation="10dp"
-            android:src="@drawable/ic_launcher_background"
-            app:riv_corner_radius="100dp" />
-
     </LinearLayout>
 
     <Button
@@ -73,6 +63,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btn_UsuarioCrear" />
+
+    <TextView
+        android:id="@+id/tvEmpty"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="No hay usuarios disponibles"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/rv_usuarios"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

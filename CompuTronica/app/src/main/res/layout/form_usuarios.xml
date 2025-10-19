@@ -8,16 +8,6 @@
     android:orientation="vertical"
     android:padding="10dp">
 
-    <ImageView
-        android:id="@+id/img_perfil_form"
-        android:layout_width="153dp"
-        android:layout_height="126dp"
-        android:layout_gravity="center"
-        android:layout_marginBottom="10dp"
-        android:background="@drawable/rounded_background_white"
-        android:contentDescription="@string/btn_crear_nuevo_usuario"
-        app:srcCompat="@drawable/baseline_people_24" />
-
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/titCodigoIns"
         android:layout_width="match_parent"
