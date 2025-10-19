@@ -22,12 +22,16 @@ class MainActivity : AppCompatActivity() {
                     changeFrame(DashBoardActivity())
                     true
                 }
-                R.id.nav_chat -> {
-                    changeFrame(ChatActivity())
+                R.id.nav_asignatura -> {
+                    changeFrame(AsignaturaActivity())
                     true
                 }
-                R.id.nav_usuarios -> {
-                    changeFrame(UsuariosActivity())
+                R.id.nav_calificaoiones -> {
+                    changeFrame(CalificacionActivity())
+                    true
+                }
+                R.id.nav_more -> {
+                    changeFrame(MoreMenuNavActivity())
                     true
                 }
                 else -> false

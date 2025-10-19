@@ -12,52 +12,22 @@
     android:paddingBottom="10dp"
     tools:context=".PerfilActivity">
 
-    <LinearLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageView
-            android:id="@+id/VectorRPerfil"
-            android:layout_width="40dp"
-            android:layout_height="34dp"
-            android:layout_weight="0"
-            app:srcCompat="@drawable/baseline_keyboard_return_24" />
-
-        <TextView
-            android:id="@+id/txtPefilReturn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/txtReturnUsuarios"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-
-    </LinearLayout>
-
     <Button
         android:id="@+id/btn_UsuarioCrear"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="32dp"
         android:layout_marginEnd="8dp"
         android:text="@string/btn_crear_nuevo_usuario"
         android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_usuarios"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -68,11 +38,13 @@
         android:id="@+id/tvEmpty"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:text="No hay usuarios disponibles"
         android:textAlignment="center"
         app:layout_constraintBottom_toTopOf="@+id/rv_usuarios"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_UsuarioCrear" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

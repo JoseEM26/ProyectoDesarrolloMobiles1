@@ -96,7 +96,7 @@ class UsuariosActivity : Fragment() {
                     correoInstitucional = dialogBinding.etCorreoInstitutcional.text.toString().trim(),
                     contrasena = dialogBinding.etContrasena.text.toString().trim(),
                     tipo = TipoUsuario.valueOf(dialogBinding.spnTipo.selectedItem.toString()),
-                    estado = true,
+                    estado = dialogBinding.swtEstado.isActivated,
                     createdAt = Timestamp.now(),
                     updatedAt = Timestamp.now()
                 )
@@ -120,12 +120,14 @@ class UsuariosActivity : Fragment() {
         dialogBinding.etCorreoInstitutcional.setText(usuario.correoInstitucional)
         dialogBinding.etCodigoInst.setText(usuario.codigoInstitucional)
         dialogBinding.etContrasena.setText(usuario.contrasena)
+        dialogBinding.swtEstado.isChecked = usuario.estado
 
         dialogBinding.spnTipo.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, tipos)
         dialogBinding.spnSede.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, sedes)
 
         dialogBinding.spnTipo.setSelection(tipos.indexOf(usuario.tipo.name))
         dialogBinding.spnSede.setSelection(sedes.indexOf(usuario.sede))
+
 
         AlertDialog.Builder(requireContext())
             .setTitle("Editar Usuario")
@@ -139,6 +141,7 @@ class UsuariosActivity : Fragment() {
                     "contrasena" to dialogBinding.etContrasena.text.toString().trim(),
                     "sede" to dialogBinding.spnSede.selectedItem.toString(),
                     "tipo" to dialogBinding.spnTipo.selectedItem.toString(),
+                    "estado" to dialogBinding.swtEstado.isChecked,
                     "updatedAt" to Timestamp.now()
                 )
 

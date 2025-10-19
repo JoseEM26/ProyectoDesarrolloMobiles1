@@ -13,4 +13,10 @@
         <item>SJL</item>
         <item>Miraflores</item>
     </string-array>
+    <string-array name="moreOpcionNav">
+        <item>Asignatura</item>
+        <item>Calificaciones</item>
+        <item>Perfil</item>
+        <item>Presentacion</item>
+    </string-array>
 </resources>
