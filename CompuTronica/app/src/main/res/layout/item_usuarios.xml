@@ -7,56 +7,73 @@
     android:layout_margin="6dp"
     app:cardCornerRadius="16dp"
     app:cardUseCompatPadding="true"
-
-    >
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/azul_profundo">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/azul_oscuro"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:gravity="center"
-        android:textAlignment="center">
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="8dp">
 
-        <com.makeramen.roundedimageview.RoundedImageView
-            android:id="@+id/img_usuario_photo"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            android:src="@drawable/ic_launcher_background"
-            app:riv_corner_radius="100dp" />
-
+        <!-- Columna de datos del usuario -->
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:orientation="vertical">
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/txtUsuariosNombre"
-                android:layout_width="200dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="TextView"
-                android:textAlignment="center" />
+                android:text="Nombre Apellido"
+                android:textAppearance="?attr/textAppearanceSubtitle1"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                tools:ignore="HardcodedText" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/txtUsuariosSede"
-                android:layout_width="200dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="TextView"
-                android:textAlignment="center" />
-
+                android:text="Sede Lima"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="@color/white"
+                tools:ignore="HardcodedText" />
         </LinearLayout>
 
+        <!-- Estado -->
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/txtUsuariosActivo"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="TextView"
-            android:textAlignment="center"
-            android:textStyle="bold" />
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:layout_marginEnd="8dp"
+            android:text="Activo"
+            android:textColor="@color/azul_profundo"
+            android:textStyle="bold"
+            tools:ignore="HardcodedText" />
+
+        <ImageButton
+            android:id="@+id/btnMenu"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center_vertical"
+            android:adjustViewBounds="true"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/app_name"
+            android:gravity="center"
+            android:padding="0dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/baseline_dehaze_24"
+
+            android:tint="@color/BackGround" />
+
+
 
     </LinearLayout>
-
 </com.google.android.material.card.MaterialCardView>
