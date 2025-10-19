@@ -1,9 +1,7 @@
 package com.example.computronica
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -16,23 +14,23 @@ import com.example.computronica.Model.TipoUsuario
 import com.example.computronica.Model.Usuario
 import com.example.computronica.databinding.ActivityUsuariosBinding
 import com.example.computronica.databinding.FormUsuariosBinding
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
-import com.google.firebase.Timestamp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 
 class UsuariosActivity : Fragment() {
 
     private var _b: ActivityUsuariosBinding? = null
     private val b get() = _b!!
-    private var ui = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private val db by lazy { FirebaseFirestore.getInstance() }
-    private val adapter = UsuarioAdapter(mutableListOf(), onEdit = this::showEditDialog)
     private var listenerReg: ListenerRegistration? = null
+
+    private val adapter = UsuarioAdapter(
+        mutableListOf(),
+        onEdit = { usuario -> showEditDialog(usuario) },
+        onDelete = { usuario -> eliminarUsuario(usuario) }
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,14 +39,12 @@ class UsuariosActivity : Fragment() {
     ): View {
         _b = ActivityUsuariosBinding.inflate(inflater, container, false)
 
-        // Configurar RecyclerView
         b.rvUsuarios.layoutManager = LinearLayoutManager(requireContext())
         b.rvUsuarios.adapter = adapter
         b.rvUsuarios.addItemDecoration(
             DividerItemDecoration(requireContext(), RecyclerView.VERTICAL)
         )
 
-        // Botón para crear nuevo usuario
         b.btnUsuarioCrear.setOnClickListener { showCreateDialog() }
 
         return b.root
@@ -59,7 +55,6 @@ class UsuariosActivity : Fragment() {
         listarUsuarios()
     }
 
-    // 🔹 Listar usuarios desde Firestore
     private fun listarUsuarios() {
         listenerReg?.remove()
         listenerReg = db.collection("usuarios")
@@ -71,9 +66,7 @@ class UsuariosActivity : Fragment() {
                 }
 
                 val list = snapshot?.documents?.mapNotNull { doc ->
-                    doc.toObject(Usuario::class.java)?.apply {
-                        id = doc.id // Genera ID entero único
-                    }
+                    doc.toObject(Usuario::class.java)?.apply { id = doc.id }
                 }.orEmpty()
 
                 adapter.replaceAll(list)
@@ -81,72 +74,95 @@ class UsuariosActivity : Fragment() {
             }
     }
 
-    // 🔹 Crear usuario nuevo
     private fun showCreateDialog() {
         val dialogBinding = FormUsuariosBinding.inflate(layoutInflater)
 
         val tipos = resources.getStringArray(R.array.tipoUsuario)
-        dialogBinding.spnTipo.adapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_spinner_dropdown_item,
-            tipos
-        )
-
-        // Spinner para sede (desde strings.xml)
         val sedes = resources.getStringArray(R.array.sedes)
-        dialogBinding.spnSede.adapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_spinner_dropdown_item,
-            sedes
-        )
+
+        dialogBinding.spnTipo.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, tipos)
+        dialogBinding.spnSede.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, sedes)
 
         AlertDialog.Builder(requireContext())
             .setTitle("Registrar Usuario")
             .setView(dialogBinding.root)
             .setPositiveButton("Guardar") { _, _ ->
-                val nombre = dialogBinding.etNombre.text.toString().trim()
-                val apellido = dialogBinding.etApellido.text.toString().trim()
-                val correo = dialogBinding.etCorreoInstitutcional.text.toString().trim()
-                val codigo = dialogBinding.etCodigoInst.text.toString().trim()
-                val contrasena = dialogBinding.etContrasena.text.toString().trim()
-                val tipo = dialogBinding.spnTipo.selectedItem.toString()
-                val sede = dialogBinding.spnSede.selectedItem.toString()
-
-                if (nombre.isEmpty() || apellido.isEmpty() || correo.isEmpty()) {
-                    toast("Completa todos los campos obligatorios")
-                    return@setPositiveButton
-                }
-
-                val nuevoUsuario = Usuario(
-                    id = 0.toString(), // Se genera luego en Firestore
-                    codigoInstitucional = codigo,
-                    sede = sede,
-                    nombre = nombre,
-                    apellido = apellido,
-                    correoInstitucional = correo,
-                    contrasena = contrasena,
-                    tipo = TipoUsuario.valueOf(tipo),
+                val usuario = Usuario(
+                    id = "",
+                    codigoInstitucional = dialogBinding.etCodigoInst.text.toString().trim(),
+                    sede = dialogBinding.spnSede.selectedItem.toString(),
+                    nombre = dialogBinding.etNombre.text.toString().trim(),
+                    apellido = dialogBinding.etApellido.text.toString().trim(),
+                    correoInstitucional = dialogBinding.etCorreoInstitutcional.text.toString().trim(),
+                    contrasena = dialogBinding.etContrasena.text.toString().trim(),
+                    tipo = TipoUsuario.valueOf(dialogBinding.spnTipo.selectedItem.toString()),
                     estado = true,
                     createdAt = Timestamp.now(),
                     updatedAt = Timestamp.now()
                 )
 
                 db.collection("usuarios")
-                    .add(nuevoUsuario)
-                    .addOnSuccessListener {
-                        toast("Usuario registrado correctamente")
-                    }
-                    .addOnFailureListener { e ->
-                        toast("Error al guardar: ${e.message}")
-                    }
+                    .add(usuario)
+                    .addOnSuccessListener { toast("✅ Usuario registrado") }
+                    .addOnFailureListener { e -> toast("❌ Error: ${e.message}") }
             }
             .setNegativeButton("Cancelar", null)
             .show()
     }
 
-    // 🔹 Editar usuario (pendiente de implementación)
     private fun showEditDialog(usuario: Usuario) {
-        toast("Función editar próximamente 😉")
+        val dialogBinding = FormUsuariosBinding.inflate(layoutInflater)
+        val tipos = resources.getStringArray(R.array.tipoUsuario)
+        val sedes = resources.getStringArray(R.array.sedes)
+
+        dialogBinding.etNombre.setText(usuario.nombre)
+        dialogBinding.etApellido.setText(usuario.apellido)
+        dialogBinding.etCorreoInstitutcional.setText(usuario.correoInstitucional)
+        dialogBinding.etCodigoInst.setText(usuario.codigoInstitucional)
+        dialogBinding.etContrasena.setText(usuario.contrasena)
+
+        dialogBinding.spnTipo.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, tipos)
+        dialogBinding.spnSede.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, sedes)
+
+        dialogBinding.spnTipo.setSelection(tipos.indexOf(usuario.tipo.name))
+        dialogBinding.spnSede.setSelection(sedes.indexOf(usuario.sede))
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Editar Usuario")
+            .setView(dialogBinding.root)
+            .setPositiveButton("Actualizar") { _, _ ->
+                val updates = mapOf(
+                    "nombre" to dialogBinding.etNombre.text.toString().trim(),
+                    "apellido" to dialogBinding.etApellido.text.toString().trim(),
+                    "correoInstitucional" to dialogBinding.etCorreoInstitutcional.text.toString().trim(),
+                    "codigoInstitucional" to dialogBinding.etCodigoInst.text.toString().trim(),
+                    "contrasena" to dialogBinding.etContrasena.text.toString().trim(),
+                    "sede" to dialogBinding.spnSede.selectedItem.toString(),
+                    "tipo" to dialogBinding.spnTipo.selectedItem.toString(),
+                    "updatedAt" to Timestamp.now()
+                )
+
+                db.collection("usuarios").document(usuario.id)
+                    .update(updates)
+                    .addOnSuccessListener { toast("✅ Usuario actualizado") }
+                    .addOnFailureListener { e -> toast("❌ Error: ${e.message}") }
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    private fun eliminarUsuario(usuario: Usuario) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Eliminar Usuario")
+            .setMessage("¿Deseas eliminar a ${usuario.nombre} ${usuario.apellido}?")
+            .setPositiveButton("Eliminar") { _, _ ->
+                db.collection("usuarios").document(usuario.id)
+                    .delete()
+                    .addOnSuccessListener { toast("🗑️ Usuario eliminado") }
+                    .addOnFailureListener { e -> toast("❌ Error: ${e.message}") }
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
     }
 
     private fun toast(msg: String) =
@@ -154,7 +170,6 @@ class UsuariosActivity : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        ui.cancel()
         listenerReg?.remove()
         _b = null
     }

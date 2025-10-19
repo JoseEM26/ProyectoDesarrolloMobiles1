@@ -7,5 +7,7 @@
     <color name="gris_claro">#A6A6A6</color>
     <color name="azul_oscuro">#0A2647</color>
     <color name="azul_verdoso">#00A6A6</color>
+    <color name="verde">#20752B</color>
+    <color name="rojo">#FF0000</color>
     <color name="negro">#000000</color>
 </resources>
