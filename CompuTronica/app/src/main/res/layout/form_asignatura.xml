@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/BackGround"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <!-- Código de Asignatura -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/titCodigoAsignatura"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rounded_background_white"
+        android:hint="Código de Asignatura">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etCodigoAsignatura"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Nombre -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/titNombre"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Nombre de la Asignatura">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etNombre"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_background_white" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Descripción -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/titDescripcion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Descripción">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etDescripcion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minLines="2"
+            android:inputType="textMultiLine"
+            android:background="@drawable/rounded_background_white" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Créditos -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/titCreditos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Créditos">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etCreditos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:background="@drawable/rounded_background_white" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:id="@+id/tvProfesorLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Profesor"
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        android:layout_marginTop="8dp" />
+
+    <Spinner
+        android:id="@+id/spnProfesor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rounded_background_white"
+        android:padding="6dp" />
+
+</LinearLayout>

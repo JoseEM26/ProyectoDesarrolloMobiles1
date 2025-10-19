@@ -51,7 +51,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="589dp"
+        android:layout_height="605dp"
         android:layout_marginTop="20dp"
         android:background="@color/white"
         android:orientation="vertical">
@@ -61,90 +61,88 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             android:layout_marginBottom="8dp"
+            android:backgroundTint="@android:color/white"
+            android:drawableEnd="@drawable/baseline_navigate_next_24"
+            android:drawablePadding="0dp"
+            android:drawableTint="@color/azul_profundo"
             android:gravity="center_vertical"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:text="Usuarios"
             android:textColor="@color/azul_profundo"
             android:textSize="20sp"
-            android:backgroundTint="@android:color/white"
             app:cornerRadius="12dp"
             app:strokeColor="@android:color/black"
-            app:strokeWidth="1dp"
-            android:drawableEnd="@drawable/baseline_navigate_next_24"
-            android:drawablePadding="0dp"
-            android:drawableTint="@color/azul_profundo" />
+            app:strokeWidth="1dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnChat"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             android:layout_marginBottom="8dp"
+            android:backgroundTint="@android:color/white"
+            android:drawableEnd="@drawable/baseline_navigate_next_24"
+            android:drawablePadding="0dp"
+            android:drawableTint="@color/azul_profundo"
             android:gravity="center_vertical"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:text="Chat"
             android:textColor="@color/azul_profundo"
             android:textSize="20sp"
-            android:backgroundTint="@android:color/white"
             app:cornerRadius="12dp"
             app:strokeColor="@android:color/black"
-            app:strokeWidth="1dp"
-            android:drawableEnd="@drawable/baseline_navigate_next_24"
-            android:drawablePadding="0dp"
-            android:drawableTint="@color/azul_profundo" />
+            app:strokeWidth="1dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPresentacion"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             android:layout_marginBottom="8dp"
+            android:backgroundTint="@android:color/white"
+            android:drawableEnd="@drawable/baseline_navigate_next_24"
+            android:drawablePadding="0dp"
+            android:drawableTint="@color/azul_profundo"
             android:gravity="center_vertical"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:text="Presentacion"
             android:textColor="@color/azul_profundo"
             android:textSize="20sp"
-            android:backgroundTint="@android:color/white"
             app:cornerRadius="12dp"
             app:strokeColor="@android:color/black"
-            app:strokeWidth="1dp"
-            android:drawableEnd="@drawable/baseline_navigate_next_24"
-            android:drawablePadding="0dp"
-            android:drawableTint="@color/azul_profundo" />
+            app:strokeWidth="1dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnLogOut"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             android:layout_marginBottom="8dp"
+            android:backgroundTint="@android:color/white"
+            android:drawableEnd="@drawable/baseline_navigate_next_24"
+            android:drawablePadding="0dp"
+            android:drawableTint="@color/azul_profundo"
             android:gravity="center_vertical"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:text="Log Out"
             android:textColor="@color/azul_profundo"
             android:textSize="20sp"
-            android:backgroundTint="@android:color/white"
             app:cornerRadius="12dp"
             app:strokeColor="@android:color/black"
-            app:strokeWidth="1dp"
-            android:drawableEnd="@drawable/baseline_navigate_next_24"
-            android:drawablePadding="0dp"
-            android:drawableTint="@color/azul_profundo" />
-
-
+            app:strokeWidth="1dp" />
 
 
     </LinearLayout>

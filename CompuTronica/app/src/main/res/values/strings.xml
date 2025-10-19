@@ -20,6 +20,8 @@
 
     <string name="btn_crear_nuevo_usuario">Crear usuario</string>
     <string name="btn_agregar_usuario">Crear usuario</string>
+    <string name="btn_agregar_asignatura">Crear asignatura</string>
+    <string name="btn_agregar_calificaiones">Crear calificaciones</string>
     <string name="btn_cancelar">Cancelar</string>
     <string name="btnVerPerfi">Ver perfil</string>
     <string name="btnChat">Chat</string>

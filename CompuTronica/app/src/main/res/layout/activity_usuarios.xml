@@ -13,7 +13,7 @@
     tools:context=".PerfilActivity">
 
     <Button
-        android:id="@+id/btn_UsuarioCrear"
+        android:id="@+id/btnUsuarioCrear"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
@@ -24,7 +24,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_usuarios"
+        android:id="@+id/rvUsuarios"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="8dp"
@@ -32,7 +32,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_UsuarioCrear" />
+        app:layout_constraintTop_toBottomOf="@+id/btnUsuarioCrear" />
 
     <TextView
         android:id="@+id/tvEmpty"
@@ -41,10 +41,10 @@
         android:layout_marginTop="8dp"
         android:text="No hay usuarios disponibles"
         android:textAlignment="center"
-        app:layout_constraintBottom_toTopOf="@+id/rv_usuarios"
+        app:layout_constraintBottom_toTopOf="@+id/rvUsuarios"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_UsuarioCrear" />
+        app:layout_constraintTop_toBottomOf="@+id/btn_usuariosCreate" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
