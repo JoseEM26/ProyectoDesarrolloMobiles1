@@ -28,20 +28,20 @@
             android:orientation="vertical">
 
             <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/txtUsuariosNombre"
+                android:id="@+id/txtNombreCurso"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Nombre Apellido"
+                android:text="NombreCurso"
                 android:textAppearance="?attr/textAppearanceSubtitle1"
                 android:textColor="@color/white"
                 android:textStyle="bold"
                 tools:ignore="HardcodedText" />
 
             <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/txtUsuariosSede"
+                android:id="@+id/txtTipoAsignaturaFecha"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Sede Lima"
+                android:text="TipoASignaturaFecha"
                 android:textAppearance="?attr/textAppearanceBody2"
                 android:textColor="@color/white"
                 tools:ignore="HardcodedText" />
@@ -49,20 +49,20 @@
 
         <!-- Estado -->
         <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/txtUsuariosActivo"
+            android:id="@+id/txtNotaCurso"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:gravity="center"
             android:layout_marginEnd="8dp"
-            android:text="Activo"
+            android:gravity="center"
+            android:text="Nota"
             android:textColor="@color/azul_profundo"
             android:textStyle="bold"
             tools:ignore="HardcodedText" />
 
         <ImageButton
-            android:id="@+id/btnMenu"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:id="@+id/btnMenuCalificaicon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_gravity="center_vertical"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
@@ -71,7 +71,7 @@
             android:padding="0dp"
             android:scaleType="fitCenter"
             android:src="@drawable/baseline_dehaze_24"
-            app:tint="@color/BackGround" />
+            app:tint="#FFFFFF" />
 
 
 

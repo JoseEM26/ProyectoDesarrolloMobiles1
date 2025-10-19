@@ -88,7 +88,7 @@ class UsuariosActivity : Fragment() {
             .setView(dialogBinding.root)
             .setPositiveButton("Guardar") { _, _ ->
                 val usuario = Usuario(
-                    id = "",
+                    id = db.collection("usuarios").document().id,
                     codigoInstitucional = dialogBinding.etCodigoInst.text.toString().trim(),
                     sede = dialogBinding.spnSede.selectedItem.toString(),
                     nombre = dialogBinding.etNombre.text.toString().trim(),
