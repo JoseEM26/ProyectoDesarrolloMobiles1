@@ -56,4 +56,12 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:${libs.versions.firebaseBom.get()}"))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
+
+    // ✅ NUEVAS DEPENDENCIAS PARA EL CHAT:
+    implementation("com.google.firebase:firebase-database-ktx")  // Realtime Database
+    implementation("com.google.firebase:firebase-storage-ktx")   // Storage (para imágenes)
+
+    // Coroutines para operaciones asíncronas
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 }
