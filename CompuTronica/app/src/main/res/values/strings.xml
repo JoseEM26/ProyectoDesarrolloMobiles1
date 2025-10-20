@@ -1,0 +1,47 @@
+<resources>
+    <string name="app_name">CompuTronica</string>
+
+    <string name="txtReturnPerfil">Perfil</string>
+    <string name="txtReturnUsuarios">Usuarios</string>
+
+    <string name="txtPefilNombreApellido">Nombre y Apellido</string>
+    <string name="txtPerfilCodigo">Codigo Estudiante</string>
+    <string name="txtPerfilCorreo">Correo Institucional</string>
+    <string name="txtPerfilSede">Sede</string>
+
+    <string name="spnEstado">Estado</string>
+    <string name="contextDescripcionImgPErfil">Imagen perfil form</string>
+
+    <string name="hint_nombre">Nombre completo</string>
+    <string name="hint_Apellido">Apellido completo</string>
+    <string name="hint_CorreoInsti">Correo Institucional</string>
+    <string name="hint_Constrasena">Contraseña</string>
+    <string name="hint_codigoInsti">Codigo Institucional</string>
+
+    <string name="btn_crear_nuevo_usuario">Crear usuario</string>
+    <string name="btn_agregar_usuario">Crear usuario</string>
+    <string name="btn_agregar_asignatura">Crear asignatura</string>
+    <string name="btn_agregar_calificaiones">Crear calificaciones</string>
+    <string name="btn_cancelar">Cancelar</string>
+    <string name="btnVerPerfi">Ver perfil</string>
+    <string name="btnChat">Chat</string>
+    <string name="btnUsuarios">Usuarios</string>
+    <string name="btnPresentacion">Presentacion</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_alert_create">Crear nuevo usuario</string>
+    <string name="title_alert_editar">Editar usuario</string>
+    <string name="title_alert_eliminar">Eliminar usuario</string>
+
+    <string name="msg_campo_requerido">Este campo es obligatorio</string>
+    <string name="msg_ocurrio_error">Corrige los errores antes de continuar</string>
+    <string name="msg_correo_invalido">Correo inválido</string>
+    <string name="msg_contrasena_invalida">La contraseña debe tener al menos 6 caracteres</string>
+
+    <string name="tab_inicio">Inicio</string>
+    <string name="tabAsignatura">Asignatura</string>
+    <string name="tabCalificaciones">Calificaciones</string>
+    <string name="tab_more">More</string>
+
+    <string name="msg_error">Ocurrio un error</string>
+</resources>
