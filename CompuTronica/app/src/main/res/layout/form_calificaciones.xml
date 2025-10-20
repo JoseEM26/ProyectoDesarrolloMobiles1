@@ -12,19 +12,21 @@
         android:orientation="vertical"
         android:padding="8dp">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/titEstudianteId"
+        <TextView
+            android:id="@+id/tvEstudianteLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="ID del Estudiante">
+            android:text="Estudiante"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            android:layout_marginTop="8dp" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etEstudianteId"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:background="@drawable/rounded_background_white" />
-        </com.google.android.material.textfield.TextInputLayout>
+        <Spinner
+            android:id="@+id/spnEstudiante"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_background_white"
+            android:padding="6dp" />
 
         <TextView
             android:id="@+id/tvAsignaturaLabel"
@@ -69,21 +71,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal"
-                android:background="@drawable/rounded_background_white" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/titFecha"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Fecha de Registro">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etFecha"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:enabled="false"
-                android:focusable="false"
                 android:background="@drawable/rounded_background_white" />
         </com.google.android.material.textfield.TextInputLayout>
 
