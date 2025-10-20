@@ -7,24 +7,30 @@
         <item>profesor</item>
         <item>administrativo</item>
     </string-array>
+
     <string-array name="sedes">
         <item>Seleccionar...</item>
         <item>Lima Centro</item>
-        <item>SJL</item>
+        <item>San Juan de Lurigancho</item>
         <item>Miraflores</item>
     </string-array>
+
     <string-array name="moreOpcionNav">
-        <item>Asignatura</item>
+        <item>Asignaturas</item>
         <item>Calificaciones</item>
         <item>Perfil</item>
-        <item>Presentacion</item>
+        <item>Presentación</item>
     </string-array>
 
     <string-array name="tipoAsignatura">
+        <item>Seleccionar...</item>
         <item>T1</item>
         <item>T2</item>
         <item>Proyecto</item>
         <item>T3</item>
         <item>Parcial</item>
+        <item>Final</item>
     </string-array>
+
+
 </resources>

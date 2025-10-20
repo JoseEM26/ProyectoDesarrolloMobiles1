@@ -1,12 +1,13 @@
 package com.example.computronica.Model
 
-import java.util.Date
+import com.google.firebase.Timestamp
 
-data class Calificaciones (
+data class Calificaciones(
     var id: String = "",
-    val estudianteId: Int,
-    val asignaturaId: String,
-    val evaluacion: String, // "Parcial" o "Final"
-    val nota: Double,
-    val fechaRegistro: Date = Date()
+    val estudianteId: String = "",
+    val asignaturaId: String = "",
+    val evaluacion: String = "",
+    val nota: Double = 0.0,
+    val fechaRegistro: String = ""
 )
+
