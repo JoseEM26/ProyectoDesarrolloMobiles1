@@ -2,148 +2,163 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+    android:id="@+id/layoutLogin"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#4ACBF2"
-    tools:context=".MainActivity">
+    android:background="@color/azul_suave"
+    tools:context=".LoginActivity">
 
+    <!-- Capa blanca translúcida para efecto suave -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha="0.7"
+        android:alpha="0.15"
         android:background="@color/white" />
 
+    <!-- Encabezado -->
     <LinearLayout
+        android:id="@+id/header"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/card_view"
-        android:background="#4ACBF2"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="0dp"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="18dp">
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="180dp"
-            android:src="@drawable/logo" />
+        android:padding="28dp">
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
             android:fontFamily="sans-serif-medium"
-            android:text="Computronica"
-            android:textAlignment="center"
+            android:shadowColor="@color/azul_oscuro"
+            android:shadowDx="0"
+            android:shadowDy="1"
+            android:shadowRadius="2"
+            android:text="CompuTronica"
             android:textColor="@color/white"
             android:textSize="32sp"
             android:textStyle="bold" />
 
-
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:alpha="0.9"
+            android:text="Inicia sesión para continuar"
+            android:textColor="@color/white"
+            android:textSize="15sp" />
     </LinearLayout>
 
+    <!-- Tarjeta blanca del login -->
     <androidx.cardview.widget.CardView
-        android:id="@+id/card_view"
+        android:id="@+id/cardLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/header"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginStart="10dp"
+        android:layout_margin="26dp"
+        android:layout_marginTop="165dp"
         android:background="@color/white"
-        app:cardCornerRadius="28dp">
+        app:cardCornerRadius="32dp"
+        app:cardElevation="10dp">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="450dp"
-            android:background="@color/white"
+            android:layout_height="match_parent"
             android:orientation="vertical"
-            android:padding="38dp">
+            android:padding="34dp">
 
-            <View
-                android:layout_width="wrap_content"
-                android:layout_height="0dp" />
-
+            <!-- Usuario -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:alpha="0.7"
-                android:text="Código de Alumno"
-                android:textColor="@color/negro"/>
+                android:alpha="0.9"
+                android:fontFamily="sans-serif-medium"
+                android:text="Código de Estudiante"
+                android:textColor="@color/azul_oscuro"
+                android:textSize="15sp" />
 
             <EditText
+                android:id="@+id/etUsuario"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textEmailAddress" />
+                android:background="@drawable/rounded_background_white"
+                android:hint="Ejemplo: 20230145"
+                android:inputType="text"
+                android:padding="12dp"
+                android:textColor="@color/negro"
+                android:textColorHint="@color/gris_claro" />
 
-            <View
-                android:layout_width="wrap_content"
-                android:layout_height="20dp" />
-
+            <!-- Contraseña -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:alpha="0.7"
+                android:layout_marginTop="14dp"
+                android:alpha="0.9"
+                android:fontFamily="sans-serif-medium"
                 android:text="Contraseña"
-                android:textColor="@color/negro" />
+                android:textColor="@color/azul_oscuro"
+                android:textSize="15sp" />
 
             <EditText
+                android:id="@+id/etContrasena"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPassword" />
+                android:background="@drawable/rounded_background_white"
+                android:hint="••••••••"
+                android:inputType="textPassword"
+                android:padding="12dp"
+                android:textColor="@color/negro"
+                android:textColorHint="@color/gris_claro" />
 
+            <!-- Recordarme y recuperar -->
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp">
 
                 <CheckBox
+                    android:id="@+id/chkRecordar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
                     android:alpha="0.7"
-                    android:text="Rercordarme"
-                    android:textColor="@color/negro" />
+                    android:text="Recordarme"
+                    android:textColor="@color/azul_oscuro" />
 
                 <TextView
+                    android:id="@+id/tvOlvido"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:alpha="0.7"
                     android:text="¿Olvidaste tu contraseña?"
-                    android:textColor="@color/negro" />
-
+                    android:textColor="@color/azul_verdoso"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
             </RelativeLayout>
 
-            <View
-                android:layout_width="wrap_content"
-                android:layout_height="10dp" />
-
+            <!-- Botón de inicio -->
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/myButton"
+                android:id="@+id/btnLogin"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
+                android:layout_height="55dp"
+                android:layout_marginTop="26dp"
+                android:fontFamily="sans-serif-medium"
                 android:text="Iniciar Sesión"
                 android:textColor="@android:color/white"
-                app:backgroundTint="#4ACBF2"
-                app:cornerRadius="32dp" />
+                android:textSize="17sp"
+                app:backgroundTint="@color/azul_profundo"
+                app:cornerRadius="35dp" />
 
-
-            <View
-                android:layout_width="wrap_content"
-                android:layout_height="10dp" />
-
+            <!-- Texto inferior -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="40dp"
-                android:text="El acceso a tus cursos es a partir del primer día de clases."
+                android:layout_marginTop="26dp"
+                android:alpha="0.8"
+                android:text="Accede a tus cursos y calificaciones desde cualquier lugar."
                 android:textAlignment="center"
-                android:textColor="@color/negro"
-                android:alpha="0.7"
-                android:textSize="15sp" />
+                android:textColor="@color/gris_claro"
+                android:textSize="14sp" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
-
 </RelativeLayout>

@@ -22,6 +22,7 @@ class CalificacionAdapter(
 
     inner class VH(val binding: ItemCalificacionesBinding) : RecyclerView.ViewHolder(binding.root)
     private val df = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale("es", "PE"))
+    private val db = FirebaseFirestore.getInstance()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
         val binding = ItemCalificacionesBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -33,56 +34,62 @@ class CalificacionAdapter(
         val u = items[position]
         val b = holder.binding
 
-        b.txtNotaCurso.text = u.nota.toString()
-        b.txtTipoAsignaturaFecha.text = "${u.evaluacion} - ${df.format(u.fechaRegistro)}"
-//        b.txtNombreCurso.text = u.asignaturaId
-
-        val colorRes = if (u.nota > 13) R.color.verde else R.color.rojo
-        b.txtNotaCurso.setTextColor(ContextCompat.getColor(context, colorRes))
-
-        // PopupMenu con opciones
-        b.btnMenuCalificaicon.setOnClickListener { view ->
-            val popup = PopupMenu(context, view)
-            popup.menuInflater.inflate(R.menu.menu_usuario, popup.menu)
-
-            try {
-                val fields = popup.javaClass.getDeclaredField("mPopup")
-                fields.isAccessible = true
-                val menuHelper = fields.get(popup)
-                val setForceIcons = menuHelper.javaClass.getDeclaredMethod("setForceShowIcon", Boolean::class.javaPrimitiveType)
-                setForceIcons.invoke(menuHelper, true)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-
-            popup.setOnMenuItemClickListener { item ->
-                when (item.itemId) {
-                    R.id.action_editar -> onEdit(u)
-                    R.id.action_eliminar -> {
-                        AlertDialog.Builder(context)
-                            .setTitle("Eliminar calificación")
-                            .setMessage("¿Seguro que deseas eliminar esta calificación de ${u.asignaturaId}?")
-                            .setPositiveButton("Eliminar") { _, _ ->
-                                FirebaseFirestore.getInstance()
-                                    .collection("calificaciones")
-                                    .document(u.id)
-                                    .delete()
-                                    .addOnSuccessListener {
-                                        Toast.makeText(context, "✅ Calificación eliminada", Toast.LENGTH_SHORT).show()
-                                        onDelete(u)
-                                    }
-                                    .addOnFailureListener {
-                                        Toast.makeText(context, "❌ Error al eliminar", Toast.LENGTH_SHORT).show()
-                                    }
-                            }
-                            .setNegativeButton("Cancelar", null)
-                            .show()
-                    }
-                }
-                true
-            }
-            popup.show()
-        }
+//        // Mostrar nota y tipo de evaluación con fecha
+//        b.txtNotaCurso.text = u.nota.toString()
+//        b.txtTipoAsignaturaFecha.text = "${u.evaluacion} - ${df.format(u.fechaRegistro)}"
+//
+//        // Mostrar color dependiendo de la nota
+//        val colorRes = if (u.nota > 13) R.color.verde else R.color.rojo
+//        b.txtNotaCurso.setTextColor(ContextCompat.getColor(context, colorRes))
+//
+//        // 🔹 Mostrar nombre de la asignatura (buscarlo en Firestore)
+//        obtenerNombreAsignatura(u.asignaturaId) { nombre ->
+//            b.txtNombreCurso.text = nombre ?: "Asignatura desconocida"
+//        }
+//
+//        // 🔹 PopupMenu de opciones (editar / eliminar)
+//        b.btnMenuCalificaicon.setOnClickListener { view ->
+//            val popup = PopupMenu(context, view)
+//            popup.menuInflater.inflate(R.menu.menu_usuario, popup.menu)
+//
+//            // Forzar íconos visibles en el menú
+//            try {
+//                val fields = popup.javaClass.getDeclaredField("mPopup")
+//                fields.isAccessible = true
+//                val menuHelper = fields.get(popup)
+//                val setForceIcons = menuHelper.javaClass.getDeclaredMethod("setForceShowIcon", Boolean::class.javaPrimitiveType)
+//                setForceIcons.invoke(menuHelper, true)
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//            }
+//
+//            popup.setOnMenuItemClickListener { item ->
+//                when (item.itemId) {
+//                    R.id.action_editar -> onEdit(u)
+//                    R.id.action_eliminar -> {
+//                        AlertDialog.Builder(context)
+//                            .setTitle("Eliminar calificación")
+//                            .setMessage("¿Seguro que deseas eliminar esta calificación de ${b.txtNombreCurso.text}?")
+//                            .setPositiveButton("Eliminar") { _, _ ->
+//                                db.collection("calificaciones")
+//                                    .document(u.id)
+//                                    .delete()
+//                                    .addOnSuccessListener {
+//                                        Toast.makeText(context, "✅ Calificación eliminada", Toast.LENGTH_SHORT).show()
+//                                        onDelete(u)
+//                                    }
+//                                    .addOnFailureListener {
+//                                        Toast.makeText(context, "❌ Error al eliminar", Toast.LENGTH_SHORT).show()
+//                                    }
+//                            }
+//                            .setNegativeButton("Cancelar", null)
+//                            .show()
+//                    }
+//                }
+//                true
+//            }
+//            popup.show()
+//        }
     }
 
     override fun getItemCount(): Int = items.size
@@ -91,5 +98,22 @@ class CalificacionAdapter(
         items.clear()
         items.addAll(newCalificaciones)
         notifyDataSetChanged()
+    }
+
+    private fun obtenerNombreAsignatura(asignaturaId: String, callback: (String?) -> Unit) {
+        db.collection("asignaturas")
+            .document(asignaturaId)
+            .get()
+            .addOnSuccessListener { doc ->
+                if (doc.exists()) {
+                    val nombre = doc.getString("nombre") // asegúrate que el campo se llame "nombre"
+                    callback(nombre)
+                } else {
+                    callback(null)
+                }
+            }
+            .addOnFailureListener {
+                callback(null)
+            }
     }
 }

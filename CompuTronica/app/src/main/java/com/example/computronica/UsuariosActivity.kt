@@ -15,6 +15,7 @@ import com.example.computronica.Model.Usuario
 import com.example.computronica.databinding.ActivityUsuariosBinding
 import com.example.computronica.databinding.FormUsuariosBinding
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
@@ -24,6 +25,7 @@ class UsuariosActivity : Fragment() {
     private var _b: ActivityUsuariosBinding? = null
     private val b get() = _b!!
     private val db by lazy { FirebaseFirestore.getInstance() }
+    private val auth by lazy { FirebaseAuth.getInstance() }
     private var listenerReg: ListenerRegistration? = null
 
     private val adapter = UsuarioAdapter(
@@ -76,7 +78,6 @@ class UsuariosActivity : Fragment() {
 
     private fun showCreateDialog() {
         val dialogBinding = FormUsuariosBinding.inflate(layoutInflater)
-
         val tipos = resources.getStringArray(R.array.tipoUsuario)
         val sedes = resources.getStringArray(R.array.sedes)
 
@@ -87,24 +88,44 @@ class UsuariosActivity : Fragment() {
             .setTitle("Registrar Usuario")
             .setView(dialogBinding.root)
             .setPositiveButton("Guardar") { _, _ ->
-                val usuario = Usuario(
-                    id = db.collection("usuarios").document().id,
-                    codigoInstitucional = dialogBinding.etCodigoInst.text.toString().trim(),
-                    sede = dialogBinding.spnSede.selectedItem.toString(),
-                    nombre = dialogBinding.etNombre.text.toString().trim(),
-                    apellido = dialogBinding.etApellido.text.toString().trim(),
-                    correoInstitucional = dialogBinding.etCorreoInstitutcional.text.toString().trim(),
-                    contrasena = dialogBinding.etContrasena.text.toString().trim(),
-                    tipo = TipoUsuario.valueOf(dialogBinding.spnTipo.selectedItem.toString()),
-                    estado = dialogBinding.swtEstado.isActivated,
-                    createdAt = Timestamp.now(),
-                    updatedAt = Timestamp.now()
-                )
+                val correo = dialogBinding.etCorreoInstitutcional.text.toString().trim()
+                val pass = dialogBinding.etContrasena.text.toString().trim()
+                val nombre = dialogBinding.etNombre.text.toString().trim()
 
-                db.collection("usuarios")
-                    .add(usuario)
-                    .addOnSuccessListener { toast("✅ Usuario registrado") }
-                    .addOnFailureListener { e -> toast("❌ Error: ${e.message}") }
+                if (correo.isEmpty() || pass.isEmpty() || nombre.isEmpty()) {
+                    toast("⚠️ Complete los campos obligatorios")
+                    return@setPositiveButton
+                }
+
+                // Crear usuario en Firebase Authentication
+                auth.createUserWithEmailAndPassword(correo, pass)
+                    .addOnSuccessListener { result ->
+                        val uid = result.user?.uid ?: return@addOnSuccessListener
+
+                        // Guardar usuario en Firestore con el UID de Authentication
+                        val usuario = Usuario(
+                            id = uid,
+                            codigoInstitucional = dialogBinding.etCodigoInst.text.toString().trim(),
+                            sede = dialogBinding.spnSede.selectedItem.toString(),
+                            nombre = nombre,
+                            apellido = dialogBinding.etApellido.text.toString().trim(),
+                            correoInstitucional = correo,
+                            contrasena = pass,
+                            tipo = TipoUsuario.valueOf(dialogBinding.spnTipo.selectedItem.toString()),
+                            estado = dialogBinding.swtEstado.isChecked,
+                            createdAt = Timestamp.now(),
+                            updatedAt = Timestamp.now()
+                        )
+
+                        db.collection("usuarios").document(uid)
+                            .set(usuario)
+                            .addOnSuccessListener { toast("✅ Usuario creado correctamente") }
+                            .addOnFailureListener { e -> toast("❌ Error al guardar en BD: ${e.message}") }
+
+                    }
+                    .addOnFailureListener { e ->
+                        toast("❌ Error al crear en Authentication: ${e.message}")
+                    }
             }
             .setNegativeButton("Cancelar", null)
             .show()
@@ -128,7 +149,6 @@ class UsuariosActivity : Fragment() {
         dialogBinding.spnTipo.setSelection(tipos.indexOf(usuario.tipo.name))
         dialogBinding.spnSede.setSelection(sedes.indexOf(usuario.sede))
 
-
         AlertDialog.Builder(requireContext())
             .setTitle("Editar Usuario")
             .setView(dialogBinding.root)
@@ -145,10 +165,18 @@ class UsuariosActivity : Fragment() {
                     "updatedAt" to Timestamp.now()
                 )
 
+                // Actualizar Firestore
                 db.collection("usuarios").document(usuario.id)
                     .update(updates)
                     .addOnSuccessListener { toast("✅ Usuario actualizado") }
                     .addOnFailureListener { e -> toast("❌ Error: ${e.message}") }
+
+                // Actualizar correo y contraseña en Firebase Authentication
+                val userAuth = auth.currentUser
+                if (userAuth != null && userAuth.uid == usuario.id) {
+                    userAuth.updateEmail(dialogBinding.etCorreoInstitutcional.text.toString().trim())
+                    userAuth.updatePassword(dialogBinding.etContrasena.text.toString().trim())
+                }
             }
             .setNegativeButton("Cancelar", null)
             .show()
@@ -159,10 +187,17 @@ class UsuariosActivity : Fragment() {
             .setTitle("Eliminar Usuario")
             .setMessage("¿Deseas eliminar a ${usuario.nombre} ${usuario.apellido}?")
             .setPositiveButton("Eliminar") { _, _ ->
+                // Eliminar de Firestore
                 db.collection("usuarios").document(usuario.id)
                     .delete()
                     .addOnSuccessListener { toast("🗑️ Usuario eliminado") }
                     .addOnFailureListener { e -> toast("❌ Error: ${e.message}") }
+
+                // Eliminar de Authentication
+                val userAuth = auth.currentUser
+                if (userAuth != null && userAuth.uid == usuario.id) {
+                    userAuth.delete()
+                }
             }
             .setNegativeButton("Cancelar", null)
             .show()
