@@ -12,14 +12,15 @@
     android:paddingBottom="10dp"
     tools:context=".PerfilActivity">
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnUsuarioCrear"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:text="@string/btn_crear_nuevo_usuario"
         android:textColor="@color/white"
+        app:backgroundTint="@color/azul_oscuro"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -38,13 +39,13 @@
         android:id="@+id/tvEmpty"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="32dp"
         android:text="No hay usuarios disponibles"
         android:textAlignment="center"
         app:layout_constraintBottom_toTopOf="@+id/rvUsuarios"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_usuariosCreate" />
+        app:layout_constraintTop_toBottomOf="@+id/btnUsuarioCrear" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
