@@ -32,7 +32,7 @@
             android:textColor="@color/BackGround" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/button6"
+            android:id="@+id/btnPerfil"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"

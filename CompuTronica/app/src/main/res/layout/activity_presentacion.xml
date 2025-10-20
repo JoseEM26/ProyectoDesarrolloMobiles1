@@ -1,19 +1,185 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/BackGround"
     tools:context=".PresentacionActivity">
 
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="TextView"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:padding="16dp">
+
+        <!-- Fondo degradado superior -->
+        <View
+            android:id="@+id/fondoDegradado"
+            android:layout_width="0dp"
+            android:layout_height="260dp"
+            android:background="@drawable/bg_gradiente_azul"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Imagen del Instituto -->
+        <ImageView
+            android:id="@+id/imgInstituto"
+            android:layout_width="0dp"
+            android:layout_height="200dp"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginTop="32dp"
+            android:background="@drawable/bg_card_blanca"
+            android:clipToOutline="true"
+            android:contentDescription="@string/contextDescripcionImgInstituto"
+            android:elevation="8dp"
+            android:scaleType="centerCrop"
+            android:src="@mipmap/ic_logo_foreground"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Card con información -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardInfo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="22dp"
+            app:cardElevation="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/imgInstituto">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="456dp"
+                android:orientation="vertical"
+                android:padding="22dp">
+
+                <TextView
+                    android:id="@+id/tvTitulo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:fontFamily="sans-serif-medium"
+                    android:gravity="center"
+                    android:text="@string/txtInstitutoTitulo"
+                    android:textColor="@color/azul_oscuro"
+                    android:textSize="26sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvLema"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="sans-serif-light"
+                    android:gravity="center"
+                    android:text="@string/txtInstitutoLema"
+                    android:textColor="@color/azul_suave"
+                    android:textSize="16sp" />
+
+                <View
+                    android:layout_width="90dp"
+                    android:layout_height="2dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginVertical="12dp"
+                    android:background="@color/azul_profundo" />
+
+                <!-- Información de contacto -->
+                <TextView
+                    android:id="@+id/tvDescripcion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif"
+                    android:lineSpacingExtra="5dp"
+                    android:paddingBottom="12dp"
+                    android:text="@string/txtInstitutoDescripcion"
+                    android:textAlignment="center"
+                    android:textColor="@color/negro"
+                    android:textSize="15sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="60dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <!-- Sede -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="10dp">
+
+                        <ImageView
+                            android:layout_width="46dp"
+                            android:layout_height="46dp"
+                            android:src="@drawable/baseline_location_on_24"
+                            app:tint="@color/azul_profundo" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="@string/txtInstitutoSede"
+                            android:textColor="@color/azul_oscuro"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+
+                    <!-- Teléfono -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="10dp">
+
+                        <ImageView
+                            android:layout_width="46dp"
+                            android:layout_height="46dp"
+                            android:src="@drawable/baseline_local_phone_24"
+                            app:tint="@color/azul_profundo" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="@string/txtInstitutoTelefono"
+                            android:textColor="@color/azul_oscuro"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+
+                    <!-- Correo -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="10dp">
+
+                        <ImageView
+                            android:layout_width="46dp"
+                            android:layout_height="46dp"
+                            android:src="@drawable/baseline_email_24"
+                            app:tint="@color/azul_profundo" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="@string/txtInstitutoCorreo"
+                            android:textColor="@color/azul_oscuro"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
