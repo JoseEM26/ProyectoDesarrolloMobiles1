@@ -10,7 +10,7 @@
 
     <!-- Código de Asignatura -->
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/titCodigoAsignatura"
+        android:id="@+id/tilCodigoAsignatura"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/rounded_background_white"
@@ -25,7 +25,7 @@
 
     <!-- Nombre -->
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/titNombre"
+        android:id="@+id/tilNombre"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Nombre de la Asignatura">
@@ -39,7 +39,7 @@
 
     <!-- Descripción -->
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/titDescripcion"
+        android:id="@+id/tilDescripcion"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Descripción">
@@ -55,7 +55,7 @@
 
     <!-- Créditos -->
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/titCreditos"
+        android:id="@+id/tilCreditos"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Créditos">
