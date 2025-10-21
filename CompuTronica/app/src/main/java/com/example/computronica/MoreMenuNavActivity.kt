@@ -34,25 +34,31 @@ class MoreMenuNavActivity : Fragment() {
         val usuario: Usuario? = SessionManager.currentUser
 
         if (usuario != null) {
-            b.txtNombreUsuario.text=usuario.nombre+" "+usuario.apellido
-        }else{
-            b.txtNombreUsuario.text=getString(R.string.msg_usuarioNoLogueado)
+            b.txtNombreUsuario.text = "${usuario.nombre} ${usuario.apellido}"
+        } else {
+            b.txtNombreUsuario.text = getString(R.string.msg_usuarioNoLogueado)
         }
 
+        val mainActivity = requireActivity() as MainActivity
+
         b.btnChat.setOnClickListener {
-            (requireActivity() as MainActivity).changeFrame(ChatActivity())
+            mainActivity.changeFrame(ChatActivity())
+            mainActivity.supportActionBar?.title = "Chat Institucional 💬"
         }
 
         b.btnPresentacion.setOnClickListener {
-            (requireActivity() as MainActivity).changeFrame(PresentacionActivity())
+            mainActivity.changeFrame(PresentacionActivity())
+            mainActivity.supportActionBar?.title = "Presentación"
         }
 
         b.btnUsuarios.setOnClickListener {
-            (requireActivity() as MainActivity).changeFrame(UsuariosActivity())
+            mainActivity.changeFrame(UsuariosActivity())
+            mainActivity.supportActionBar?.title = "Gestión de Usuarios"
         }
 
         b.btnPerfil.setOnClickListener {
-            (requireActivity() as MainActivity).changeFrame(PerfilActivity())
+            mainActivity.changeFrame(PerfilActivity())
+            mainActivity.supportActionBar?.title = "Mi Perfil"
         }
 
         b.btnLogOut.setOnClickListener {
@@ -62,7 +68,6 @@ class MoreMenuNavActivity : Fragment() {
             startActivity(intent)
             requireActivity().finish()
         }
-
     }
 
     override fun onDestroyView() {

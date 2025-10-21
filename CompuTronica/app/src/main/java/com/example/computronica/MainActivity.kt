@@ -13,7 +13,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        // Validación de sesión antes de inflar la vista
         val usuario = SessionManager.currentUser
         val firebaseUser = FirebaseAuth.getInstance().currentUser
         if (usuario == null || firebaseUser == null) {
@@ -25,26 +24,48 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        setSupportActionBar(binding.toolbarMain)
 
-        // Bottom Navigation
+        setSupportActionBar(binding.toolbarMain)
+        supportActionBar?.setDisplayHomeAsUpEnabled(false)
+
+        // Configurar toolbar base
+        binding.toolbarMain.title = "Dashboard"
+        binding.toolbarMain.subtitle = "Bienvenido a Computrónica"
+
         binding.bottomNav.setOnItemSelectedListener { item ->
-            when(item.itemId) {
-                R.id.nav_inicio -> changeFrame(DashBoardActivity())
-                R.id.nav_asignatura -> changeFrame(AsignaturaActivity())
-                R.id.nav_calificaoiones -> changeFrame(CalificacionActivity())
-                R.id.nav_more -> changeFrame(MoreMenuNavActivity())
+            when (item.itemId) {
+                R.id.nav_inicio -> {
+                    changeFrame(DashBoardActivity())
+                    updateToolbar("Dashboard", "Bienvenido a Computrónica")
+                }
+                R.id.nav_asignatura -> {
+                    changeFrame(AsignaturaActivity())
+                    updateToolbar("Asignaturas", "Gestión de cursos y docentes")
+                }
+                R.id.nav_calificaoiones -> {
+                    changeFrame(CalificacionActivity())
+                    updateToolbar("Calificaciones", "Consulta y registro de notas")
+                }
+                R.id.nav_more -> {
+                    changeFrame(MoreMenuNavActivity())
+                    updateToolbar("Más opciones", "Configuraciones y soporte")
+                }
                 else -> false
             }
             true
         }
 
-        if(savedInstanceState == null) {
+        if (savedInstanceState == null) {
             binding.bottomNav.selectedItemId = R.id.nav_inicio
         }
     }
 
-    fun changeFrame(fragment: Fragment){
+    private fun updateToolbar(title: String, subtitle: String) {
+        binding.toolbarMain.title = title
+        binding.toolbarMain.subtitle = subtitle
+    }
+
+    fun changeFrame(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
             .replace(R.id.frameLayout, fragment)
             .commit()
