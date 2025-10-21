@@ -11,10 +11,7 @@ import com.example.computronica.Adapter.UsersAdapter
 import com.example.computronica.Model.UserModel
 import com.example.computronica.databinding.ActivityUsersChatBinding
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -26,6 +23,7 @@ class UsersChatFragment : Fragment() {
     private val binding get() = _binding!!
     private var uiScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private lateinit var usersAdapter: UsersAdapter
+    private val db = FirebaseFirestore.getInstance()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -61,37 +59,44 @@ class UsersChatFragment : Fragment() {
 
     private fun loadUsers() {
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val databaseReference = FirebaseDatabase.getInstance().getReference("users")
 
-        databaseReference.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                usersAdapter.clear()
-                for (dataSnapshot in snapshot.children) {
-                    val userId = dataSnapshot.key ?: continue
-                    val userModel = dataSnapshot.getValue(UserModel::class.java)
+        // ✅ USANDO FIRESTORE: Colección "usuarios"
+        db.collection("usuarios")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Toast.makeText(
+                        requireContext(),
+                        "Error al cargar usuarios: ${error.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@addSnapshotListener
+                }
 
-                    if (userModel != null) {
-                        // Asegurar que el UserID esté configurado
-                        if (userModel.userID.isEmpty()) {
-                            userModel.userID = userId
-                        }
+                if (snapshot != null) {
+                    usersAdapter.clear()
 
-                        // No mostrar el usuario actual en la lista
+                    for (document in snapshot.documents) {
+                        val userId = document.id
+
+                        // Mapear desde Firestore a UserModel
+                        val nombre = document.getString("nombre") ?: ""
+                        val apellido = document.getString("apellido") ?: ""
+                        val email = document.getString("email") ?: ""
+
+                        // Crear UserModel para el chat
+                        val userModel = UserModel(
+                            userID = userId,
+                            userName = "$nombre $apellido",
+                            userEmail = email
+                        )
+
+                        // No mostrar el usuario actual
                         if (userId != currentUserId) {
                             usersAdapter.add(userModel)
                         }
                     }
                 }
             }
-
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(
-                    requireContext(),
-                    "Error al cargar usuarios",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        })
     }
 
     private fun openChat(user: UserModel) {
@@ -107,5 +112,4 @@ class UsersChatFragment : Fragment() {
         uiScope.cancel()
         _binding = null
     }
-
 }

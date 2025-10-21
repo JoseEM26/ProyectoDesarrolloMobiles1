@@ -11,7 +11,8 @@ import com.example.computronica.Adapter.MessageAdapter
 import com.example.computronica.Model.MessageModel
 import com.example.computronica.databinding.ActivityChatBinding
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -25,13 +26,11 @@ class ChatFragment : Fragment() {
     private var uiScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     private lateinit var messageAdapter: MessageAdapter
-    private lateinit var dbReferenceSender: DatabaseReference
-    private lateinit var dbReferenceReceiver: DatabaseReference
+    private val db = FirebaseFirestore.getInstance()
 
     private var receiverId: String = ""
     private var receiverName: String = ""
-    private var senderRoom: String = ""
-    private var receiverRoom: String = ""
+    private var chatRoomId: String = ""
 
     companion object {
         private const val ARG_RECEIVER_ID = "receiver_id"
@@ -83,16 +82,9 @@ class ChatFragment : Fragment() {
     private fun setupChat() {
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-        senderRoom = "$currentUserId$receiverId"
-        receiverRoom = "$receiverId$currentUserId"
-
-        dbReferenceSender = FirebaseDatabase.getInstance()
-            .getReference("chats")
-            .child(senderRoom)
-
-        dbReferenceReceiver = FirebaseDatabase.getInstance()
-            .getReference("chats")
-            .child(receiverRoom)
+        // Crear un ID único para la sala de chat (ordenado alfabéticamente)
+        val ids = listOf(currentUserId, receiverId).sorted()
+        chatRoomId = "${ids[0]}_${ids[1]}"
     }
 
     private fun setupRecyclerView() {
@@ -104,37 +96,37 @@ class ChatFragment : Fragment() {
     }
 
     private fun loadMessages() {
-        dbReferenceSender.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val messages = mutableListOf<MessageModel>()
+        // ✅ USANDO FIRESTORE: Colección "chats" → documento chatRoomId → subcolección "messages"
+        db.collection("chats")
+            .document(chatRoomId)
+            .collection("messages")
+            .orderBy("timestamp", Query.Direction.ASCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Toast.makeText(
+                        requireContext(),
+                        "Error al cargar mensajes: ${error.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@addSnapshotListener
+                }
 
-                for (dataSnapshot in snapshot.children) {
-                    val messageModel = dataSnapshot.getValue(MessageModel::class.java)
-                    if (messageModel != null) {
-                        messages.add(messageModel)
+                if (snapshot != null) {
+                    messageAdapter.clear()
+
+                    for (document in snapshot.documents) {
+                        val messageModel = document.toObject(MessageModel::class.java)
+                        if (messageModel != null) {
+                            messageAdapter.add(messageModel)
+                        }
+                    }
+
+                    // Scroll al último mensaje
+                    if (messageAdapter.itemCount > 0) {
+                        binding.chatRecycler.scrollToPosition(messageAdapter.itemCount - 1)
                     }
                 }
-
-                // Ordenar por timestamp
-                messages.sortBy { it.timestamp }
-
-                messageAdapter.clear()
-                messages.forEach { messageAdapter.add(it) }
-
-                // Scroll al último mensaje
-                if (messageAdapter.itemCount > 0) {
-                    binding.chatRecycler.scrollToPosition(messageAdapter.itemCount - 1)
-                }
             }
-
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(
-                    requireContext(),
-                    "Error al cargar mensajes",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        })
     }
 
     private fun setupSendButton() {
@@ -164,16 +156,19 @@ class ChatFragment : Fragment() {
             timestamp = System.currentTimeMillis()
         )
 
-        // Enviar a ambos rooms
-        dbReferenceSender.child(messageId).setValue(messageModel)
+        // ✅ GUARDAR EN FIRESTORE
+        db.collection("chats")
+            .document(chatRoomId)
+            .collection("messages")
+            .document(messageId)
+            .set(messageModel)
             .addOnSuccessListener {
-                dbReferenceReceiver.child(messageId).setValue(messageModel)
                 binding.messageEdit.text?.clear()
             }
-            .addOnFailureListener {
+            .addOnFailureListener { e ->
                 Toast.makeText(
                     requireContext(),
-                    "Error al enviar mensaje",
+                    "Error al enviar mensaje: ${e.message}",
                     Toast.LENGTH_SHORT
                 ).show()
             }
