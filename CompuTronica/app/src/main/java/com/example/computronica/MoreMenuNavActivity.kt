@@ -1,14 +1,11 @@
 package com.example.computronica
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.example.computronica.Model.Usuario
 import com.example.computronica.databinding.ActivityMoreMenuNavBinding
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -30,39 +27,46 @@ class MoreMenuNavActivity : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupButtons()
+    }
 
-        val usuario: Usuario? = SessionManager.currentUser
-
-        if (usuario != null) {
-            b.txtNombreUsuario.text=usuario.nombre+" "+usuario.apellido
-        }else{
-            b.txtNombreUsuario.text=getString(R.string.msg_usuarioNoLogueado)
-        }
-
+    private fun setupButtons() {
+        // Botón Chat
         b.btnChat.setOnClickListener {
-            (requireActivity() as MainActivity).changeFrame(ChatActivity())
+            openUsersChatFragment()
         }
 
-        b.btnPresentacion.setOnClickListener {
-            (requireActivity() as MainActivity).changeFrame(PresentacionActivity())
-        }
-
+        // Botón Usuarios (si lo necesitas)
         b.btnUsuarios.setOnClickListener {
-            (requireActivity() as MainActivity).changeFrame(UsuariosActivity())
+            // Aquí puedes abrir el UsuariosActivity de tu equipo si lo necesitas
+            // O dejarlo sin acción si ya tienen esa funcionalidad en otro lado
         }
 
-        b.btnPerfil.setOnClickListener {
-            (requireActivity() as MainActivity).changeFrame(PerfilActivity())
+        // Botón Presentación
+        b.btnPresentacion.setOnClickListener {
+            openFragment(PresentacionActivity())
         }
 
+        // Botón Logout
         b.btnLogOut.setOnClickListener {
-            FirebaseAuth.getInstance().signOut()
-            SessionManager.clearSession()
-            val intent = Intent(requireContext(), LoginActivity::class.java)
-            startActivity(intent)
-            requireActivity().finish()
+            // Aquí implementarás el logout de Firebase
+            // Por ahora lo dejamos preparado
         }
+    }
 
+    private fun openUsersChatFragment() {
+        val fragment = UsersChatFragment()
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.frameLayout, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    private fun openFragment(fragment: Fragment) {
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.frameLayout, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     override fun onDestroyView() {

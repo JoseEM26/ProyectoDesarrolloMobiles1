@@ -1,6 +1,6 @@
 package com.example.computronica.Model
 
-class MessageModel {
+
     data class MessageModel(
         var messageId: String = "",
         var senderId: String = "",
@@ -10,4 +10,3 @@ class MessageModel {
         // Constructor vacío requerido por Firebase
         constructor() : this("", "", "", 0L)
     }
-}
