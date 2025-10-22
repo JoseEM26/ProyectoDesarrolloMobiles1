@@ -31,7 +31,7 @@
             android:name=".AsignaturaActivity"
             android:exported="false" />
         <activity
-            android:name=".ChatActivity"
+            android:name=".ChatFragment"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
