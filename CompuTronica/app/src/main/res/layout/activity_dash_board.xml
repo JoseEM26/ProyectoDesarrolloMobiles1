@@ -59,10 +59,10 @@
                     android:id="@+id/tvEstudiantesCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="120"
+                    android:text="-"
+                    android:textColor="@color/azul_profundo"
                     android:textSize="28sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/azul_profundo"/>
+                    android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -93,10 +93,10 @@
                     android:id="@+id/tvCalificacionesCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="85"
+                    android:text="-"
+                    android:textColor="@color/azul_suave"
                     android:textSize="28sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/azul_suave"/>
+                    android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -127,10 +127,10 @@
                     android:id="@+id/tvAsignaturasCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="12"
+                    android:text="-"
+                    android:textColor="@color/azul_verdoso"
                     android:textSize="28sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/azul_verdoso"/>
+                    android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -172,10 +172,10 @@
                 android:id="@+id/tvPromedio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="14.8"
+                android:text="-"
+                android:textColor="@color/azul_suave"
                 android:textSize="28sp"
-                android:textStyle="bold"
-                android:textColor="@color/azul_suave"/>
+                android:textStyle="bold" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

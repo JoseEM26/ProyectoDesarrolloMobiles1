@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -33,7 +32,6 @@ class AsignaturaActivity : Fragment() {
         onDelete = { asignatura -> eliminarAsignatura(asignatura) }
     )
 
-    // Para almacenar los profesores disponibles (nombre y ID)
     private val profesorNombres = mutableListOf<String>()
     private val profesorIds = mutableListOf<String>()
 
@@ -66,7 +64,8 @@ class AsignaturaActivity : Fragment() {
             .orderBy("nombre", Query.Direction.ASCENDING)
             .addSnapshotListener { snapshot, e ->
                 if (e != null) {
-                    toast("Error al cargar asignaturas: ${e.message}")
+                    b.tvEmpty.text = "Error al cargar asignaturas"
+                    b.tvEmpty.visibility = View.VISIBLE
                     return@addSnapshotListener
                 }
 
@@ -84,24 +83,19 @@ class AsignaturaActivity : Fragment() {
         profesorIds.clear()
 
         db.collection("usuarios")
-            .whereEqualTo("tipo", "profesor") // asegúrate que coincida con Firestore
+            .whereEqualTo("tipo", "profesor")
             .get()
             .addOnSuccessListener { result ->
-                for (doc in result.documents) { // ✅ usa .documents
+                for (doc in result.documents) {
                     val usuario = doc.toObject(Usuario::class.java)
                     if (usuario != null) {
                         profesorNombres.add(usuario.nombre)
                         profesorIds.add(doc.id)
                     }
                 }
-                toast("✅ Profesores cargados: ${profesorNombres.size}")
                 onLoaded()
             }
-            .addOnFailureListener {
-                toast("❌ Error al cargar profesores: ${it.message}")
-            }
     }
-
 
     private fun showCreateDialog() {
         val dialogBinding = FormAsignaturaBinding.inflate(layoutInflater)
@@ -114,37 +108,65 @@ class AsignaturaActivity : Fragment() {
             )
         }
 
-        AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle("Registrar Asignatura")
             .setView(dialogBinding.root)
-            .setPositiveButton("Guardar") { _, _ ->
-                val nombre = dialogBinding.etNombre.text.toString().trim()
-                val codigo = dialogBinding.etCodigoAsignatura.text.toString().trim()
-                val descripcion = dialogBinding.etDescripcion.text.toString().trim()
-                val creditos = dialogBinding.etCreditos.text.toString().toIntOrNull() ?: 3
-                val profesorIndex = dialogBinding.spnProfesor.selectedItemPosition
-
-                if (nombre.isEmpty() || codigo.isEmpty()) {
-                    toast("⚠️ Completa los campos obligatorios")
-                    return@setPositiveButton
-                }
-
-                val asignatura = Asignatura(
-                    id=db.collection("asignaturas").document().id,
-                    codigoAsignatura = codigo,
-                    nombre = nombre,
-                    descripcion = descripcion,
-                    creditos = creditos,
-                    profesorId = profesorIds.getOrNull(profesorIndex)
-                )
-
-                db.collection("asignaturas")
-                    .add(asignatura)
-                    .addOnSuccessListener { toast("✅ Asignatura registrada") }
-                    .addOnFailureListener { e -> toast("❌ Error: ${e.message}") }
-            }
+            .setPositiveButton("Guardar", null)
             .setNegativeButton("Cancelar", null)
-            .show()
+            .create()
+
+        dialog.show()
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            // Limpiar errores
+            dialogBinding.tilNombre.error = null
+            dialogBinding.tilCodigoAsignatura.error = null
+            dialogBinding.tilDescripcion.error = null
+            dialogBinding.tilCreditos.error = null
+
+            val nombre = dialogBinding.etNombre.text.toString().trim()
+            val codigo = dialogBinding.etCodigoAsignatura.text.toString().trim()
+            val descripcion = dialogBinding.etDescripcion.text.toString().trim()
+            val creditos = dialogBinding.etCreditos.text.toString().toIntOrNull()
+            val profesorIndex = dialogBinding.spnProfesor.selectedItemPosition
+
+            var valid = true
+
+            if (nombre.isEmpty()) {
+                dialogBinding.tilNombre.error = "Ingrese el nombre"
+                valid = false
+            }
+            if (codigo.isEmpty()) {
+                dialogBinding.tilCodigoAsignatura.error = "Ingrese el código"
+                valid = false
+            }
+            if (descripcion.isEmpty()) {
+                dialogBinding.tilDescripcion.error = "Ingrese una descripción"
+                valid = false
+            }
+            if (creditos == null || creditos <= 0) {
+                dialogBinding.tilCreditos.error = "Ingrese un número válido de créditos"
+                valid = false
+            }
+
+            if (!valid) return@setOnClickListener
+
+            val asignatura = Asignatura(
+                id = db.collection("asignaturas").document().id,
+                codigoAsignatura = codigo,
+                nombre = nombre,
+                descripcion = descripcion,
+                creditos = creditos!!,
+                profesorId = profesorIds.getOrNull(profesorIndex)
+            )
+
+            db.collection("asignaturas")
+                .add(asignatura)
+                .addOnSuccessListener { dialog.dismiss() }
+                .addOnFailureListener {
+                    dialogBinding.tilNombre.error = "Error: ${it.message}"
+                }
+        }
     }
 
     private fun showEditDialog(asignatura: Asignatura) {
@@ -165,25 +187,64 @@ class AsignaturaActivity : Fragment() {
             if (selectedIndex >= 0) dialogBinding.spnProfesor.setSelection(selectedIndex)
         }
 
-        AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle("Editar Asignatura")
             .setView(dialogBinding.root)
-            .setPositiveButton("Actualizar") { _, _ ->
-                val updates = mapOf(
-                    "nombre" to dialogBinding.etNombre.text.toString().trim(),
-                    "codigoAsignatura" to dialogBinding.etCodigoAsignatura.text.toString().trim(),
-                    "descripcion" to dialogBinding.etDescripcion.text.toString().trim(),
-                    "creditos" to (dialogBinding.etCreditos.text.toString().toIntOrNull() ?: 3),
-                    "profesorId" to profesorIds.getOrNull(dialogBinding.spnProfesor.selectedItemPosition)
-                )
-
-                db.collection("asignaturas").document(asignatura.id)
-                    .update(updates)
-                    .addOnSuccessListener { toast("✅ Asignatura actualizada") }
-                    .addOnFailureListener { e -> toast("❌ Error: ${e.message}") }
-            }
+            .setPositiveButton("Actualizar", null)
             .setNegativeButton("Cancelar", null)
-            .show()
+            .create()
+
+        dialog.show()
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            // Limpiar errores
+            dialogBinding.tilNombre.error = null
+            dialogBinding.tilCodigoAsignatura.error = null
+            dialogBinding.tilDescripcion.error = null
+            dialogBinding.tilCreditos.error = null
+
+            val nombre = dialogBinding.etNombre.text.toString().trim()
+            val codigo = dialogBinding.etCodigoAsignatura.text.toString().trim()
+            val descripcion = dialogBinding.etDescripcion.text.toString().trim()
+            val creditos = dialogBinding.etCreditos.text.toString().toIntOrNull()
+            val profesorIndex = dialogBinding.spnProfesor.selectedItemPosition
+
+            var valid = true
+
+            if (nombre.isEmpty()) {
+                dialogBinding.tilNombre.error = "Ingrese el nombre"
+                valid = false
+            }
+            if (codigo.isEmpty()) {
+                dialogBinding.tilCodigoAsignatura.error = "Ingrese el código"
+                valid = false
+            }
+            if (descripcion.isEmpty()) {
+                dialogBinding.tilDescripcion.error = "Ingrese una descripción"
+                valid = false
+            }
+            if (creditos == null || creditos <= 0) {
+                dialogBinding.tilCreditos.error = "Ingrese un número válido de créditos"
+                valid = false
+            }
+
+            if (!valid) return@setOnClickListener
+
+            val updates = mapOf(
+                "nombre" to nombre,
+                "codigoAsignatura" to codigo,
+                "descripcion" to descripcion,
+                "creditos" to creditos!!,
+                "profesorId" to profesorIds.getOrNull(profesorIndex)
+            )
+
+            db.collection("asignaturas").document(asignatura.id)
+                .update(updates)
+                .addOnSuccessListener { dialog.dismiss() }
+                .addOnFailureListener {
+                    dialogBinding.tilNombre.error = "Error: ${it.message}"
+                }
+        }
     }
 
     private fun eliminarAsignatura(asignatura: Asignatura) {
@@ -193,15 +254,13 @@ class AsignaturaActivity : Fragment() {
             .setPositiveButton("Eliminar") { _, _ ->
                 db.collection("asignaturas").document(asignatura.id)
                     .delete()
-                    .addOnSuccessListener { toast("🗑️ Asignatura eliminada") }
-                    .addOnFailureListener { e -> toast("❌ Error: ${e.message}") }
+                    .addOnFailureListener { e ->
+                        b.tvEmpty.text = "Error al eliminar: ${e.message}"
+                    }
             }
             .setNegativeButton("Cancelar", null)
             .show()
     }
-
-    private fun toast(msg: String) =
-        Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
 
     override fun onDestroyView() {
         super.onDestroyView()

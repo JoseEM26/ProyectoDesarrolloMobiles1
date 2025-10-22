@@ -1,11 +1,14 @@
 package com.example.computronica
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.example.computronica.Model.Usuario
 import com.example.computronica.databinding.ActivityMoreMenuNavBinding
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -27,42 +30,57 @@ class MoreMenuNavActivity : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Display user name or default message
+        val usuario: Usuario? = SessionManager.currentUser
+        if (usuario != null) {
+            b.txtNombreUsuario.text = "${usuario.nombre} ${usuario.apellido}"
+        } else {
+            b.txtNombreUsuario.text = getString(R.string.msg_usuarioNoLogueado)
+        }
+
         setupButtons()
     }
 
     private fun setupButtons() {
+        val mainActivity = requireActivity() as MainActivity
+
         // Botón Chat
         b.btnChat.setOnClickListener {
             openUsersChatFragment()
-        }
-
-        // Botón Usuarios (si lo necesitas)
-        b.btnUsuarios.setOnClickListener {
-            // Aquí puedes abrir el UsuariosActivity de tu equipo si lo necesitas
-            // O dejarlo sin acción si ya tienen esa funcionalidad en otro lado
+            mainActivity.supportActionBar?.title = "Chat Institucional 💬"
         }
 
         // Botón Presentación
         b.btnPresentacion.setOnClickListener {
-            openFragment(PresentacionActivity())
+            mainActivity.changeFrame(PresentacionActivity())
+            mainActivity.supportActionBar?.title = "Presentación"
+        }
+
+        // Botón Usuarios
+        b.btnUsuarios.setOnClickListener {
+            mainActivity.changeFrame(UsuariosActivity())
+            mainActivity.supportActionBar?.title = "Gestión de Usuarios"
+        }
+
+        // Botón Perfil
+        b.btnPerfil.setOnClickListener {
+            mainActivity.changeFrame(PerfilActivity())
+            mainActivity.supportActionBar?.title = "Mi Perfil"
         }
 
         // Botón Logout
         b.btnLogOut.setOnClickListener {
-            // Aquí implementarás el logout de Firebase
-            // Por ahora lo dejamos preparado
+            FirebaseAuth.getInstance().signOut()
+            SessionManager.clearSession()
+            val intent = Intent(requireContext(), LoginActivity::class.java)
+            startActivity(intent)
+            requireActivity().finish()
         }
     }
 
     private fun openUsersChatFragment() {
         val fragment = UsersChatFragment()
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.frameLayout, fragment)
-            .addToBackStack(null)
-            .commit()
-    }
-
-    private fun openFragment(fragment: Fragment) {
         parentFragmentManager.beginTransaction()
             .replace(R.id.frameLayout, fragment)
             .addToBackStack(null)
