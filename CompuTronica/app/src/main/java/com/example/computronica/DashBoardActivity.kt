@@ -1,10 +1,10 @@
 package com.example.computronica
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.computronica.Model.Calificaciones
@@ -13,7 +13,6 @@ import com.example.computronica.Model.Usuario
 import com.example.computronica.databinding.ActivityDashBoardBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -43,9 +42,18 @@ class DashBoardActivity : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initializeFirebase()
         loadUserData()
+        updateTextColors()
     }
 
-    // Initialize Firebase and check for configuration issues
+    private fun updateTextColors() {
+        // Ajustar colores según el tema claro/oscuro
+        binding.tvWelcome.setTextColor(ContextCompat.getColor(requireContext(), R.color.azul_oscuro))
+        binding.tvEstudiantesCount.setTextColor(ContextCompat.getColor(requireContext(), R.color.negro))
+        binding.tvCalificacionesCount.setTextColor(ContextCompat.getColor(requireContext(), R.color.negro))
+        binding.tvAsignaturasCount.setTextColor(ContextCompat.getColor(requireContext(), R.color.negro))
+        binding.tvPromedio.setTextColor(ContextCompat.getColor(requireContext(), if (binding.tvPromedio.text != "-") R.color.verde_exito else R.color.rojo_error))
+    }
+
     private fun initializeFirebase() {
         try {
             FirebaseAuth.getInstance().currentUser ?: run {
@@ -56,6 +64,7 @@ class DashBoardActivity : Fragment() {
         } catch (e: Exception) {
             binding.tvWelcome.text = getString(R.string.welcome_default, "Usuario")
             clearLoadingState()
+            Log.e("DashBoardActivity", "Error initializing Firebase: ${e.message}")
         }
     }
 
@@ -72,6 +81,7 @@ class DashBoardActivity : Fragment() {
         binding.tvCalificacionesCount.text = "-"
         binding.tvAsignaturasCount.text = "-"
         binding.tvPromedio.text = "-"
+        updateTextColors()
     }
 
     private fun loadUserData() {
@@ -96,6 +106,7 @@ class DashBoardActivity : Fragment() {
             } catch (e: Exception) {
                 binding.tvWelcome.text = getString(R.string.welcome_default, "Usuario")
                 clearLoadingState()
+                Log.e("DashBoardActivity", "Error loading user data: ${e.message}")
             }
         }
     }
@@ -115,6 +126,9 @@ class DashBoardActivity : Fragment() {
                     binding.tvEstudiantesCount.text = snapshot.size().toString()
                 } catch (e: Exception) {
                     binding.tvEstudiantesCount.text = "-"
+                    Log.e("DashBoardActivity", "Error loading estudiantes count: ${e.message}")
+                } finally {
+                    updateTextColors()
                 }
             }
         } else {
@@ -132,6 +146,9 @@ class DashBoardActivity : Fragment() {
                 binding.tvCalificacionesCount.text = snapshot.size().toString()
             } catch (e: Exception) {
                 binding.tvCalificacionesCount.text = "-"
+                Log.e("DashBoardActivity", "Error loading calificaciones count: ${e.message}")
+            } finally {
+                updateTextColors()
             }
         }
 
@@ -142,6 +159,9 @@ class DashBoardActivity : Fragment() {
                     binding.tvAsignaturasCount.text = snapshot.size().toString()
                 } catch (e: Exception) {
                     binding.tvAsignaturasCount.text = "-"
+                    Log.e("DashBoardActivity", "Error loading asignaturas count: ${e.message}")
+                } finally {
+                    updateTextColors()
                 }
             }
         } else {
@@ -167,10 +187,12 @@ class DashBoardActivity : Fragment() {
                 }
             } catch (e: Exception) {
                 binding.tvPromedio.text = "-"
+                Log.e("DashBoardActivity", "Error loading average grade: ${e.message}")
+            } finally {
+                updateTextColors()
             }
         }
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

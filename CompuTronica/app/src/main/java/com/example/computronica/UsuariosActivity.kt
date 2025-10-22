@@ -72,7 +72,7 @@ class UsuariosActivity : Fragment() {
                 }.orEmpty()
 
                 adapter.replaceAll(list)
-                b.tvEmpty.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
+                b.emptyState.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
             }
     }
 
