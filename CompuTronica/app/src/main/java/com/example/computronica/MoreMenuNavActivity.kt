@@ -31,36 +31,45 @@ class MoreMenuNavActivity : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Display user name or default message
         val usuario: Usuario? = SessionManager.currentUser
-
         if (usuario != null) {
             b.txtNombreUsuario.text = "${usuario.nombre} ${usuario.apellido}"
         } else {
             b.txtNombreUsuario.text = getString(R.string.msg_usuarioNoLogueado)
         }
 
+        setupButtons()
+    }
+
+    private fun setupButtons() {
         val mainActivity = requireActivity() as MainActivity
 
+        // Botón Chat
         b.btnChat.setOnClickListener {
-            mainActivity.changeFrame(ChatActivity())
+            openUsersChatFragment()
             mainActivity.supportActionBar?.title = "Chat Institucional 💬"
         }
 
+        // Botón Presentación
         b.btnPresentacion.setOnClickListener {
             mainActivity.changeFrame(PresentacionActivity())
             mainActivity.supportActionBar?.title = "Presentación"
         }
 
+        // Botón Usuarios
         b.btnUsuarios.setOnClickListener {
             mainActivity.changeFrame(UsuariosActivity())
             mainActivity.supportActionBar?.title = "Gestión de Usuarios"
         }
 
+        // Botón Perfil
         b.btnPerfil.setOnClickListener {
             mainActivity.changeFrame(PerfilActivity())
             mainActivity.supportActionBar?.title = "Mi Perfil"
         }
 
+        // Botón Logout
         b.btnLogOut.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
             SessionManager.clearSession()
@@ -68,6 +77,14 @@ class MoreMenuNavActivity : Fragment() {
             startActivity(intent)
             requireActivity().finish()
         }
+    }
+
+    private fun openUsersChatFragment() {
+        val fragment = UsersChatFragment()
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.frameLayout, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     override fun onDestroyView() {
