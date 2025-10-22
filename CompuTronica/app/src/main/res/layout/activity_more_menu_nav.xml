@@ -1,149 +1,181 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/BackGround"
-    android:orientation="vertical"
+    android:background="@drawable/gradient_background"
+    android:padding="16dp"
     tools:context=".MoreMenuNavActivity">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <!-- Tarjeta de perfil -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardProfile"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="5dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginRight="5dp"
-        android:layout_marginBottom="5dp"
-        android:background="@drawable/rounded_background"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:textAlignment="center">
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:cardUseCompatPadding="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:strokeColor="@color/azul_suave"
+        app:strokeWidth="1dp">
 
-        <TextView
-            android:id="@+id/txtNombreUsuario"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:text="TextView"
-            android:textAlignment="center"
-            android:textColor="@color/BackGround" />
+            android:orientation="vertical"
+            android:padding="16dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnPerfil"
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/txtNombreUsuario"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:text="@string/user_name"
+                android:textColor="@color/azul_oscuro"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                tools:text="Juan Pérez" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPerfil"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="8dp"
+                android:fontFamily="sans-serif-medium"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="@string/btnVerPerfi"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                app:backgroundTint="@color/azul_profundo"
+                app:cornerRadius="12dp"
+                app:icon="@drawable/ic_profile"
+                app:iconGravity="start"
+                app:iconTint="@color/white"
+                app:rippleColor="@color/azul_suave" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Opciones de menú -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:cardUseCompatPadding="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardProfile"
+        app:strokeColor="@color/azul_suave"
+        app:strokeWidth="1dp">
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="10dp"
-            android:text="@string/btnVerPerfi"
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            android:textStyle="bold|italic"
-            app:backgroundTint="@color/azul_profundo"
-            app:cornerRadius="12dp"
-            app:strokeWidth="0dp" />
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="16dp">
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnUsuarios"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:fontFamily="sans-serif-medium"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="@string/users"
+                android:textColor="@color/azul_oscuro"
+                android:textSize="16sp"
+                app:backgroundTint="@color/white"
+                app:cornerRadius="12dp"
+                app:icon="@drawable/ic_users"
+                app:iconGravity="start"
+                app:iconPadding="8dp"
+                app:iconTint="@color/azul_profundo"
+                app:rippleColor="@color/azul_suave"
+                app:strokeColor="@color/gris_claro"
+                app:strokeWidth="1dp" />
 
-    </LinearLayout>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnChat"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:fontFamily="sans-serif-medium"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="@string/chat"
+                android:textColor="@color/azul_oscuro"
+                android:textSize="16sp"
+                app:backgroundTint="@color/white"
+                app:cornerRadius="12dp"
+                app:icon="@drawable/ic_chat"
+                app:iconGravity="start"
+                app:iconPadding="8dp"
+                app:iconTint="@color/azul_profundo"
+                app:rippleColor="@color/azul_suave"
+                app:strokeColor="@color/gris_claro"
+                app:strokeWidth="1dp" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="605dp"
-        android:layout_marginTop="20dp"
-        android:background="@color/white"
-        android:orientation="vertical">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPresentacion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:fontFamily="sans-serif-medium"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="@string/presentation"
+                android:textColor="@color/azul_oscuro"
+                android:textSize="16sp"
+                app:backgroundTint="@color/white"
+                app:cornerRadius="12dp"
+                app:icon="@drawable/ic_presentation"
+                app:iconGravity="start"
+                app:iconPadding="8dp"
+                app:iconTint="@color/azul_profundo"
+                app:rippleColor="@color/azul_suave"
+                app:strokeColor="@color/gris_claro"
+                app:strokeWidth="1dp" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnUsuarios"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="8dp"
-            android:backgroundTint="@color/white"
-            android:drawableEnd="@drawable/baseline_navigate_next_24"
-            android:drawablePadding="0dp"
-            android:drawableTint="@color/azul_profundo"
-            android:gravity="center_vertical"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:text="Usuarios"
-            android:textColor="@color/azul_profundo"
-            android:textSize="20sp"
-            app:cornerRadius="12dp"
-            app:strokeColor="@android:color/black"
-            app:strokeWidth="1dp" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLogOut"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:fontFamily="sans-serif-medium"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="@string/log_out"
+                android:textColor="@color/azul_oscuro"
+                android:textSize="16sp"
+                app:backgroundTint="@color/white"
+                app:cornerRadius="12dp"
+                app:icon="@drawable/ic_logout"
+                app:iconGravity="start"
+                app:iconPadding="8dp"
+                app:iconTint="@color/azul_profundo"
+                app:rippleColor="@color/azul_suave"
+                app:strokeColor="@color/gris_claro"
+                app:strokeWidth="1dp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnChat"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="8dp"
-            android:backgroundTint="@color/white"
-            android:drawableEnd="@drawable/baseline_navigate_next_24"
-            android:drawablePadding="0dp"
-            android:drawableTint="@color/azul_profundo"
-            android:gravity="center_vertical"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:text="Chat"
-            android:textColor="@color/azul_profundo"
-            android:textSize="20sp"
-            app:cornerRadius="12dp"
-            app:strokeColor="@android:color/black"
-            app:strokeWidth="1dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnPresentacion"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="8dp"
-            android:backgroundTint="@color/white"
-            android:drawableEnd="@drawable/baseline_navigate_next_24"
-            android:drawablePadding="0dp"
-            android:drawableTint="@color/azul_profundo"
-            android:gravity="center_vertical"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:text="Presentacion"
-            android:textColor="@color/azul_profundo"
-            android:textSize="20sp"
-            app:cornerRadius="12dp"
-            app:strokeColor="@android:color/black"
-            app:strokeWidth="1dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnLogOut"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="8dp"
-            android:backgroundTint="@color/white"
-            android:drawableEnd="@drawable/baseline_navigate_next_24"
-            android:drawablePadding="0dp"
-            android:drawableTint="@color/azul_profundo"
-            android:gravity="center_vertical"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:text="Log Out"
-            android:textColor="@color/azul_profundo"
-            android:textSize="20sp"
-            app:cornerRadius="12dp"
-            app:strokeColor="@android:color/black"
-            app:strokeWidth="1dp" />
-
-
-    </LinearLayout>
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

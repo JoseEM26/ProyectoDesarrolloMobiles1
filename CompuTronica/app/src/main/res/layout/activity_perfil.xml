@@ -2,178 +2,231 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/BackGround">
+    android:background="@color/BackGround"
+    tools:context=".PerfilActivity">
 
     <!-- Header -->
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="0dp"
-        android:layout_height="200dp"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center"
-        android:background="@color/azul_profundo"
+        android:background="@drawable/gradient_background"
+        android:padding="24dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <TextView
+        <ImageView
+            android:id="@+id/iconPerfil"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/baseline_person_24"
+            android:contentDescription="Foto de perfil"
+            app:tint="@color/white"
+            android:scaleType="centerInside" />
+
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/txtPerfilNombreHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Nombre Apellido"
+            android:fontFamily="sans-serif-condensed"
+            android:text="@string/txtInstitutoTitulo"
             android:textColor="@color/white"
-            android:textSize="22sp"
+            android:textSize="24sp"
             android:textStyle="bold"
-            android:layout_marginTop="10dp"/>
+            android:layout_marginTop="12dp"
+            android:shadowColor="@color/azul_oscuro"
+            android:shadowDx="0"
+            android:shadowDy="2"
+            android:shadowRadius="4"
+            tools:text="Nombre Apellido" />
     </LinearLayout>
 
-    <!-- Card con detalles -->
-    <androidx.cardview.widget.CardView
+    <!-- Tarjeta con detalles -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardPerfil"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_margin="24dp"
         app:cardBackgroundColor="@color/white"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="8dp"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="6dp"
+        app:strokeColor="@color/azul_suave"
+        app:strokeWidth="1dp"
         app:layout_constraintTop_toBottomOf="@id/header"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="16dp">
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="20dp"
-            android:gravity="center_vertical"
-            android:weightSum="6">
+            android:layout_height="wrap_content"
+            android:padding="24dp">
 
             <!-- Código Institucional -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/lblPerfilCodigo"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="12dp">
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/perfil_codigo_institucional"
+                android:textColor="@color/gris_oscuro"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:text="Código Institucional"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/gris_claro"                    android:textSize="14sp"
-                    android:textStyle="bold"/>
-
-                <TextView
-                    android:id="@+id/txtPerfilCodigo"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/rounded_background_light"
-                    android:padding="10dp"
-                    android:text="20230145"
-                    android:textColor="@color/azul_oscuro"
-                    android:textSize="18sp" />
-            </LinearLayout>
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/txtPerfilCodigo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/rounded_background_light"
+                android:padding="12dp"
+                android:text="20230145"
+                android:textColor="@color/azul_oscuro"
+                android:textSize="16sp"
+                android:foreground="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/lblPerfilCodigo"
+                tools:text="20230145" />
 
             <!-- Correo -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/lblPerfilCorreo"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="12dp">
+                android:layout_marginTop="16dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/perfil_correo"
+                android:textColor="@color/gris_oscuro"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/txtPerfilCodigo" />
 
-                <TextView
-                    android:text="Correo Electrónico"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/gris_claro"                    android:textSize="14sp"
-                    android:textStyle="bold"/>
-
-                <TextView
-                    android:id="@+id/txtPerfilCorreo"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/rounded_background_light"
-                    android:padding="10dp"
-                    android:text="usuario@correo.com"
-                    android:textColor="@color/azul_oscuro"
-                    android:textSize="18sp" />
-            </LinearLayout>
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/txtPerfilCorreo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/rounded_background_light"
+                android:padding="12dp"
+                android:text="usuario@correo.com"
+                android:textColor="@color/azul_oscuro"
+                android:textSize="16sp"
+                android:foreground="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/lblPerfilCorreo"
+                tools:text="usuario@correo.com" />
 
             <!-- Sede -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/lblUsuariosSede"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="12dp">
+                android:layout_marginTop="16dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/perfil_sede"
+                android:textColor="@color/gris_oscuro"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/txtPerfilCorreo" />
 
-                <TextView
-                    android:text="Sede"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/gris_claro"                    android:textSize="14sp"
-                    android:textStyle="bold"/>
-
-                <TextView
-                    android:id="@+id/txtUsuariosSede"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/rounded_background_light"
-                    android:padding="10dp"
-                    android:text="Sede Principal"
-                    android:textColor="@color/azul_oscuro"
-                    android:textSize="18sp" />
-            </LinearLayout>
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/txtUsuariosSede"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/rounded_background_light"
+                android:padding="12dp"
+                android:text="Sede Principal"
+                android:textColor="@color/azul_oscuro"
+                android:textSize="16sp"
+                android:foreground="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/lblUsuariosSede"
+                tools:text="Sede Principal" />
 
             <!-- Tipo de usuario -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/lblPerfilTipo"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="12dp">
+                android:layout_marginTop="16dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/perfil_tipo_usuario"
+                android:textColor="@color/gris_oscuro"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/txtUsuariosSede" />
 
-                <TextView
-                    android:text="Tipo de Usuario"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/gris_claro"                    android:textSize="14sp"
-                    android:textStyle="bold"/>
-
-                <TextView
-                    android:id="@+id/txtPerfilTipo"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/rounded_background_light"
-                    android:padding="10dp"
-                    android:text="Estudiante"
-                    android:textColor="@color/azul_oscuro"
-                    android:textSize="18sp" />
-            </LinearLayout>
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/txtPerfilTipo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/rounded_background_light"
+                android:padding="12dp"
+                android:text="Estudiante"
+                android:textColor="@color/azul_oscuro"
+                android:textSize="16sp"
+                android:foreground="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/lblPerfilTipo"
+                tools:text="Estudiante" />
 
             <!-- Estado -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/lblPerfilEstado"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_marginTop="16dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/perfil_estado"
+                android:textColor="@color/gris_oscuro"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/txtPerfilTipo" />
 
-                <TextView
-                    android:text="Estado"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/gris_claro"                    android:textSize="14sp"
-                    android:textStyle="bold"/>
-
-                <TextView
-                    android:id="@+id/txtPerfilEstado"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/rounded_background_light"
-                    android:padding="10dp"
-                    android:text="Activo"
-                    android:textColor="@color/azul_oscuro"
-                    android:textSize="18sp" />
-            </LinearLayout>
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
-
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/txtPerfilEstado"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/rounded_background_light"
+                android:padding="12dp"
+                android:text="Activo"
+                android:textColor="@color/verde_exito"
+                android:textSize="16sp"
+                android:foreground="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/lblPerfilEstado"
+                tools:text="Activo" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

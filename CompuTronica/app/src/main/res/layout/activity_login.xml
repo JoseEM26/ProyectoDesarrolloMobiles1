@@ -1,164 +1,232 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layoutLogin"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/azul_suave"
+    android:background="@drawable/gradient_background"
     tools:context=".LoginActivity">
 
-    <!-- Capa blanca translúcida para efecto suave -->
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+    <!-- Capa translúcida -->
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:alpha="0.15"
-        android:background="@color/white" />
+        android:background="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Encabezado -->
     <LinearLayout
         android:id="@+id/header"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="0dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="48dp"
+        android:layout_marginEnd="24dp"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="28dp">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-medium"
+            android:fontFamily="sans-serif-condensed"
+            android:letterSpacing="0.02"
             android:shadowColor="@color/azul_oscuro"
             android:shadowDx="0"
-            android:shadowDy="1"
-            android:shadowRadius="2"
-            android:text="CompuTronica"
+            android:shadowDy="2"
+            android:shadowRadius="4"
+            android:text="@string/login_title"
             android:textColor="@color/white"
-            android:textSize="32sp"
-            android:textStyle="bold" />
+            android:textSize="36sp"
+            android:textStyle="bold"
+            tools:text="CompuTronica" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:alpha="0.9"
-            android:text="Inicia sesión para continuar"
+            android:layout_marginTop="8dp"
+            android:alpha="0.85"
+            android:fontFamily="sans-serif"
+            android:text="@string/login_subtitle"
             android:textColor="@color/white"
-            android:textSize="15sp" />
+            android:textSize="16sp"
+            tools:text="Inicia sesión para continuar" />
     </LinearLayout>
 
-    <!-- Tarjeta blanca del login -->
-    <androidx.cardview.widget.CardView
+    <!-- Tarjeta de login -->
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardLogin"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/header"
-        android:layout_alignParentBottom="true"
-        android:layout_margin="26dp"
-        android:layout_marginTop="165dp"
-        android:background="@color/white"
-        app:cardCornerRadius="32dp"
-        app:cardElevation="10dp">
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="32dp"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="8dp"
+        app:cardUseCompatPadding="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header"
+        app:strokeColor="@color/azul_suave"
+        app:strokeWidth="1dp">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="34dp">
+            android:padding="28dp">
 
-            <!-- Usuario -->
-            <TextView
+            <!-- Código de estudiante -->
+            <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:alpha="0.9"
                 android:fontFamily="sans-serif-medium"
-                android:text="Código de Estudiante"
+                android:text="@string/student_code"
                 android:textColor="@color/azul_oscuro"
                 android:textSize="15sp" />
 
-            <EditText
-                android:id="@+id/etUsuario"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/rounded_background_white"
-                android:hint="Ejemplo: 20230145"
-                android:inputType="text"
-                android:padding="12dp"
-                android:textColor="@color/negro"
-                android:textColorHint="@color/gris_claro" />
+                android:layout_marginTop="8dp"
+                app:boxBackgroundColor="@color/white"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxStrokeColor="@color/azul_suave"
+                app:boxStrokeWidth="1dp"
+                app:hintTextColor="@color/gris_oscuro"
+                app:startIconDrawable="@drawable/ic_users"
+                app:startIconTint="@color/azul_profundo">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etUsuario"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Ejemplo: 20230145"
+                    android:inputType="text"
+                    android:padding="14dp"
+                    android:textColor="@color/negro"
+                    android:textColorHint="@color/gris_claro"
+                    android:textSize="16sp" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Contraseña -->
-            <TextView
+            <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:alpha="0.9"
+                android:layout_marginTop="16dp"
                 android:fontFamily="sans-serif-medium"
-                android:text="Contraseña"
+                android:text="@string/password"
                 android:textColor="@color/azul_oscuro"
                 android:textSize="15sp" />
 
-            <EditText
-                android:id="@+id/etContrasena"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/rounded_background_white"
-                android:hint="••••••••"
-                android:inputType="textPassword"
-                android:padding="12dp"
-                android:textColor="@color/negro"
-                android:textColorHint="@color/gris_claro" />
+                android:layout_marginTop="8dp"
+                app:boxBackgroundColor="@color/white"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxStrokeColor="@color/azul_suave"
+                app:boxStrokeWidth="1dp"
+                app:hintTextColor="@color/gris_oscuro"
+                app:startIconDrawable="@drawable/ic_password"
+                app:startIconTint="@color/azul_profundo">
 
-            <!-- Recordarme y recuperar -->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp">
-
-                <CheckBox
-                    android:id="@+id/chkRecordar"
-                    android:layout_width="wrap_content"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etContrasena"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:alpha="0.7"
-                    android:text="Recordarme"
-                    android:textColor="@color/azul_oscuro" />
+                    android:hint="••••••••"
+                    android:inputType="textPassword"
+                    android:padding="14dp"
+                    android:textColor="@color/negro"
+                    android:textColorHint="@color/gris_claro"
+                    android:textSize="16sp" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-                <TextView
+            <!-- Recordarme y recuperar contraseña -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/chkRecordar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/remember_me"
+                    android:textColor="@color/azul_oscuro"
+                    android:textSize="14sp"
+                    app:buttonTint="@color/azul_verdoso"
+                    app:useMaterialThemeColors="false" />
+
+                <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/tvOlvido"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:text="¿Olvidaste tu contraseña?"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/forgot_password"
                     android:textColor="@color/azul_verdoso"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-            </RelativeLayout>
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:padding="8dp" />
+            </LinearLayout>
 
-            <!-- Botón de inicio -->
+            <!-- Botón de inicio de sesión -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnLogin"
                 android:layout_width="match_parent"
-                android:layout_height="55dp"
-                android:layout_marginTop="26dp"
+                android:layout_height="60dp"
+                android:layout_marginTop="28dp"
+                android:layout_marginBottom="8dp"
                 android:fontFamily="sans-serif-medium"
-                android:text="Iniciar Sesión"
-                android:textColor="@android:color/white"
-                android:textSize="17sp"
+                android:text="@string/login_button"
+                android:textColor="@color/white"
+                android:textSize="16sp"
                 app:backgroundTint="@color/azul_profundo"
-                app:cornerRadius="35dp" />
+                app:cornerRadius="18dp"
+                app:icon="@drawable/ic_login"
+                app:iconGravity="start"
+                app:iconPadding="8dp"
+                app:iconTint="@color/white"
+                app:rippleColor="@color/azul_suave" />
 
             <!-- Texto inferior -->
-            <TextView
+            <com.google.android.material.textview.MaterialTextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="26dp"
-                android:alpha="0.8"
-                android:text="Accede a tus cursos y calificaciones desde cualquier lugar."
-                android:textAlignment="center"
-                android:textColor="@color/gris_claro"
-                android:textSize="14sp" />
+                android:layout_marginTop="12dp"
+                android:fontFamily="sans-serif"
+                android:gravity="center"
+                android:lineSpacingExtra="4dp"
+                android:text="@string/login_description"
+                android:textColor="@color/gris_oscuro"
+                android:textSize="14sp"
+                tools:text="Accede a tus cursos y calificaciones desde cualquier lugar." />
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
-</RelativeLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

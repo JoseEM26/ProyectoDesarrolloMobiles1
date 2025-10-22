@@ -11,4 +11,16 @@
     <color name="rojo">#FF0000</color>
     <color name="negro">#000000</color>
         <color name="gris_oscuro">#546E7A</color>
+        <color name="verde_exito">#4CAF50</color>
+        <color name="rojo_error">#F44336</color>
+
+
+        <color name="azul_oscuro_night">#3F51B5</color>
+        <color name="azul_suave_night">#90CAF9</color>
+        <color name="azul_profundo_night">#303F9F</color>
+        <color name="azul_verdoso_night">#4DB6AC</color>
+        <color name="gris_claro_night">#90A4AE</color>
+        <color name="gris_oscuro_night">#78909C</color>
+        <color name="BackGround_night">#212121</color>
+
 </resources>

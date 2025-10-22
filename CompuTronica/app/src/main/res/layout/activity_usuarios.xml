@@ -1,51 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E0E0E0"
-    android:paddingStart="10dp"
-    android:paddingTop="10dp"
-    android:paddingEnd="10dp"
-    android:paddingBottom="10dp"
+    android:background="@drawable/gradient_background"
+    android:padding="24dp"
     tools:context=".PerfilActivity">
 
+    <!-- Título de la sección -->
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-condensed"
+        android:letterSpacing="0.02"
+        android:shadowColor="@color/azul_oscuro"
+        android:shadowDx="0"
+        android:shadowDy="2"
+        android:shadowRadius="4"
+        android:text="@string/users_title"
+        android:textColor="@color/white"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Gestión de Usuarios" />
+
+    <!-- Botón para crear usuario -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnUsuarioCrear"
-        android:layout_width="150dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="16dp"
+        android:fontFamily="sans-serif-medium"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
         android:text="@string/btn_crear_nuevo_usuario"
         android:textColor="@color/white"
-        app:backgroundTint="@color/azul_oscuro"
+        android:textSize="14sp"
+        app:backgroundTint="@color/azul_profundo"
+        app:cornerRadius="20dp"
+        app:icon="@drawable/ic_add_user"
+        app:iconGravity="start"
+        app:iconPadding="8dp"
+        app:iconTint="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/tvTitle"
+        app:rippleColor="@color/azul_suave" />
 
+    <!-- RecyclerView para usuarios -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvUsuarios"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="24dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnUsuarioCrear" />
+        app:layout_constraintTop_toBottomOf="@id/btnUsuarioCrear"
+        tools:itemCount="8"
+        tools:listitem="@layout/item_usuario" />
 
-    <TextView
-        android:id="@+id/tvEmpty"
+    <!-- Estado vacío -->
+    <LinearLayout
+        android:id="@+id/emptyState"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="No hay usuarios disponibles"
-        android:textAlignment="center"
-        app:layout_constraintBottom_toTopOf="@+id/rvUsuarios"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="64dp"
+        android:layout_marginEnd="32dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnUsuarioCrear" />
+        app:layout_constraintTop_toBottomOf="@id/btnUsuarioCrear"
+        tools:visibility="visible">
 
+        <ImageView
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:layout_marginBottom="16dp"
+            android:src="@drawable/ic_users"
+            app:tint="@color/gris_claro" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/no_users_available"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"
+            tools:text="No hay usuarios disponibles" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:gravity="center"
+            android:lineSpacingExtra="4dp"
+            android:text="@string/no_users_subtitle"
+            android:textColor="@color/gris_claro"
+            android:textSize="14sp"
+            tools:text="Crea un nuevo usuario para comenzar." />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
