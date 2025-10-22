@@ -58,5 +58,16 @@
     <string name="txtInstitutoSede">Sede Central Lima</string>
     <string name="txtInstitutoTelefono">(01) 987-654-321</string>
     <string name="txtInstitutoCorreo">info@computronica.edu.pe</string>
+    <string name="loading">Cargando...</string>
+    <string name="no_grades_available">No hay calificaciones</string>
+    <string name="error_loading_grades">Error al cargar calificaciones</string>
+    <string name="error_loading_data">Error al cargar datos</string>
 
+    <string name="welcome_user">Bienvenido, %s</string>
+    <string name="welcome_default">Bienvenido, %s</string>
+    <string name="students">Estudiantes</string>
+    <string name="grades">Calificaciones</string>
+    <string name="subjects">Asignaturas</string>
+    <string name="average_grade">Promedio General</string>
+    <string name="recent_grades">Últimas Calificaciones</string>
 </resources>
