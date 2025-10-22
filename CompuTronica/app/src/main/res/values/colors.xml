@@ -10,4 +10,5 @@
     <color name="verde">#20752B</color>
     <color name="rojo">#FF0000</color>
     <color name="negro">#000000</color>
+        <color name="gris_oscuro">#546E7A</color>
 </resources>
