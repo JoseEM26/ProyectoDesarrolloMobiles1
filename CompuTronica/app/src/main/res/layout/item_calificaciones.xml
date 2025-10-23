@@ -5,22 +5,24 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="6dp"
-    app:cardCornerRadius="16dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginBottom="8dp"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
     app:cardUseCompatPadding="true"
-    app:strokeWidth="1dp"
-    app:strokeColor="@color/azul_profundo">
+    app:strokeColor="@color/azul_suave"
+    app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/azul_oscuro"
-        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="8dp">
+        android:padding="16dp">
 
-        <!-- Columna de datos del usuario -->
+        <!-- Columna de datos del curso -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -31,49 +33,50 @@
                 android:id="@+id/txtNombreCurso"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="NombreCurso"
-                android:textAppearance="?attr/textAppearanceSubtitle1"
-                android:textColor="@color/white"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/course_name"
+                android:textColor="@color/azul_oscuro"
+                android:textSize="16sp"
                 android:textStyle="bold"
-                tools:ignore="HardcodedText" />
+                tools:text="Matemáticas Avanzadas" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/txtTipoAsignaturaFecha"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="TipoASignaturaFecha"
-                android:textAppearance="?attr/textAppearanceBody2"
-                android:textColor="@color/white"
-                tools:ignore="HardcodedText" />
+                android:layout_marginTop="4dp"
+                android:fontFamily="sans-serif"
+                android:text="@string/grade_details"
+                android:textColor="@color/gris_oscuro"
+                android:textSize="14sp"
+                tools:text="Evaluación Final - 10/22/2025" />
         </LinearLayout>
 
-        <!-- Estado -->
+        <!-- Nota -->
+
+        <!-- Botón de opciones -->
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/txtNotaCurso"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginEnd="8dp"
-            android:gravity="center"
-            android:text="Nota"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="16dp"
+            android:gravity="center_vertical"
+            android:text="@string/grade_value"
             android:textColor="@color/azul_profundo"
+            android:textSize="18sp"
             android:textStyle="bold"
-            tools:ignore="HardcodedText" />
+            tools:text="4.5" />
 
         <ImageButton
             android:id="@+id/btnMenuCalificaicon"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_gravity="center_vertical"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/app_name"
-            android:gravity="center"
-            android:padding="0dp"
-            android:scaleType="fitCenter"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/menu_action"
             android:src="@drawable/baseline_dehaze_24"
-            app:tint="#FFFFFF" />
-
-
+            app:tint="@color/azul_oscuro" />
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

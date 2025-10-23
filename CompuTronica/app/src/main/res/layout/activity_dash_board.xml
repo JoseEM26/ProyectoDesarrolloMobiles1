@@ -6,7 +6,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/BackGround"
+    android:background="@drawable/gradient_background"
     tools:context=".DashBoardActivity">
 
     <!-- Header -->
@@ -14,164 +14,205 @@
         android:id="@+id/tvWelcome"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Bienvenido, Usuario"
-        android:textSize="24sp"
-        android:textColor="@color/azul_oscuro"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="20dp"
+        android:text="@string/welcome_default"
+        android:textColor="@color/white"
+        android:textSize="26sp"
         android:textStyle="bold"
-        android:gravity="center"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Bienvenido, Usuario" />
 
     <!-- Tarjetas resumen -->
     <LinearLayout
         android:id="@+id/llCards"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="16dp"
         android:orientation="horizontal"
-        android:gravity="center"
         android:weightSum="3"
-        app:layout_constraintTop_toBottomOf="@id/tvWelcome"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvWelcome">
 
         <!-- Card 1: Estudiantes -->
         <androidx.cardview.widget.CardView
             android:layout_width="0dp"
-            android:layout_height="120dp"
-            android:layout_weight="1"
+            android:layout_height="140dp"
             android:layout_margin="8dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="6dp"
-            android:background="@color/white">
+            android:layout_weight="1"
+            android:foreground="?attr/selectableItemBackground"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardUseCompatPadding="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:gravity="center"
                 android:orientation="vertical"
-                android:gravity="center">
+                android:padding="12dp">
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_users"
+                    app:tint="@color/azul_profundo" />
 
                 <TextView
                     android:id="@+id/tvEstudiantesCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
                     android:text="-"
                     android:textColor="@color/azul_profundo"
-                    android:textSize="28sp"
+                    android:textSize="24sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Estudiantes"
-                    android:textSize="14sp"
-                    android:textColor="@color/gris_claro"/>
+                    android:layout_marginTop="4dp"
+                    android:text="@string/students"
+                    android:textColor="@color/gris_oscuro"
+                    android:textSize="14sp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
         <!-- Card 2: Calificaciones -->
         <androidx.cardview.widget.CardView
             android:layout_width="0dp"
-            android:layout_height="120dp"
-            android:layout_weight="1"
+            android:layout_height="140dp"
             android:layout_margin="8dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="6dp"
-            android:background="@color/white">
+            android:layout_weight="1"
+            android:foreground="?attr/selectableItemBackground"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardUseCompatPadding="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:gravity="center"
                 android:orientation="vertical"
-                android:gravity="center">
+                android:padding="12dp">
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_grades"
+                    app:tint="@color/azul_suave" />
 
                 <TextView
                     android:id="@+id/tvCalificacionesCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
                     android:text="-"
                     android:textColor="@color/azul_suave"
-                    android:textSize="28sp"
+                    android:textSize="24sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Calificaciones"
-                    android:textSize="14sp"
-                    android:textColor="@color/gris_claro"/>
+                    android:layout_marginTop="4dp"
+                    android:text="@string/grades"
+                    android:textColor="@color/gris_oscuro"
+                    android:textSize="14sp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
         <!-- Card 3: Asignaturas -->
         <androidx.cardview.widget.CardView
             android:layout_width="0dp"
-            android:layout_height="120dp"
-            android:layout_weight="1"
+            android:layout_height="140dp"
             android:layout_margin="8dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="6dp"
-            android:background="@color/white">
+            android:layout_weight="1"
+            android:foreground="?attr/selectableItemBackground"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardUseCompatPadding="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:gravity="center"
                 android:orientation="vertical"
-                android:gravity="center">
+                android:padding="12dp">
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_subjects"
+                    app:tint="@color/azul_verdoso" />
 
                 <TextView
                     android:id="@+id/tvAsignaturasCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
                     android:text="-"
                     android:textColor="@color/azul_verdoso"
-                    android:textSize="28sp"
+                    android:textSize="24sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Asignaturas"
-                    android:textSize="14sp"
-                    android:textColor="@color/gris_claro"/>
+                    android:layout_marginTop="4dp"
+                    android:text="@string/subjects"
+                    android:textColor="@color/gris_oscuro"
+                    android:textSize="14sp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
     </LinearLayout>
 
     <!-- Promedio General -->
     <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
         android:layout_width="0dp"
-        android:layout_height="150dp"
-        android:layout_margin="16dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="6dp"
-        android:background="@color/white"
-        app:layout_constraintTop_toBottomOf="@id/llCards"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="16dp"
+        android:foreground="?attr/selectableItemBackground"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:cardUseCompatPadding="true"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/llCards">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
             android:orientation="vertical"
-            android:gravity="center">
+            android:padding="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Promedio General"
-                android:textSize="16sp"
+                android:text="@string/average_grade"
                 android:textColor="@color/azul_oscuro"
-                android:textStyle="bold"/>
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvPromedio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:text="-"
                 android:textColor="@color/azul_suave"
                 android:textSize="28sp"
@@ -182,17 +223,19 @@
     <!-- Últimas Calificaciones -->
     <androidx.cardview.widget.CardView
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
-        android:background="@color/white"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="6dp"
-        app:layout_constraintBottom_toTopOf="@+id/llCards"
+        android:foreground="?attr/selectableItemBackground"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:cardUseCompatPadding="true"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/cardView">
 
         <LinearLayout
             android:id="@+id/llRecientes"
@@ -204,9 +247,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Últimas Calificaciones"
+                android:text="@string/recent_grades"
                 android:textColor="@color/azul_oscuro"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textStyle="bold" />
             <!-- Aquí se agregarán dinámicamente las calificaciones -->
         </LinearLayout>

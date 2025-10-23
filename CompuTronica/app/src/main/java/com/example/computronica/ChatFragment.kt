@@ -96,7 +96,6 @@ class ChatFragment : Fragment() {
     }
 
     private fun loadMessages() {
-        // ✅ USANDO FIRESTORE: Colección "chats" → documento chatRoomId → subcolección "messages"
         db.collection("chats")
             .document(chatRoomId)
             .collection("messages")

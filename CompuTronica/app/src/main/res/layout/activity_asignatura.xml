@@ -1,53 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/BackGround"
-    android:paddingStart="10dp"
-    android:paddingTop="10dp"
-    android:paddingEnd="10dp"
-    android:paddingBottom="10dp"
+    android:background="@drawable/gradient_background"
+    android:padding="16dp"
     tools:context=".PerfilActivity">
 
+    <!-- Botón para agregar asignatura -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_calificaionesCreate"
-        android:layout_width="150dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:backgroundTint="@color/azul_profundo"
+        android:fontFamily="sans-serif-medium"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
         android:text="@string/btn_agregar_asignatura"
         android:textColor="@color/white"
-        app:backgroundTint="@color/azul_profundo"
-        app:cornerRadius="16dp"
+        android:textSize="14sp"
+        app:cornerRadius="12dp"
+        app:icon="@drawable/ic_add"
+        app:iconGravity="start"
+        app:iconTint="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:rippleColor="@color/azul_suave" />
 
-
+    <!-- RecyclerView para asignaturas -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_asginaturas"
+        android:id="@+id/rv_asignaturas"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_calificaionesCreate" />
+        app:layout_constraintTop_toBottomOf="@id/btn_calificaionesCreate"
+        tools:listitem="@layout/item_asignatura" />
 
-    <TextView
+    <!-- Texto para lista vacía -->
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvEmpty"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
-        android:text="No hay Asignatura disponibles"
-        android:textAlignment="center"
-        app:layout_constraintBottom_toTopOf="@+id/rv_asginaturas"
+        android:layout_marginEnd="16dp"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:text="@string/no_subjects_available"
+        android:textColor="@color/gris_oscuro"
+        android:textSize="16sp"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_calificaionesCreate" />
-
+        app:layout_constraintTop_toBottomOf="@id/btn_calificaionesCreate"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

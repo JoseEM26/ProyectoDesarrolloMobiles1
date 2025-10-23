@@ -2,17 +2,28 @@ package com.example.computronica
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.computronica.databinding.ActivityMainBinding
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var lastClickTime = 0L
+    private val debounceDelay = 500L // 500ms debounce
+    private var currentFragment: Fragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
+        // Check user session
         val usuario = SessionManager.currentUser
         val firebaseUser = FirebaseAuth.getInstance().currentUser
         if (usuario == null || firebaseUser == null) {
@@ -28,33 +39,51 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbarMain)
         supportActionBar?.setDisplayHomeAsUpEnabled(false)
 
-        // Configurar toolbar base
-        binding.toolbarMain.title = "Dashboard"
-        binding.toolbarMain.subtitle = "Bienvenido a Computrónica"
+        // Configure toolbar
+        updateToolbar("Dashboard", "Bienvenido a Computrónica")
 
+        // Set up bottom navigation with debouncing
         binding.bottomNav.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_inicio -> {
-                    changeFrame(DashBoardActivity())
-                    updateToolbar("Dashboard", "Bienvenido a Computrónica")
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - lastClickTime > debounceDelay) {
+                lastClickTime = currentTime
+                when (item.itemId) {
+                    R.id.nav_inicio -> {
+                        if (currentFragment !is DashBoardActivity) {
+                            changeFrame(DashBoardActivity())
+                            updateToolbar("Dashboard", "Bienvenido a Computrónica")
+                        }
+                        true
+                    }
+                    R.id.nav_asignatura -> {
+                        if (currentFragment !is AsignaturaActivity) {
+                            changeFrame(AsignaturaActivity())
+                            updateToolbar("Asignaturas", "Gestión de cursos y docentes")
+                        }
+                        true
+                    }
+                    R.id.nav_calificaoiones -> {
+                        if (currentFragment !is CalificacionActivity) {
+                            changeFrame(CalificacionActivity())
+                            updateToolbar("Calificaciones", "Consulta y registro de notas")
+                        }
+                        true
+                    }
+                    R.id.nav_more -> {
+                        if (currentFragment !is MoreMenuNavActivity) {
+                            changeFrame(MoreMenuNavActivity())
+                            updateToolbar("Más opciones", "Configuraciones y soporte")
+                        }
+                        true
+                    }
+                    else -> false
                 }
-                R.id.nav_asignatura -> {
-                    changeFrame(AsignaturaActivity())
-                    updateToolbar("Asignaturas", "Gestión de cursos y docentes")
-                }
-                R.id.nav_calificaoiones -> {
-                    changeFrame(CalificacionActivity())
-                    updateToolbar("Calificaciones", "Consulta y registro de notas")
-                }
-                R.id.nav_more -> {
-                    changeFrame(MoreMenuNavActivity())
-                    updateToolbar("Más opciones", "Configuraciones y soporte")
-                }
-                else -> false
+            } else {
+                false
             }
-            true
         }
 
+        // Set default fragment
         if (savedInstanceState == null) {
             binding.bottomNav.selectedItemId = R.id.nav_inicio
         }
@@ -63,11 +92,30 @@ class MainActivity : AppCompatActivity() {
     private fun updateToolbar(title: String, subtitle: String) {
         binding.toolbarMain.title = title
         binding.toolbarMain.subtitle = subtitle
+        // Ajustar colores según el tema
+        binding.toolbarMain.setTitleTextColor(ContextCompat.getColor(this, android.R.color.white))
+        binding.toolbarMain.setSubtitleTextColor(ContextCompat.getColor(this, R.color.gris_claro))
     }
 
     fun changeFrame(fragment: Fragment) {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.frameLayout, fragment)
-            .commit()
+        scope.launch {
+            try {
+                if (!isFinishing && !supportFragmentManager.isStateSaved) {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.frameLayout, fragment)
+                        .commit()
+                    currentFragment = fragment
+                } else {
+                    Log.w("MainActivity", "Cannot commit fragment transaction: Activity is finishing or state saved")
+                }
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Error in fragment transaction: ${e.message}")
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        scope.cancel()
     }
 }

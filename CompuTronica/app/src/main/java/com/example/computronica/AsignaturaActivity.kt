@@ -42,9 +42,9 @@ class AsignaturaActivity : Fragment() {
     ): View {
         _b = ActivityAsignaturaBinding.inflate(inflater, container, false)
 
-        b.rvAsginaturas.layoutManager = LinearLayoutManager(requireContext())
-        b.rvAsginaturas.adapter = adapter
-        b.rvAsginaturas.addItemDecoration(
+        b.rvAsignaturas.layoutManager = LinearLayoutManager(requireContext())
+        b.rvAsignaturas.adapter = adapter
+        b.rvAsignaturas.addItemDecoration(
             DividerItemDecoration(requireContext(), RecyclerView.VERTICAL)
         )
 

@@ -1,10 +1,10 @@
 package com.example.computronica
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.computronica.Model.Calificaciones
@@ -13,142 +13,190 @@ import com.example.computronica.Model.Usuario
 import com.example.computronica.databinding.ActivityDashBoardBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class DashBoardActivity : Fragment() {
 
-    private var _b: ActivityDashBoardBinding? = null
-    private val b get() = _b!!
+    private var _binding: ActivityDashBoardBinding? = null
+    private val binding get() = _binding!!
     private val db by lazy { FirebaseFirestore.getInstance() }
-    private val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-    private var userTipo: TipoUsuario = TipoUsuario.estudiante // default
+    private val userId by lazy { FirebaseAuth.getInstance().currentUser?.uid.orEmpty() }
+    private var userTipo: TipoUsuario = TipoUsuario.estudiante
+    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _b = ActivityDashBoardBinding.inflate(inflater, container, false)
-        return b.root
+        _binding = ActivityDashBoardBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initializeFirebase()
+        loadUserData()
+        updateTextColors()
+    }
 
-        // Obtener tipo de usuario y nombre
-        db.collection("usuarios").document(userId).get()
-            .addOnSuccessListener { doc ->
+    private fun updateTextColors() {
+        // Ajustar colores según el tema claro/oscuro
+        binding.tvWelcome.setTextColor(ContextCompat.getColor(requireContext(), R.color.azul_oscuro))
+        binding.tvEstudiantesCount.setTextColor(ContextCompat.getColor(requireContext(), R.color.negro))
+        binding.tvCalificacionesCount.setTextColor(ContextCompat.getColor(requireContext(), R.color.negro))
+        binding.tvAsignaturasCount.setTextColor(ContextCompat.getColor(requireContext(), R.color.negro))
+        binding.tvPromedio.setTextColor(ContextCompat.getColor(requireContext(), if (binding.tvPromedio.text != "-") R.color.verde_exito else R.color.rojo_error))
+    }
+
+    private fun initializeFirebase() {
+        try {
+            FirebaseAuth.getInstance().currentUser ?: run {
+                binding.tvWelcome.text = getString(R.string.welcome_default, "Usuario")
+                clearLoadingState()
+            }
+            db.firestoreSettings = db.firestoreSettings // Ensure Firestore is initialized
+        } catch (e: Exception) {
+            binding.tvWelcome.text = getString(R.string.welcome_default, "Usuario")
+            clearLoadingState()
+            Log.e("DashBoardActivity", "Error initializing Firebase: ${e.message}")
+        }
+    }
+
+    private fun showLoadingState() {
+        binding.tvWelcome.text = getString(R.string.loading)
+        binding.tvEstudiantesCount.text = "..."
+        binding.tvCalificacionesCount.text = "..."
+        binding.tvAsignaturasCount.text = "..."
+        binding.tvPromedio.text = "..."
+    }
+
+    private fun clearLoadingState() {
+        binding.tvEstudiantesCount.text = "-"
+        binding.tvCalificacionesCount.text = "-"
+        binding.tvAsignaturasCount.text = "-"
+        binding.tvPromedio.text = "-"
+        updateTextColors()
+    }
+
+    private fun loadUserData() {
+        if (userId.isEmpty()) {
+            binding.tvWelcome.text = getString(R.string.welcome_default, "Usuario")
+            clearLoadingState()
+            return
+        }
+
+        scope.launch {
+            try {
+                val doc = db.collection("usuarios").document(userId).get().await()
                 val user = doc.toObject(Usuario::class.java)
                 if (user != null) {
                     userTipo = user.tipo
-                    b.tvWelcome.text = "Bienvenido, ${user.nombre}"
-                    cargarDatosDashboard()
+                    binding.tvWelcome.text = getString(R.string.welcome_user, user.nombre)
+                    loadDashboardData()
+                } else {
+                    binding.tvWelcome.text = getString(R.string.welcome_default, "Usuario")
+                    clearLoadingState()
                 }
+            } catch (e: Exception) {
+                binding.tvWelcome.text = getString(R.string.welcome_default, "Usuario")
+                clearLoadingState()
+                Log.e("DashBoardActivity", "Error loading user data: ${e.message}")
             }
-            .addOnFailureListener {
-                b.tvWelcome.text = "Bienvenido, Usuario"
-            }
+        }
     }
 
-    private fun cargarDatosDashboard() {
-        cargarConteos()
-        cargarPromedio()
-        cargarUltimasCalificaciones()
+    private fun loadDashboardData() {
+        loadCounts()
+        loadAverageGrade()
     }
 
-    private fun cargarConteos() {
-        // Contar Estudiantes (solo admin)
+    private fun loadCounts() {
         if (userTipo == TipoUsuario.administrativo) {
-            db.collection("usuarios").whereEqualTo("tipo", TipoUsuario.estudiante.name).get()
-                .addOnSuccessListener { snapshot ->
-                    b.tvEstudiantesCount.text = snapshot.size().toString()
+            scope.launch {
+                try {
+                    val snapshot = db.collection("usuarios")
+                        .whereEqualTo("tipo", TipoUsuario.estudiante.name)
+                        .get().await()
+                    binding.tvEstudiantesCount.text = snapshot.size().toString()
+                } catch (e: Exception) {
+                    binding.tvEstudiantesCount.text = "-"
+                    Log.e("DashBoardActivity", "Error loading estudiantes count: ${e.message}")
+                } finally {
+                    updateTextColors()
                 }
-        } else {
-            b.tvEstudiantesCount.text = "-" // No mostrar a profesor o estudiante
-        }
-
-        // Contar Calificaciones
-        val calificacionesQuery: Query = if (userTipo == TipoUsuario.estudiante) {
-            db.collection("calificaciones").whereEqualTo("estudianteId", userId)
-        } else {
-            db.collection("calificaciones")
-        }
-
-        calificacionesQuery.get()
-            .addOnSuccessListener { snapshot ->
-                b.tvCalificacionesCount.text = snapshot.size().toString()
             }
+        } else {
+            binding.tvEstudiantesCount.text = "-"
+        }
 
-        // Contar Asignaturas (solo admin/profesor)
+        scope.launch {
+            try {
+                val query = if (userTipo == TipoUsuario.estudiante) {
+                    db.collection("calificaciones").whereEqualTo("estudianteId", userId)
+                } else {
+                    db.collection("calificaciones")
+                }
+                val snapshot = query.get().await()
+                binding.tvCalificacionesCount.text = snapshot.size().toString()
+            } catch (e: Exception) {
+                binding.tvCalificacionesCount.text = "-"
+                Log.e("DashBoardActivity", "Error loading calificaciones count: ${e.message}")
+            } finally {
+                updateTextColors()
+            }
+        }
+
         if (userTipo != TipoUsuario.estudiante) {
-            db.collection("asignaturas").get()
-                .addOnSuccessListener { snapshot ->
-                    b.tvAsignaturasCount.text = snapshot.size().toString()
+            scope.launch {
+                try {
+                    val snapshot = db.collection("asignaturas").get().await()
+                    binding.tvAsignaturasCount.text = snapshot.size().toString()
+                } catch (e: Exception) {
+                    binding.tvAsignaturasCount.text = "-"
+                    Log.e("DashBoardActivity", "Error loading asignaturas count: ${e.message}")
+                } finally {
+                    updateTextColors()
                 }
+            }
         } else {
-            b.tvAsignaturasCount.text = "-" // estudiantes no necesitan ver todas
+            binding.tvAsignaturasCount.text = "-"
         }
     }
 
-    private fun cargarPromedio() {
-        val calificacionesQuery: Query = if (userTipo == TipoUsuario.estudiante) {
-            db.collection("calificaciones").whereEqualTo("estudianteId", userId)
-        } else {
-            db.collection("calificaciones")
-        }
-
-        calificacionesQuery.get()
-            .addOnSuccessListener { snapshot ->
-                if (!snapshot.isEmpty) {
-                    val notas = snapshot.documents.mapNotNull { it.getDouble("nota") }
-                    val promedio = notas.average()
-                    b.tvPromedio.text = String.format("%.2f", promedio)
+    private fun loadAverageGrade() {
+        scope.launch {
+            try {
+                val query = if (userTipo == TipoUsuario.estudiante) {
+                    db.collection("calificaciones").whereEqualTo("estudianteId", userId)
                 } else {
-                    b.tvPromedio.text = "-"
+                    db.collection("calificaciones")
                 }
-            }
-    }
-
-    private fun cargarUltimasCalificaciones() {
-        val calificacionesQuery: Query = if (userTipo == TipoUsuario.estudiante) {
-            db.collection("calificaciones")
-                .whereEqualTo("estudianteId", userId)
-                .orderBy("fechaRegistro", Query.Direction.DESCENDING)
-                .limit(5)
-        } else {
-            db.collection("calificaciones")
-                .orderBy("fechaRegistro", Query.Direction.DESCENDING)
-                .limit(5)
-        }
-
-        calificacionesQuery.get()
-            .addOnSuccessListener { snapshot ->
-                b.llRecientes.removeAllViews()
+                val snapshot = query.get().await()
                 if (!snapshot.isEmpty) {
-                    for (doc in snapshot.documents) {
-                        val cal = doc.toObject(Calificaciones::class.java)
-                        if (cal != null) {
-                            val tv = TextView(requireContext()).apply {
-                                text = "${cal.estudianteId} - ${cal.asignaturaId} - ${cal.nota}"
-                                setPadding(6, 6, 6, 6)
-                                setTextColor(ContextCompat.getColor(requireContext(), R.color.negro))
-                            }
-                            b.llRecientes.addView(tv)
-                        }
-                    }
+                    val grades = snapshot.documents.mapNotNull { it.getDouble("nota") }
+                    val average = grades.average()
+                    binding.tvPromedio.text = String.format("%.2f", average)
                 } else {
-                    val tv = TextView(requireContext()).apply {
-                        text = "No hay calificaciones"
-                        setPadding(6, 6, 6, 6)
-                        setTextColor(ContextCompat.getColor(requireContext(), R.color.gris_claro))
-                    }
-                    b.llRecientes.addView(tv)
+                    binding.tvPromedio.text = "-"
                 }
+            } catch (e: Exception) {
+                binding.tvPromedio.text = "-"
+                Log.e("DashBoardActivity", "Error loading average grade: ${e.message}")
+            } finally {
+                updateTextColors()
             }
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _b = null
+        scope.cancel()
+        _binding = null
     }
 }
