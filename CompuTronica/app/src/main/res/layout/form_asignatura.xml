@@ -68,20 +68,60 @@
             android:background="@drawable/rounded_background_white" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- Profesores -->
     <TextView
         android:id="@+id/tvProfesorLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Profesor"
+        android:text="Profesores"
         android:textColor="@android:color/black"
         android:textSize="14sp"
         android:layout_marginTop="8dp" />
 
-    <Spinner
-        android:id="@+id/spnProfesor"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilProfesores"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/rounded_background_white"
-        android:padding="6dp" />
+        android:hint="Seleccionar profesores activos"
+        android:background="@drawable/rounded_background_white">
+
+        <MultiAutoCompleteTextView
+            android:id="@+id/etProfesores"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:dropDownSelector="@android:drawable/list_selector_background"
+            android:drawableEnd="@drawable/ic_dropdown"
+            android:background="@null"
+            android:imeOptions="actionDone" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Estudiantes -->
+    <TextView
+        android:id="@+id/tvEstudiantesLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Estudiantes"
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        android:layout_marginTop="8dp" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilEstudiantes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Seleccionar estudiantes activos"
+        android:background="@drawable/rounded_background_white">
+
+        <MultiAutoCompleteTextView
+            android:id="@+id/etEstudiantes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:dropDownSelector="@android:drawable/list_selector_background"
+            android:drawableEnd="@drawable/ic_dropdown"
+            android:background="@null"
+            android:imeOptions="actionDone" />
+    </com.google.android.material.textfield.TextInputLayout>
 
 </LinearLayout>
