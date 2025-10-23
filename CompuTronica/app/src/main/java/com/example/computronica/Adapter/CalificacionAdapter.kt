@@ -6,9 +6,13 @@ import android.view.ViewGroup
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.RecyclerView
 import com.example.computronica.Model.Calificaciones
+import com.example.computronica.Model.TipoUsuario
+import com.example.computronica.Model.Usuario
 import com.example.computronica.R
+import com.example.computronica.SessionManager
 import com.example.computronica.databinding.ItemCalificacionesBinding
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
@@ -35,6 +39,8 @@ class CalificacionAdapter(
         val context = holder.binding.root.context
         val item = items[position]
         val b = holder.binding
+        val usuario: Usuario? = SessionManager.currentUser
+        b.btnMenuCalificaicon.isInvisible = usuario?.tipo == TipoUsuario.estudiante
 
         b.txtNotaCurso.text = item.nota.toString()
 
