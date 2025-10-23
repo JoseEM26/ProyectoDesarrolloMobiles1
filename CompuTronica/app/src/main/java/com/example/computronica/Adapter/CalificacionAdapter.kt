@@ -61,7 +61,10 @@ class CalificacionAdapter(
         b.btnMenuCalificaicon.setOnClickListener { view ->
             val popup = PopupMenu(context, view)
             popup.menuInflater.inflate(R.menu.menu_usuario, popup.menu)
-
+            // Disable or hide delete option for non-admins
+            if (usuario?.tipo != TipoUsuario.administrativo) {
+                popup.menu.findItem(R.id.action_eliminar)?.isVisible = false
+            }
             // Forzar íconos visibles
             try {
                 val fields = popup.javaClass.getDeclaredField("mPopup")

@@ -43,6 +43,8 @@ class AsignaturasAdapter(
         val asignatura = items[position]
         val b = holder.binding
         val usuario: Usuario? = SessionManager.currentUser
+
+        // Hide menu button for students
         b.btnMenuAsig.isInvisible = usuario?.tipo == TipoUsuario.estudiante
 
         // Mostrar datos básicos
@@ -54,47 +56,63 @@ class AsignaturasAdapter(
 
         // Mostrar PopupMenu al presionar el botón
         b.btnMenuAsig.setOnClickListener { view ->
-            val popup = PopupMenu(context, view)
-            popup.menuInflater.inflate(R.menu.menu_usuario, popup.menu)
+            if (usuario?.tipo != TipoUsuario.estudiante) { // Only show for non-students
+                val popup = PopupMenu(context, view)
+                popup.menuInflater.inflate(R.menu.menu_usuario, popup.menu)
 
-            // Forzar mostrar íconos
-            try {
-                val fields = popup.javaClass.getDeclaredField("mPopup")
-                fields.isAccessible = true
-                val menuHelper = fields.get(popup)
-                val setForceIcons = menuHelper.javaClass.getDeclaredMethod("setForceShowIcon", Boolean::class.javaPrimitiveType)
-                setForceIcons.invoke(menuHelper, true)
-            } catch (e: Exception) {
-                Log.e("AsignaturasAdapter", "Error forcing icons in PopupMenu: ${e.message}")
-            }
+                // Disable or hide delete option for non-admins
+                if (usuario?.tipo != TipoUsuario.administrativo) {
+                    popup.menu.findItem(R.id.action_eliminar)?.isVisible = false
+                }
 
-            popup.setOnMenuItemClickListener { item ->
-                when (item.itemId) {
-                    R.id.action_editar -> onEdit(asignatura)
-                    R.id.action_eliminar -> {
-                        AlertDialog.Builder(context)
-                            .setTitle("Eliminar asignatura")
-                            .setMessage("¿Seguro que deseas eliminar la asignatura \"${asignatura.nombre}\"?")
-                            .setPositiveButton("Eliminar") { _, _ ->
-                                FirebaseFirestore.getInstance()
-                                    .collection("asignaturas")
-                                    .document(asignatura.id)
-                                    .delete()
-                                    .addOnSuccessListener {
-                                        Toast.makeText(context, "✅ Asignatura eliminada", Toast.LENGTH_SHORT).show()
-                                        onDelete(asignatura)
+                // Forzar mostrar íconos
+                try {
+                    val fields = popup.javaClass.getDeclaredField("mPopup")
+                    fields.isAccessible = true
+                    val menuHelper = fields.get(popup)
+                    val setForceIcons = menuHelper.javaClass.getDeclaredMethod("setForceShowIcon", Boolean::class.javaPrimitiveType)
+                    setForceIcons.invoke(menuHelper, true)
+                } catch (e: Exception) {
+                    Log.e("AsignaturasAdapter", "Error forcing icons in PopupMenu: ${e.message}")
+                }
+
+                popup.setOnMenuItemClickListener { item ->
+                    when (item.itemId) {
+                        R.id.action_editar -> {
+                            onEdit(asignatura)
+                            true
+                        }
+                        R.id.action_eliminar -> {
+                            if (usuario?.tipo == TipoUsuario.administrativo) {
+                                AlertDialog.Builder(context)
+                                    .setTitle("Eliminar asignatura")
+                                    .setMessage("¿Seguro que deseas eliminar la asignatura \"${asignatura.nombre}\"?")
+                                    .setPositiveButton("Eliminar") { _, _ ->
+                                        FirebaseFirestore.getInstance()
+                                            .collection("asignaturas")
+                                            .document(asignatura.id)
+                                            .delete()
+                                            .addOnSuccessListener {
+                                                Toast.makeText(context, "✅ Asignatura eliminada", Toast.LENGTH_SHORT).show()
+                                                onDelete(asignatura)
+                                            }
+                                            .addOnFailureListener {
+                                                Toast.makeText(context, "❌ Error al eliminar", Toast.LENGTH_SHORT).show()
+                                            }
                                     }
-                                    .addOnFailureListener {
-                                        Toast.makeText(context, "❌ Error al eliminar", Toast.LENGTH_SHORT).show()
-                                    }
+                                    .setNegativeButton("Cancelar", null)
+                                    .show()
+                                true
+                            } else {
+                                Toast.makeText(context, "❌ Solo los administradores pueden eliminar asignaturas", Toast.LENGTH_SHORT).show()
+                                true
                             }
-                            .setNegativeButton("Cancelar", null)
-                            .show()
+                        }
+                        else -> false
                     }
                 }
-                true
+                popup.show()
             }
-            popup.show()
         }
     }
 
