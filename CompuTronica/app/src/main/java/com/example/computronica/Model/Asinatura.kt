@@ -6,5 +6,6 @@ data class Asignatura(
     val nombre: String = "",
     val descripcion: String? = null,
     val creditos: Int = 3,
-    val profesorId: String? = null
+    val profesores: List<String> = emptyList(),
+    val estudiantes: List<String> = emptyList()
 )

@@ -42,6 +42,7 @@
 
         <!-- Card 1: Estudiantes -->
         <androidx.cardview.widget.CardView
+            android:id="@+id/cardEstudiantes"
             android:layout_width="0dp"
             android:layout_height="140dp"
             android:layout_margin="8dp"
@@ -76,6 +77,7 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvEstudiantesLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
@@ -87,6 +89,7 @@
 
         <!-- Card 2: Calificaciones -->
         <androidx.cardview.widget.CardView
+            android:id="@+id/cardCalificaciones"
             android:layout_width="0dp"
             android:layout_height="140dp"
             android:layout_margin="8dp"
@@ -121,6 +124,7 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvCalificacionesLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
@@ -132,6 +136,7 @@
 
         <!-- Card 3: Asignaturas -->
         <androidx.cardview.widget.CardView
+            android:id="@+id/cardAsignaturas"
             android:layout_width="0dp"
             android:layout_height="140dp"
             android:layout_margin="8dp"
@@ -166,6 +171,7 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvAsignaturasLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
@@ -176,9 +182,9 @@
         </androidx.cardview.widget.CardView>
     </LinearLayout>
 
-    <!-- Promedio General -->
+    <!-- Promedios por Asignatura -->
     <androidx.cardview.widget.CardView
-        android:id="@+id/cardView"
+        android:id="@+id/cardPromedios"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -194,34 +200,27 @@
         app:layout_constraintTop_toBottomOf="@id/llCards">
 
         <LinearLayout
+            android:id="@+id/llPromedios"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
             android:orientation="vertical"
             android:padding="16dp">
 
             <TextView
+                android:id="@+id/tvPromediosLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/average_grade"
+                android:text="@string/average_by_subject"
                 android:textColor="@color/azul_oscuro"
                 android:textSize="18sp"
                 android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvPromedio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="-"
-                android:textColor="@color/azul_suave"
-                android:textSize="28sp"
-                android:textStyle="bold" />
+            <!-- Promedios por asignatura se agregarán dinámicamente -->
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
     <!-- Últimas Calificaciones -->
     <androidx.cardview.widget.CardView
+        android:id="@+id/cardRecientes"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="16dp"
@@ -235,7 +234,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardView">
+        app:layout_constraintTop_toBottomOf="@id/cardPromedios">
 
         <LinearLayout
             android:id="@+id/llRecientes"
@@ -251,7 +250,7 @@
                 android:textColor="@color/azul_oscuro"
                 android:textSize="18sp"
                 android:textStyle="bold" />
-            <!-- Aquí se agregarán dinámicamente las calificaciones -->
+            <!-- Calificaciones recientes se agregarán dinámicamente -->
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

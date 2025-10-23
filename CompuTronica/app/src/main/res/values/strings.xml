@@ -102,10 +102,20 @@
     <string name="no_users_available">No hay usuarios disponibles</string>
     <string name="no_users_subtitle">Crea un nuevo usuario para comenzar.</string>
     <string name="users_title">Gestión de Usuarios</string>
-        <string name="perfil_codigo_institucional">Código Institucional</string>
-        <string name="perfil_correo">Correo Electrónico</string>
-        <string name="perfil_sede">Sede</string>
-        <string name="perfil_tipo_usuario">Tipo de Usuario</string>
-        <string name="perfil_estado">Estado</string>
-        <string name="copiado_al_portapapeles">Copiado al portapapeles</string>
+    <string name="perfil_codigo_institucional">Código Institucional</string>
+    <string name="perfil_correo">Correo Electrónico</string>
+    <string name="perfil_sede">Sede</string>
+    <string name="perfil_tipo_usuario">Tipo de Usuario</string>
+    <string name="perfil_estado">Estado</string>
+    <string name="copiado_al_portapapeles">Copiado al portapapeles</string>
+    <string name="total_students">Total de Estudiantes</string>
+    <string name="my_grades">Mis Calificaciones</string>
+    <string name="assigned_grades">Calificaciones Asignadas</string>
+    <string name="total_grades">Total de Calificaciones</string>
+    <string name="my_subjects">Mis Asignaturas</string>
+    <string name="teaching_subjects">Asignaturas Dictadas</string>
+    <string name="total_subjects">Total de Asignaturas</string>
+    <string name="average_by_subject">Promedios por Asignatura</string>
+    <string name="my_average_by_subject">Mis Promedios por Asignatura</string>
+    <string name="class_average_by_subject">Promedio del Aula por Asignatura</string>
 </resources>
