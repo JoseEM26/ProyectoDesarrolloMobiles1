@@ -32,6 +32,7 @@ class UsuarioAdapter(
         b.txtUsuariosNombre.text = "${u.nombre} ${u.apellido}"
         b.txtUsuariosSede.text = u.sede
         b.txtUsuariosActivo.text = if (u.estado) "Activo" else "Inactivo"
+        b.txtUsuariosTipo.text=u.tipo.toString()
 
         // Color dinámico para estado
         val colorRes = if (u.estado) R.color.verde else R.color.rojo
