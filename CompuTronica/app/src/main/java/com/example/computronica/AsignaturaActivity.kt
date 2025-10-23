@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.computronica.Adapter.AsignaturasAdapter
 import com.example.computronica.Model.Asignatura
+import com.example.computronica.Model.TipoUsuario
 import com.example.computronica.Model.Usuario
 import com.example.computronica.databinding.ActivityAsignaturaBinding
 import com.example.computronica.databinding.FormAsignaturaBinding
@@ -55,6 +56,7 @@ class AsignaturaActivity : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         listarAsignaturas()
     }
 

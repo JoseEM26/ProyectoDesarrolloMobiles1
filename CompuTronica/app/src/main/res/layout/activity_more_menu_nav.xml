@@ -64,6 +64,27 @@
                 app:iconGravity="start"
                 app:iconTint="@color/white"
                 app:rippleColor="@color/azul_suave" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLogOut"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:fontFamily="sans-serif-medium"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="@string/log_out"
+                android:textColor="@color/azul_oscuro"
+                android:textSize="16sp"
+                app:backgroundTint="@color/white"
+                app:cornerRadius="12dp"
+                app:icon="@drawable/ic_logout"
+                app:iconGravity="start"
+                app:iconPadding="8dp"
+                app:iconTint="@color/azul_profundo"
+                app:rippleColor="@color/azul_suave"
+                app:strokeColor="@color/gris_claro"
+                app:strokeWidth="1dp" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
@@ -91,27 +112,6 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:padding="16dp">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnUsuarios"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:fontFamily="sans-serif-medium"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:text="@string/users"
-                android:textColor="@color/azul_oscuro"
-                android:textSize="16sp"
-                app:backgroundTint="@color/white"
-                app:cornerRadius="12dp"
-                app:icon="@drawable/ic_users"
-                app:iconGravity="start"
-                app:iconPadding="8dp"
-                app:iconTint="@color/azul_profundo"
-                app:rippleColor="@color/azul_suave"
-                app:strokeColor="@color/gris_claro"
-                app:strokeWidth="1dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnChat"
@@ -156,25 +156,26 @@
                 app:strokeWidth="1dp" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnLogOut"
+                android:id="@+id/btnUsuarios"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:fontFamily="sans-serif-medium"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
-                android:text="@string/log_out"
+                android:text="@string/users"
                 android:textColor="@color/azul_oscuro"
                 android:textSize="16sp"
                 app:backgroundTint="@color/white"
                 app:cornerRadius="12dp"
-                app:icon="@drawable/ic_logout"
+                app:icon="@drawable/ic_users"
                 app:iconGravity="start"
                 app:iconPadding="8dp"
                 app:iconTint="@color/azul_profundo"
                 app:rippleColor="@color/azul_suave"
                 app:strokeColor="@color/gris_claro"
                 app:strokeWidth="1dp" />
+
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
