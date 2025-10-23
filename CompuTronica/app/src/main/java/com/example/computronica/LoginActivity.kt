@@ -40,6 +40,12 @@ class LoginActivity : AppCompatActivity() {
                                 val usuario = doc.toObject(Usuario::class.java)
                                 if (usuario != null) {
                                     usuario.id = doc.id // Asignar id
+                                    // Check if user is active
+                                    if (!usuario.estado) {
+                                        auth.signOut() // Log out inactive user
+                                        toast("❌ Su cuenta está inactiva. Contacte al administrador.")
+                                        return@addOnSuccessListener
+                                    }
                                     SessionManager.currentUser = usuario
                                     SessionManager.userId = uid
                                     toast("Bienvenido ${usuario.nombre}")
@@ -65,8 +71,23 @@ class LoginActivity : AppCompatActivity() {
         val usuario = SessionManager.currentUser
         val firebaseUser = FirebaseAuth.getInstance().currentUser
         if (usuario != null && firebaseUser != null) {
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
+            // Verify user is still active
+            db.collection("usuarios").document(firebaseUser.uid).get()
+                .addOnSuccessListener { doc ->
+                    val updatedUsuario = doc.toObject(Usuario::class.java)
+                    if (updatedUsuario != null && updatedUsuario.estado) {
+                        startActivity(Intent(this, MainActivity::class.java))
+                        finish()
+                    } else {
+                        auth.signOut()
+                        SessionManager.currentUser = null
+                        SessionManager.userId = null
+                        toast("❌ Su cuenta está inactiva. Contacte al administrador.")
+                    }
+                }
+                .addOnFailureListener {
+                    toast("Error al verificar usuario")
+                }
         }
     }
 

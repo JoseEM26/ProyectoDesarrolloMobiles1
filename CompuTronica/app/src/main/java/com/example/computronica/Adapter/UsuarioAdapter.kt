@@ -1,10 +1,12 @@
 package com.example.computronica.Adapter
 
 import android.app.AlertDialog
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.computronica.Model.Usuario
 import com.example.computronica.R
@@ -37,6 +39,10 @@ class UsuarioAdapter(
         // Color dinámico para estado
         val colorRes = if (u.estado) R.color.verde else R.color.rojo
         b.txtUsuariosActivo.setTextColor(context.getColor(colorRes))
+        val iconRes = if (u.estado) R.drawable.ic_active else R.drawable.ic_inactive
+        b.ivStatus.setImageResource(iconRes)
+        val iconColorRes = if (u.estado) R.color.verde else R.color.rojo
+        b.ivStatus.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(b.ivStatus.context, iconColorRes))
 
         // Mostrar PopupMenu al presionar el botón
         b.btnMenu.setOnClickListener { view ->

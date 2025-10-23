@@ -41,8 +41,7 @@ class MoreMenuNavActivity : Fragment() {
         if (usuario != null) {
             binding.txtNombreUsuario.text = "${usuario.nombre} ${usuario.apellido}"
             binding.txtNombreUsuario.setTextColor(ContextCompat.getColor(requireContext(), R.color.azul_oscuro))
-            // Ocultar btnUsuarios para estudiantes
-            binding.btnUsuarios.isInvisible = usuario.tipo == TipoUsuario.estudiante
+            binding.btnUsuarios.isInvisible = usuario.tipo == TipoUsuario.estudiante || usuario.tipo == TipoUsuario.profesor
         } else {
             binding.txtNombreUsuario.text = getString(R.string.msg_usuarioNoLogueado)
             binding.txtNombreUsuario.setTextColor(ContextCompat.getColor(requireContext(), R.color.rojo_error))
