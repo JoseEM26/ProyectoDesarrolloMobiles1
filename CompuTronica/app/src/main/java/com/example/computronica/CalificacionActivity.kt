@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -188,19 +189,49 @@ class CalificacionActivity : Fragment() {
                 if (!isValid) return@setOnClickListener
 
                 val estudianteId = estudianteIds[estudianteIndex]
-                val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                val calificacion = Calificaciones(
-                    id = db.collection("calificaciones").document().id,
-                    asignaturaId = asignaturaIds[asignaturaIndex],
-                    nota = nota,
-                    evaluacion = evaluacion,
-                    fechaRegistro = sdf.format(Date()),
-                    estudianteId = estudianteId
-                )
+                val asignaturaId = asignaturaIds[asignaturaIndex]
 
-                db.collection("calificaciones").document(calificacion.id)
-                    .set(calificacion)
-                    .addOnSuccessListener { alertDialog.dismiss() }
+                db.collection("calificaciones")
+                    .whereEqualTo("estudianteId", estudianteId)
+                    .whereEqualTo("asignaturaId", asignaturaId)
+                    .whereEqualTo("evaluacion", evaluacion)
+                    .get()
+                    .addOnSuccessListener { querySnapshot ->
+                        if (!querySnapshot.isEmpty) {
+                            Toast.makeText(
+                                requireContext(),
+                                "Ya existe una calificacion de '$evaluacion' para este estudiante en esta asignatura",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        } else {
+                            val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                            val calificacion = Calificaciones(
+                                id = db.collection("calificaciones").document().id,
+                                asignaturaId = asignaturaIds[asignaturaIndex],
+                                nota = nota,
+                                evaluacion = evaluacion,
+                                fechaRegistro = sdf.format(Date()),
+                                estudianteId = estudianteId
+                            )
+
+                            db.collection("calificaciones").document(calificacion.id)
+                                .set(calificacion)
+                                .addOnSuccessListener {
+                                    Toast.makeText(
+                                        requireContext(),
+                                        "Error al guardar",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                        }
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(
+                            requireContext(),
+                            "Error al validar",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
             }
         }
 
