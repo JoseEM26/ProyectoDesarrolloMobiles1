@@ -2,6 +2,7 @@ package com.example.computronica
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.computronica.Model.Usuario
@@ -14,6 +15,8 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var b: ActivityLoginBinding
     private lateinit var auth: FirebaseAuth
     private val db = FirebaseFirestore.getInstance()
+    // 👁 Variable para controlar si la contraseña está visible
+    private var isPasswordVisible = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,6 +24,20 @@ class LoginActivity : AppCompatActivity() {
         setContentView(b.root)
 
         auth = FirebaseAuth.getInstance()
+
+        // --- 👁 Toggle de visibilidad de contraseña ---
+        b.btnTogglePassword.setOnClickListener {
+            isPasswordVisible = !isPasswordVisible
+            val inputType = if (isPasswordVisible)
+                android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+            else
+                android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+            b.etContrasena.inputType = inputType
+            b.etContrasena.setSelection(b.etContrasena.text?.length ?: 0)
+            b.btnTogglePassword.setImageResource(
+                if (isPasswordVisible) R.drawable.ic_eye_open else R.drawable.ic_eye_closed
+            )
+        }
 
         b.btnLogin.setOnClickListener {
             val email = b.etUsuario.text.toString().trim()

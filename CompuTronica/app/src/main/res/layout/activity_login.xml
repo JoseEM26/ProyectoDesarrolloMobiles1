@@ -134,33 +134,53 @@
                 android:textColor="@color/azul_oscuro"
                 android:textSize="15sp" />
 
-            <com.google.android.material.textfield.TextInputLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:boxBackgroundColor="@color/white"
-                app:boxBackgroundMode="outline"
-                app:boxCornerRadiusBottomEnd="12dp"
-                app:boxCornerRadiusBottomStart="12dp"
-                app:boxCornerRadiusTopEnd="12dp"
-                app:boxCornerRadiusTopStart="12dp"
-                app:boxStrokeColor="@color/azul_suave"
-                app:boxStrokeWidth="1dp"
-                app:hintTextColor="@color/gris_oscuro"
-                app:startIconDrawable="@drawable/ic_password"
-                app:startIconTint="@color/azul_profundo">
+                android:layout_marginTop="8dp">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etContrasena"
+                <!-- Campo de contraseña -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilContrasena"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="••••••••"
-                    android:inputType="textPassword"
-                    android:padding="14dp"
-                    android:textColor="@color/negro"
-                    android:textColorHint="@color/gris_claro"
-                    android:textSize="16sp" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    app:boxBackgroundColor="@color/white"
+                    app:boxBackgroundMode="outline"
+                    app:boxCornerRadiusBottomEnd="12dp"
+                    app:boxCornerRadiusBottomStart="12dp"
+                    app:boxCornerRadiusTopEnd="12dp"
+                    app:boxCornerRadiusTopStart="12dp"
+                    app:boxStrokeColor="@color/azul_suave"
+                    app:boxStrokeWidth="1dp"
+                    app:hintTextColor="@color/gris_oscuro"
+                    app:startIconDrawable="@drawable/ic_password"
+                    app:startIconTint="@color/azul_profundo">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etContrasena"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="••••••••"
+                        android:inputType="textPassword"
+                        android:paddingEnd="48dp"
+                        android:padding="14dp"
+                        android:textColor="@color/negro"
+                        android:textColorHint="@color/gris_claro"
+                        android:textSize="16sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Ícono de ojo dentro del campo -->
+                <ImageView
+                    android:id="@+id/btnTogglePassword"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignEnd="@id/tilContrasena"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="16dp"
+                    android:src="@drawable/ic_eye_closed"
+                    android:background="@android:color/transparent"
+                    app:tint="@color/azul_profundo" />
+            </RelativeLayout>
 
             <!-- Recordarme y recuperar contraseña -->
             <LinearLayout
