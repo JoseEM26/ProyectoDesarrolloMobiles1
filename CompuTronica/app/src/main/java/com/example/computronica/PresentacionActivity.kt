@@ -36,7 +36,6 @@ class PresentacionActivity : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // 📍 Abrir ubicación en Google Maps
         b.cardSede.setOnClickListener {
             try {
                 val direccion = "Instituto CompuTronica, Lima, Perú"
@@ -48,15 +47,13 @@ class PresentacionActivity : Fragment() {
             }
         }
 
-        // ☎️ Llamar por teléfono
         b.cardTelefono.setOnClickListener {
-            val numero = "+51987654321" // <-- cámbialo si deseas
+            val numero = "+51987654321"
             val intent = Intent(Intent.ACTION_DIAL)
             intent.data = Uri.parse("tel:$numero")
             startActivity(intent)
         }
 
-        // 📧 Enviar correo electrónico
         b.cardCorreo.setOnClickListener {
             try {
                 val correo = "contacto@computronica.edu.pe"

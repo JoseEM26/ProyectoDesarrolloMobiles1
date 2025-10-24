@@ -7,7 +7,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/gradient_background"
-    tools:context=".DashBoardActivity">
+    tools:context=".DashBoardActivity"
+    >
 
     <!-- Header -->
     <TextView
@@ -214,7 +215,6 @@
                 android:textColor="@color/azul_oscuro"
                 android:textSize="18sp"
                 android:textStyle="bold" />
-            <!-- Promedios por asignatura se agregarán dinámicamente -->
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
@@ -250,7 +250,6 @@
                 android:textColor="@color/azul_oscuro"
                 android:textSize="18sp"
                 android:textStyle="bold" />
-            <!-- Calificaciones recientes se agregarán dinámicamente -->
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
