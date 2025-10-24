@@ -66,11 +66,22 @@ class MoreMenuNavActivity : Fragment() {
             }
         }
 
+        //boton notas
+
+
         // Botón Presentación
         binding.btnPresentacion.setOnClickListener {
             if (debounceClick()) {
                 mainActivity.changeFrame(PresentacionActivity())
                 mainActivity.supportActionBar?.title = "Presentación"
+            }
+        }
+
+        //boton notas
+        binding.btnMisNotas.setOnClickListener {
+            if (debounceClick()) {
+                mainActivity.changeFrame(MisNotasFragment())
+                mainActivity.supportActionBar?.title = "Mis Notas 📚"
             }
         }
 
@@ -101,6 +112,7 @@ class MoreMenuNavActivity : Fragment() {
             }
         }
     }
+
 
     private fun debounceClick(): Boolean {
         val currentTime = System.currentTimeMillis()

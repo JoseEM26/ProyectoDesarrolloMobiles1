@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isInvisible
 import androidx.fragment.app.Fragment
@@ -17,6 +18,7 @@ import com.example.computronica.Model.Asignatura
 import com.example.computronica.Model.Calificaciones
 import com.example.computronica.Model.TipoUsuario
 import com.example.computronica.Model.Usuario
+import com.example.computronica.SessionManager
 import com.example.computronica.databinding.ActivityCalificacionBinding
 import com.example.computronica.databinding.FormCalificacionesBinding
 import com.google.firebase.firestore.FirebaseFirestore
@@ -28,23 +30,19 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.text.SimpleDateFormat
-import java.util.*
 
-class CalificacionActivity : Fragment() {
+class CalificacionFragment : Fragment() {
 
     private var _b: ActivityCalificacionBinding? = null
     private val b get() = _b!!
     private val db by lazy { FirebaseFirestore.getInstance() }
     private var listenerReg: ListenerRegistration? = null
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-
     private val adapter = CalificacionAdapter(
         mutableListOf(),
         onEdit = { calificacion -> showEditDialog(calificacion) },
         onDelete = { calificacion -> eliminarCalificacion(calificacion) }
     )
-
     private val asignaturaNombres = mutableListOf<String>()
     private val asignaturaIds = mutableListOf<String>()
     private val estudianteNombres = mutableListOf<String>()
@@ -56,22 +54,18 @@ class CalificacionActivity : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _b = ActivityCalificacionBinding.inflate(inflater, container, false)
-
         b.rvCalificaciones.layoutManager = LinearLayoutManager(requireContext())
         b.rvCalificaciones.adapter = adapter
         b.rvCalificaciones.addItemDecoration(
             DividerItemDecoration(requireContext(), RecyclerView.VERTICAL)
         )
-
         b.btnCalificaionesCreate.setOnClickListener { showCreateDialog() }
-
         return b.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val usuario: Usuario? = SessionManager.currentUser
-
         b.btnCalificaionesCreate.isInvisible = usuario?.tipo == TipoUsuario.estudiante
         listarCalificaciones()
     }
@@ -80,12 +74,11 @@ class CalificacionActivity : Fragment() {
         listenerReg?.remove()
         val currentUser = SessionManager.currentUser
         if (currentUser == null) {
-            Log.e("CalificacionActivity", "SessionManager.currentUser is null")
+            Log.e("CalificacionFragment", "SessionManager.currentUser is null")
             b.tvEmpty.text = "Error: No hay usuario autenticado"
             b.tvEmpty.visibility = View.VISIBLE
             return
         }
-
         scope.launch {
             try {
                 val query = when (currentUser.tipo) {
@@ -106,24 +99,21 @@ class CalificacionActivity : Fragment() {
                     TipoUsuario.administrativo -> db.collection("calificaciones")
                         .orderBy("fecha", Query.Direction.DESCENDING)
                 }
-
                 listenerReg = query.addSnapshotListener { snapshot, e ->
                     if (e != null) {
-                        Log.e("CalificacionActivity", "Error loading calificaciones: ${e.message}", e)
+                        Log.e("CalificacionFragment", "Error loading calificaciones: ${e.message}", e)
                         b.tvEmpty.text = "Error al cargar calificaciones: ${e.message}"
                         b.tvEmpty.visibility = View.VISIBLE
                         return@addSnapshotListener
                     }
-
                     val list = snapshot?.documents?.mapNotNull { doc ->
                         doc.toObject(Calificaciones::class.java)?.copy(id = doc.id)
                     }.orEmpty()
-
                     adapter.replaceAll(list)
                     b.tvEmpty.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
                 }
             } catch (e: Exception) {
-                Log.e("CalificacionActivity", "Error setting up calificaciones query: ${e.message}", e)
+                Log.e("CalificacionFragment", "Error setting up calificaciones query: ${e.message}", e)
                 b.tvEmpty.text = "Error al configurar la consulta: ${e.message}"
                 b.tvEmpty.visibility = View.VISIBLE
             }
@@ -137,7 +127,7 @@ class CalificacionActivity : Fragment() {
                 .get().await()
             snapshot.documents.map { it.id }
         } catch (e: Exception) {
-            Log.e("CalificacionActivity", "Error fetching professor asignaturas: ${e.message}", e)
+            Log.e("CalificacionFragment", "Error fetching professor asignaturas: ${e.message}", e)
             emptyList()
         }
     }
@@ -150,9 +140,8 @@ class CalificacionActivity : Fragment() {
                 .whereArrayContains("estudiantes", user.id)
             TipoUsuario.profesor -> db.collection("asignaturas")
                 .whereArrayContains("profesores", user.id)
-            else -> db.collection("asignaturas") // Admin or null user
+            else -> db.collection("asignaturas")
         }
-
         query.orderBy("nombre", Query.Direction.ASCENDING)
             .get()
             .addOnSuccessListener { result ->
@@ -166,7 +155,7 @@ class CalificacionActivity : Fragment() {
                 onLoaded()
             }
             .addOnFailureListener { e ->
-                Log.e("CalificacionActivity", "Error loading asignaturas: ${e.message}", e)
+                Log.e("CalificacionFragment", "Error loading asignaturas: ${e.message}", e)
                 onLoaded()
             }
     }
@@ -194,7 +183,7 @@ class CalificacionActivity : Fragment() {
                 onLoaded()
             }
             .addOnFailureListener { e ->
-                Log.e("CalificacionActivity", "Error loading estudiantes: ${e.message}", e)
+                Log.e("CalificacionFragment", "Error loading estudiantes: ${e.message}", e)
                 onLoaded()
             }
     }
@@ -202,7 +191,6 @@ class CalificacionActivity : Fragment() {
     private fun showCreateDialog() {
         val dialogBinding = FormCalificacionesBinding.inflate(layoutInflater)
         val currentUser = SessionManager.currentUser
-
         // Spinner Evaluaciones
         val evaluacionesArray = resources.getStringArray(R.array.tipoAsignatura)
         dialogBinding.spnEvaluacion.adapter = ArrayAdapter(
@@ -210,7 +198,6 @@ class CalificacionActivity : Fragment() {
             android.R.layout.simple_spinner_dropdown_item,
             evaluacionesArray
         )
-
         // Cargar estudiantes
         cargarEstudiantes {
             dialogBinding.spnEstudiante.adapter = ArrayAdapter(
@@ -219,7 +206,6 @@ class CalificacionActivity : Fragment() {
                 estudianteNombres
             )
         }
-
         // Cargar asignaturas (role-based)
         cargarAsignaturas(currentUser) {
             dialogBinding.spnAsignatura.adapter = ArrayAdapter(
@@ -228,28 +214,23 @@ class CalificacionActivity : Fragment() {
                 asignaturaNombres
             )
         }
-
         val alertDialog = AlertDialog.Builder(requireContext())
             .setTitle("Registrar Calificación")
             .setView(dialogBinding.root)
             .setPositiveButton("Guardar", null)
             .setNegativeButton("Cancelar", null)
             .create()
-
         alertDialog.setOnShowListener {
             alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 dialogBinding.titNota.error = null
                 dialogBinding.tvEvaluacionLabel.error = null
                 dialogBinding.tvEstudianteLabel.error = null
                 dialogBinding.tvAsignaturaLabel.error = null
-
                 val nota = dialogBinding.etNota.text.toString().toDoubleOrNull()
                 val evaluacion = dialogBinding.spnEvaluacion.selectedItem?.toString() ?: ""
                 val asignaturaIndex = dialogBinding.spnAsignatura.selectedItemPosition
                 val estudianteIndex = dialogBinding.spnEstudiante.selectedItemPosition
-
                 var isValid = true
-
                 if (nota == null || nota < 0.0 || nota > 20.0) {
                     dialogBinding.titNota.error = "Ingrese una nota válida (0-20)"
                     isValid = false
@@ -266,43 +247,61 @@ class CalificacionActivity : Fragment() {
                     dialogBinding.tvAsignaturaLabel.error = "Seleccione una asignatura válida"
                     isValid = false
                 }
-
                 if (!isValid) return@setOnClickListener
-
                 scope.launch {
                     try {
                         val estudianteId = estudianteIds[estudianteIndex]
                         val asignaturaId = asignaturaIds[asignaturaIndex]
-                        val calificacion = Calificaciones(
-                            id = db.collection("calificaciones").document().id,
-                            asignaturaId = asignaturaId,
-                            nota = nota!!,
-                            evaluacion = evaluacion,
-                            fecha = com.google.firebase.Timestamp.now(),
-                            estudianteId = estudianteId
-                        )
-
-                        db.collection("calificaciones").document(calificacion.id)
-                            .set(calificacion)
+                        // Check for duplicates (Nicolas's logic)
+                        val querySnapshot = db.collection("calificaciones")
+                            .whereEqualTo("estudianteId", estudianteId)
+                            .whereEqualTo("asignaturaId", asignaturaId)
+                            .whereEqualTo("evaluacion", evaluacion)
+                            .get()
                             .await()
-                        alertDialog.dismiss()
+                        if (!querySnapshot.isEmpty) {
+                            Toast.makeText(
+                                requireContext(),
+                                "Ya existe una calificación de '$evaluacion' para este estudiante en esta asignatura",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        } else {
+                            val calificacion = Calificaciones(
+                                id = db.collection("calificaciones").document().id,
+                                asignaturaId = asignaturaId,
+                                nota = nota!!,
+                                evaluacion = evaluacion,
+                                fecha = com.google.firebase.Timestamp.now(),
+                                estudianteId = estudianteId
+                            )
+                            db.collection("calificaciones").document(calificacion.id)
+                                .set(calificacion)
+                                .await()
+                            Toast.makeText(
+                                requireContext(),
+                                "Calificación guardada correctamente",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            alertDialog.dismiss()
+                        }
                     } catch (e: Exception) {
-                        Log.e("CalificacionActivity", "Error saving calificacion: ${e.message}", e)
-                        dialogBinding.titNota.error = "Error al guardar: ${e.message}"
+                        Log.e("CalificacionFragment", "Error saving calificacion: ${e.message}", e)
+                        Toast.makeText(
+                            requireContext(),
+                            "Error al guardar: ${e.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
         }
-
         alertDialog.show()
     }
 
     private fun showEditDialog(calificacion: Calificaciones) {
         val dialogBinding = FormCalificacionesBinding.inflate(layoutInflater)
         val currentUser = SessionManager.currentUser
-
         dialogBinding.etNota.setText(calificacion.nota.toString())
-
         // Cargar estudiantes
         cargarEstudiantes {
             dialogBinding.spnEstudiante.adapter = ArrayAdapter(
@@ -313,7 +312,6 @@ class CalificacionActivity : Fragment() {
             val selectedIndex = estudianteIds.indexOf(calificacion.estudianteId)
             if (selectedIndex >= 0) dialogBinding.spnEstudiante.setSelection(selectedIndex)
         }
-
         // Cargar asignaturas (role-based)
         cargarAsignaturas(currentUser) {
             dialogBinding.spnAsignatura.adapter = ArrayAdapter(
@@ -324,7 +322,6 @@ class CalificacionActivity : Fragment() {
             val selectedIndex = asignaturaIds.indexOf(calificacion.asignaturaId)
             if (selectedIndex >= 0) dialogBinding.spnAsignatura.setSelection(selectedIndex)
         }
-
         // Spinner Evaluaciones
         val evaluacionesArray = resources.getStringArray(R.array.tipoAsignatura)
         dialogBinding.spnEvaluacion.adapter = ArrayAdapter(
@@ -334,28 +331,23 @@ class CalificacionActivity : Fragment() {
         )
         val selectedEvalIndex = evaluacionesArray.indexOf(calificacion.evaluacion)
         if (selectedEvalIndex >= 0) dialogBinding.spnEvaluacion.setSelection(selectedEvalIndex)
-
         val alertDialog = AlertDialog.Builder(requireContext())
             .setTitle("Editar Calificación")
             .setView(dialogBinding.root)
             .setPositiveButton("Actualizar", null)
             .setNegativeButton("Cancelar", null)
             .create()
-
         alertDialog.setOnShowListener {
             alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 dialogBinding.titNota.error = null
                 dialogBinding.tvEvaluacionLabel.error = null
                 dialogBinding.tvEstudianteLabel.error = null
                 dialogBinding.tvAsignaturaLabel.error = null
-
                 val nota = dialogBinding.etNota.text.toString().toDoubleOrNull()
                 val evaluacion = dialogBinding.spnEvaluacion.selectedItem?.toString() ?: ""
                 val asignaturaIndex = dialogBinding.spnAsignatura.selectedItemPosition
                 val estudianteIndex = dialogBinding.spnEstudiante.selectedItemPosition
-
                 var isValid = true
-
                 if (nota == null || nota < 0.0 || nota > 20.0) {
                     dialogBinding.titNota.error = "Ingrese una nota válida (0-20)"
                     isValid = false
@@ -372,9 +364,7 @@ class CalificacionActivity : Fragment() {
                     dialogBinding.tvAsignaturaLabel.error = "Seleccione una asignatura válida"
                     isValid = false
                 }
-
                 if (!isValid) return@setOnClickListener
-
                 scope.launch {
                     try {
                         val estudianteId = estudianteIds[estudianteIndex]
@@ -386,19 +376,17 @@ class CalificacionActivity : Fragment() {
                             "estudianteId" to estudianteId,
                             "fecha" to com.google.firebase.Timestamp.now()
                         )
-
                         db.collection("calificaciones").document(calificacion.id)
                             .update(updates)
                             .await()
                         alertDialog.dismiss()
                     } catch (e: Exception) {
-                        Log.e("CalificacionActivity", "Error updating calificacion: ${e.message}", e)
+                        Log.e("CalificacionFragment", "Error updating calificacion: ${e.message}", e)
                         dialogBinding.titNota.error = "Error al actualizar: ${e.message}"
                     }
                 }
             }
         }
-
         alertDialog.show()
     }
 
@@ -413,7 +401,7 @@ class CalificacionActivity : Fragment() {
                             .delete()
                             .await()
                     } catch (e: Exception) {
-                        Log.e("CalificacionActivity", "Error deleting calificacion: ${e.message}", e)
+                        Log.e("CalificacionFragment", "Error deleting calificacion: ${e.message}", e)
                         b.tvEmpty.text = "Error al eliminar: ${e.message}"
                         b.tvEmpty.visibility = View.VISIBLE
                     }
