@@ -5,20 +5,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/BackGround"
+    android:background="@drawable/gradient_background"
+    android:padding="16dp"
     android:fillViewport="true"
     tools:context=".PresentacionActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="24dp">
+        android:layout_height="wrap_content">
 
         <!-- Fondo degradado superior -->
         <View
             android:id="@+id/fondoDegradado"
             android:layout_width="0dp"
             android:layout_height="280dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="24dp"
             android:background="@drawable/gradient_background"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -27,10 +30,11 @@
         <!-- Imagen del Instituto -->
         <ImageView
             android:id="@+id/imgInstituto"
-            android:layout_width="0dp"
+            android:layout_width="280dp"
             android:layout_height="220dp"
-            android:layout_marginHorizontal="32dp"
-            android:layout_marginTop="40dp"
+            android:layout_marginStart="14dp"
+            android:layout_marginTop="46dp"
+            android:layout_marginEnd="14dp"
             android:background="@drawable/bg_card_blanca"
             android:clipToOutline="true"
             android:contentDescription="@string/contextDescripcionImgInstituto"
@@ -39,30 +43,29 @@
             android:elevation="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:src="@tools:sample/backgrounds/scenic" />
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Tarjeta con información -->
+        <!-- Tarjeta de información -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardInfo"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginHorizontal="16dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
             app:cardBackgroundColor="@color/white"
             app:cardCornerRadius="24dp"
             app:cardElevation="6dp"
             app:cardUseCompatPadding="true"
-            app:strokeColor="@color/azul_suave"
-            app:strokeWidth="1dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/imgInstituto">
+            app:layout_constraintTop_toBottomOf="@+id/fondoDegradado"
+            app:strokeColor="@color/azul_suave"
+            app:strokeWidth="1dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="24dp">
+                android:padding="16dp">
 
                 <!-- Título -->
                 <com.google.android.material.textview.MaterialTextView
@@ -72,10 +75,6 @@
                     android:fontFamily="sans-serif-condensed"
                     android:gravity="center"
                     android:letterSpacing="0.02"
-                    android:shadowColor="@color/azul_oscuro"
-                    android:shadowDx="0"
-                    android:shadowDy="2"
-                    android:shadowRadius="4"
                     android:text="@string/txtInstitutoTitulo"
                     android:textColor="@color/azul_oscuro"
                     android:textSize="28sp"
@@ -129,7 +128,69 @@
                     app:layout_constraintTop_toBottomOf="@id/separator"
                     tools:text="El Instituto CompuTronica ofrece educación de calidad..." />
 
-                <!-- Información de contacto -->
+                <!-- Título: Visión -->
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/tvVisionTitulo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="Visión"
+                    android:textColor="@color/azul_profundo"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toBottomOf="@id/tvDescripcion"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <!-- Contenido: Visión -->
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/tvVision"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="sans-serif"
+                    android:lineSpacingExtra="4dp"
+                    android:text="@string/txtInstitutoVision"
+                    android:textAlignment="center"
+                    android:textColor="@color/negro"
+                    android:textSize="14sp"
+                    app:layout_constraintTop_toBottomOf="@id/tvVisionTitulo"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <!-- Título: Misión -->
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/tvMisionTitulo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="Misión"
+                    android:textColor="@color/azul_profundo"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toBottomOf="@id/tvVision"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <!-- Contenido: Misión -->
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/tvMision"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="sans-serif"
+                    android:lineSpacingExtra="4dp"
+                    android:text="@string/txtInstitutoMision"
+                    android:textAlignment="center"
+                    android:textColor="@color/negro"
+                    android:textSize="14sp"
+                    app:layout_constraintTop_toBottomOf="@id/tvMisionTitulo"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+
                 <LinearLayout
                     android:id="@+id/contactContainer"
                     android:layout_width="0dp"
@@ -137,47 +198,47 @@
                     android:layout_marginTop="24dp"
                     android:gravity="center"
                     android:orientation="horizontal"
+                    android:weightSum="3"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvDescripcion">
+                    app:layout_constraintTop_toBottomOf="@id/tvMision">
 
-                    <!-- Sede -->
+                <!-- Sede -->
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/cardSede"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
+                        android:layout_height="120dp"
                         android:layout_marginEnd="8dp"
-                        android:foreground="?attr/selectableItemBackground"
+                        android:layout_weight="1"
                         android:clickable="true"
                         android:focusable="true"
                         app:cardBackgroundColor="@color/white"
-                        app:cardElevation="2dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="3dp"
                         app:rippleColor="@color/azul_suave">
 
                         <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                            android:layout_height="match_parent"
                             android:gravity="center"
                             android:orientation="vertical"
-                            android:padding="12dp">
+                            android:padding="8dp">
 
                             <ImageView
-                                android:id="@+id/iconSede"
-                                android:layout_width="48dp"
-                                android:layout_height="48dp"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
                                 android:src="@drawable/baseline_location_on_24"
                                 app:tint="@color/azul_profundo" />
 
                             <com.google.android.material.textview.MaterialTextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
+                                android:layout_marginTop="6dp"
                                 android:fontFamily="sans-serif-medium"
+                                android:gravity="center"
                                 android:text="@string/txtInstitutoSede"
                                 android:textColor="@color/azul_oscuro"
-                                android:textSize="13sp"
-                                tools:text="Av. Principal 123, Lima" />
+                                android:textSize="12sp" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
@@ -185,39 +246,38 @@
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/cardTelefono"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
+                        android:layout_height="120dp"
                         android:layout_marginHorizontal="8dp"
-                        android:foreground="?attr/selectableItemBackground"
+                        android:layout_weight="1"
                         android:clickable="true"
                         android:focusable="true"
                         app:cardBackgroundColor="@color/white"
-                        app:cardElevation="2dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="3dp"
                         app:rippleColor="@color/azul_suave">
 
                         <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                            android:layout_height="match_parent"
                             android:gravity="center"
                             android:orientation="vertical"
-                            android:padding="12dp">
+                            android:padding="8dp">
 
                             <ImageView
-                                android:id="@+id/iconTelefono"
-                                android:layout_width="48dp"
-                                android:layout_height="48dp"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
                                 android:src="@drawable/baseline_local_phone_24"
                                 app:tint="@color/azul_profundo" />
 
                             <com.google.android.material.textview.MaterialTextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
+                                android:layout_marginTop="6dp"
                                 android:fontFamily="sans-serif-medium"
+                                android:gravity="center"
                                 android:text="@string/txtInstitutoTelefono"
                                 android:textColor="@color/azul_oscuro"
-                                android:textSize="13sp"
-                                tools:text="+51 987 654 321" />
+                                android:textSize="12sp" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
@@ -225,39 +285,38 @@
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/cardCorreo"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
+                        android:layout_height="120dp"
                         android:layout_marginStart="8dp"
-                        android:foreground="?attr/selectableItemBackground"
+                        android:layout_weight="1"
                         android:clickable="true"
                         android:focusable="true"
                         app:cardBackgroundColor="@color/white"
-                        app:cardElevation="2dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="3dp"
                         app:rippleColor="@color/azul_suave">
 
                         <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                            android:layout_height="match_parent"
                             android:gravity="center"
                             android:orientation="vertical"
-                            android:padding="12dp">
+                            android:padding="8dp">
 
                             <ImageView
-                                android:id="@+id/iconCorreo"
-                                android:layout_width="48dp"
-                                android:layout_height="48dp"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
                                 android:src="@drawable/baseline_email_24"
                                 app:tint="@color/azul_profundo" />
 
                             <com.google.android.material.textview.MaterialTextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
+                                android:layout_marginTop="6dp"
                                 android:fontFamily="sans-serif-medium"
+                                android:gravity="center"
                                 android:text="@string/txtInstitutoCorreo"
                                 android:textColor="@color/azul_oscuro"
-                                android:textSize="13sp"
-                                tools:text="contacto@computronica.edu.pe" />
+                                android:textSize="12sp" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
