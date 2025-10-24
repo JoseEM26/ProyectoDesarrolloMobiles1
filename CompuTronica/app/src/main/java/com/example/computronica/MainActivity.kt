@@ -3,6 +3,7 @@ package com.example.computronica
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -21,6 +22,7 @@ class MainActivity : AppCompatActivity() {
     private var lastClickTime = 0L
     private val debounceDelay = 500L
     private var currentFragment: Fragment? = null
+    private var isLoading = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Check user session
@@ -45,7 +47,10 @@ class MainActivity : AppCompatActivity() {
         // Set up bottom navigation with debouncing
         binding.bottomNav.setOnItemSelectedListener { item ->
             val currentTime = System.currentTimeMillis()
-            if (currentTime - lastClickTime > debounceDelay) {
+            if (isLoading) {
+                Log.d("MainActivity", "Navigation blocked due to loading")
+                false
+            } else if (currentTime - lastClickTime > debounceDelay) {
                 lastClickTime = currentTime
                 when (item.itemId) {
                     R.id.nav_inicio -> {
@@ -65,7 +70,7 @@ class MainActivity : AppCompatActivity() {
                     R.id.nav_calificaoiones -> {
                         if (currentFragment !is MisNotasFragment) {
                             changeFrame(MisNotasFragment())
-                            updateToolbar("Calificaciones", "Mis calificaciones ")
+                            updateToolbar("Calificaciones", "Mis calificaciones")
                         }
                         true
                     }
@@ -92,7 +97,6 @@ class MainActivity : AppCompatActivity() {
     private fun updateToolbar(title: String, subtitle: String) {
         binding.toolbarMain.title = title
         binding.toolbarMain.subtitle = subtitle
-        // Ajustar colores según el tema
         binding.toolbarMain.setTitleTextColor(ContextCompat.getColor(this, android.R.color.white))
         binding.toolbarMain.setSubtitleTextColor(ContextCompat.getColor(this, R.color.gris_claro))
     }
@@ -105,6 +109,10 @@ class MainActivity : AppCompatActivity() {
                         .replace(R.id.frameLayout, fragment)
                         .commit()
                     currentFragment = fragment
+                    // Hide loading when changing to a non-DashBoardFragment
+                    if (fragment !is DashBoardActivity) {
+                        setLoading(false)
+                    }
                 } else {
                     Log.w("MainActivity", "Cannot commit fragment transaction: Activity is finishing or state saved")
                 }
@@ -112,6 +120,11 @@ class MainActivity : AppCompatActivity() {
                 Log.e("MainActivity", "Error in fragment transaction: ${e.message}")
             }
         }
+    }
+
+    fun setLoading(isLoading: Boolean) {
+        this.isLoading = isLoading
+        binding.loadingOverlay.visibility = if (isLoading) View.VISIBLE else View.GONE
     }
 
     override fun onDestroy() {
