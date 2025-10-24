@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var lastClickTime = 0L
-    private val debounceDelay = 500L // 500ms debounce
+    private val debounceDelay = 500L
     private var currentFragment: Fragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,8 +63,8 @@ class MainActivity : AppCompatActivity() {
                         true
                     }
                     R.id.nav_calificaoiones -> {
-                        if (currentFragment !is CalificacionActivity) {
-                            changeFrame(CalificacionActivity())
+                        if (currentFragment !is CalificacionFragment) {
+                            changeFrame(CalificacionFragment())
                             updateToolbar("Calificaciones", "Consulta y registro de notas")
                         }
                         true
