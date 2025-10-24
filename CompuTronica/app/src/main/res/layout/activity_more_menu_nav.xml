@@ -176,27 +176,6 @@
                 app:strokeColor="@color/gris_claro"
                 app:strokeWidth="1dp" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnMisNotas"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:fontFamily="sans-serif-medium"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:text="Mis Notas"
-                android:textColor="@color/azul_oscuro"
-                android:textSize="16sp"
-                app:backgroundTint="@color/white"
-                app:cornerRadius="12dp"
-                app:icon="@drawable/baseline_edit_24"
-                app:iconGravity="start"
-                app:iconPadding="8dp"
-                app:iconTint="@color/azul_profundo"
-                app:rippleColor="@color/azul_suave"
-                app:strokeColor="@color/gris_claro"
-                app:strokeWidth="1dp" />
-
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 

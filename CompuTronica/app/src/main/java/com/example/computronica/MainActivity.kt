@@ -63,9 +63,9 @@ class MainActivity : AppCompatActivity() {
                         true
                     }
                     R.id.nav_calificaoiones -> {
-                        if (currentFragment !is CalificacionFragment) {
-                            changeFrame(CalificacionFragment())
-                            updateToolbar("Calificaciones", "Consulta y registro de notas")
+                        if (currentFragment !is MisNotasFragment) {
+                            changeFrame(MisNotasFragment())
+                            updateToolbar("Calificaciones", "Mis calificaciones ")
                         }
                         true
                     }

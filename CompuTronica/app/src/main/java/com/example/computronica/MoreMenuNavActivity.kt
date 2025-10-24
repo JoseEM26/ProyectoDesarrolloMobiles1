@@ -78,12 +78,12 @@ class MoreMenuNavActivity : Fragment() {
         }
 
         //boton notas
-        binding.btnMisNotas.setOnClickListener {
-            if (debounceClick()) {
-                mainActivity.changeFrame(MisNotasFragment())
-                mainActivity.supportActionBar?.title = "Mis Notas 📚"
-            }
-        }
+//        binding.btnMisNotas.setOnClickListener {
+//            if (debounceClick()) {
+//                mainActivity.changeFrame(MisNotasFragment())
+//                mainActivity.supportActionBar?.title = "Mis Notas 📚"
+//            }
+//        }
 
         // Botón Usuarios
         binding.btnUsuarios.setOnClickListener {
