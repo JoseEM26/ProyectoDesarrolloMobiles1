@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <!-- Toolbar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/azul_profundo"
+            app:navigationIcon="@drawable/baseline_keyboard_return_24"
+            app:titleTextColor="@color/white" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Contenido principal con scroll -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/appBarLayout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+
+            <!-- Card para detalles de la asignatura -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardAsignaturaDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tvNombreAsignatura"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/azul_oscuro"
+                        android:text="Nombre de la Asignatura" />
+
+                    <TextView
+                        android:id="@+id/tvCodigoAsignatura"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        android:textColor="@color/gris_oscuro"
+                        android:layout_marginTop="8dp"
+                        android:text="Código" />
+
+                    <TextView
+                        android:id="@+id/tvCreditosAsignatura"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        android:textColor="@color/gris_oscuro"
+                        android:layout_marginTop="8dp"
+                        android:text="Créditos" />
+
+                    <TextView
+                        android:id="@+id/tvDescripcionAsignatura"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        android:textColor="@color/negro"
+                        android:layout_marginTop="8dp"
+                        android:text="Descripción" />
+
+                    <TextView
+                        android:id="@+id/tvProfesoresLabel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Profesores"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/azul_oscuro"
+                        android:layout_marginTop="16dp" />
+
+                    <TextView
+                        android:id="@+id/tvProfesoresAsignatura"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        android:layout_marginTop="4dp"
+                        android:textColor="@color/azul_oscuro"
+                        android:text="Cargando profesores..." />
+
+                    <TextView
+                        android:id="@+id/tvEstudiantesLabel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Estudiantes Inscritos"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/azul_oscuro"
+                        android:layout_marginTop="16dp" />
+
+                    <TextView
+                        android:id="@+id/tvEstudiantesAsignatura"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        android:layout_marginTop="4dp"
+                        android:textColor="@color/azul_oscuro"
+                        android:text="Cargando estudiantes..." />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Etiqueta para la lista de temas -->
+            <TextView
+                android:id="@+id/tvTemasLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Temas"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/azul_oscuro"
+                app:layout_constraintTop_toBottomOf="@id/cardAsignaturaDetails"
+                android:layout_marginTop="16dp" />
+
+            <!-- Mensaje de lista vacía -->
+            <TextView
+                android:id="@+id/tvEmptyTemas"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No hay temas disponibles"
+                android:textSize="16sp"
+                android:textColor="@color/gris_oscuro"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@id/tvTemasLabel"
+                android:layout_marginTop="8dp" />
+
+            <!-- RecyclerView para temas -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvTemas"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/tvEmptyTemas"
+                android:layout_marginTop="8dp" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Botón flotante para acciones (por ejemplo, crear tema) -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabCreateTema"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_add"
+        app:backgroundTint="@color/azul_profundo"
+        android:contentDescription="Crear Tema"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="16dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

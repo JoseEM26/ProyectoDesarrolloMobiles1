@@ -1,8 +1,10 @@
 package com.example.computronica.Adapter
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import android.widget.TextView
@@ -15,6 +17,7 @@ import com.example.computronica.Model.TipoUsuario
 import com.example.computronica.Model.Usuario
 import com.example.computronica.R
 import com.example.computronica.SessionManager
+import com.example.computronica.TemaActivity
 import com.example.computronica.databinding.ItemAsignaturaBinding
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
@@ -44,24 +47,41 @@ class AsignaturasAdapter(
         val b = holder.binding
         val usuario: Usuario? = SessionManager.currentUser
 
-        b.btnMenuAsig.isInvisible = usuario?.tipo == TipoUsuario.estudiante
-
         // Mostrar datos básicos
         b.txtNombreAsig.text = asignatura.nombre
-        b.txtProfesorCodigoAsig.text = asignatura.codigoAsignatura  // Código de asignatura
+        b.txtProfesorCodigoAsig.text = asignatura.codigoAsignatura
 
         // Buscar nombres de los profesores en BD
         setupProfesorNames(b.txtProfesorCodigoAsig, asignatura.profesores, context)
 
+        // Handle item click to navigate to TemaActivity
+        b.root.setOnClickListener {
+            val intent = Intent(context, TemaActivity::class.java)
+            intent.putExtra("asignatura", asignatura)
+            context.startActivity(intent)
+        }
+
         // Mostrar PopupMenu al presionar el botón
+        b.btnMenuAsig.isInvisible = usuario?.tipo == null
         b.btnMenuAsig.setOnClickListener { view ->
-            if (usuario?.tipo != TipoUsuario.estudiante) { // Only show for non-students
+            if (usuario?.tipo != null) {
                 val popup = PopupMenu(context, view)
                 popup.menuInflater.inflate(R.menu.menu_usuario, popup.menu)
 
-                // Disable or hide delete option for non-admins
-                if (usuario?.tipo != TipoUsuario.administrativo) {
-                    popup.menu.findItem(R.id.action_eliminar)?.isVisible = false
+                // Configure menu options based on user role
+                when (usuario.tipo) {
+                    TipoUsuario.estudiante -> {
+                        popup.menu.findItem(R.id.action_editar)?.isVisible = false
+                        popup.menu.findItem(R.id.action_eliminar)?.isVisible = false
+                    }
+                    TipoUsuario.profesor -> {
+                        popup.menu.findItem(R.id.action_editar)?.isVisible = false
+                        popup.menu.findItem(R.id.action_eliminar)?.isVisible = false
+                    }
+                    TipoUsuario.administrativo -> {
+                        popup.menu.findItem(R.id.action_editar)?.isVisible = true
+                        popup.menu.findItem(R.id.action_eliminar)?.isVisible = true
+                    }
                 }
 
                 // Forzar mostrar íconos
@@ -78,11 +98,16 @@ class AsignaturasAdapter(
                 popup.setOnMenuItemClickListener { item ->
                     when (item.itemId) {
                         R.id.action_editar -> {
-                            onEdit(asignatura)
-                            true
+                            if (usuario.tipo == TipoUsuario.administrativo) {
+                                onEdit(asignatura)
+                                true
+                            } else {
+                                Toast.makeText(context, "❌ No tienes permiso para editar", Toast.LENGTH_SHORT).show()
+                                false
+                            }
                         }
                         R.id.action_eliminar -> {
-                            if (usuario?.tipo == TipoUsuario.administrativo) {
+                            if (usuario.tipo == TipoUsuario.administrativo) {
                                 AlertDialog.Builder(context)
                                     .setTitle("Eliminar asignatura")
                                     .setMessage("¿Seguro que deseas eliminar la asignatura \"${asignatura.nombre}\"?")
@@ -104,9 +129,10 @@ class AsignaturasAdapter(
                                 true
                             } else {
                                 Toast.makeText(context, "❌ Solo los administradores pueden eliminar asignaturas", Toast.LENGTH_SHORT).show()
-                                true
+                                false
                             }
                         }
+
                         else -> false
                     }
                 }
@@ -121,7 +147,6 @@ class AsignaturasAdapter(
             textView.setTextColor(ContextCompat.getColor(context, R.color.gris_oscuro))
             return
         }
-
         scope.launch {
             try {
                 val nombres = mutableListOf<String>()
