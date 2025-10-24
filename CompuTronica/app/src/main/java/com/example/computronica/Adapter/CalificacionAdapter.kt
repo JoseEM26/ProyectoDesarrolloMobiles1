@@ -44,7 +44,7 @@ class CalificacionAdapter(
 
         b.txtNotaCurso.text = item.nota.toString()
 
-        val fechaTexto =item.fechaRegistro
+        val fechaTexto =item.fecha
 
         b.txtTipoAsignaturaFecha.text = "${item.evaluacion} - $fechaTexto"
 

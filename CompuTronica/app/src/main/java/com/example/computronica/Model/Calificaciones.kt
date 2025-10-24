@@ -8,6 +8,5 @@ data class Calificaciones(
     val asignaturaId: String = "",
     val evaluacion: String = "",
     val nota: Double = 0.0,
-    val fechaRegistro: String = ""
+    val fecha: Timestamp? = null
 )
-

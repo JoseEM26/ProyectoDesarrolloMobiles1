@@ -44,15 +44,14 @@ class AsignaturasAdapter(
         val b = holder.binding
         val usuario: Usuario? = SessionManager.currentUser
 
-        // Hide menu button for students
         b.btnMenuAsig.isInvisible = usuario?.tipo == TipoUsuario.estudiante
 
         // Mostrar datos básicos
         b.txtNombreAsig.text = asignatura.nombre
         b.txtProfesorCodigoAsig.text = asignatura.codigoAsignatura  // Código de asignatura
 
-        // Buscar nombre del profesor en BD
-        setupProfesorName(b.txtProfesorCodigoAsig, asignatura.profesorId, context)
+        // Buscar nombres de los profesores en BD
+        setupProfesorNames(b.txtProfesorCodigoAsig, asignatura.profesores, context)
 
         // Mostrar PopupMenu al presionar el botón
         b.btnMenuAsig.setOnClickListener { view ->
@@ -116,33 +115,37 @@ class AsignaturasAdapter(
         }
     }
 
-    private fun setupProfesorName(textView: TextView, profesorId: String?, context: android.content.Context) {
-        if (profesorId.isNullOrEmpty()) {
-            textView.text = "Sin profesor"
+    private fun setupProfesorNames(textView: TextView, profesorIds: List<String>, context: android.content.Context) {
+        if (profesorIds.isEmpty()) {
+            textView.text = "Sin profesores"
             textView.setTextColor(ContextCompat.getColor(context, R.color.gris_oscuro))
             return
         }
 
         scope.launch {
             try {
-                val snapshot = db.collection("usuarios")
-                    .whereEqualTo("id", profesorId)
-                    .limit(1)
-                    .get()
-                    .await()
-
-                if (!snapshot.isEmpty) {
-                    val profesor = snapshot.documents[0].toObject(Usuario::class.java)
-                    val nombreCompleto = "${profesor?.nombre} ${profesor?.apellido ?: ""}".trim()
-                    textView.text = nombreCompleto
+                val nombres = mutableListOf<String>()
+                for (profesorId in profesorIds) {
+                    val snapshot = db.collection("usuarios")
+                        .document(profesorId)
+                        .get()
+                        .await()
+                    if (snapshot.exists()) {
+                        val profesor = snapshot.toObject(Usuario::class.java)
+                        val nombreCompleto = "${profesor?.nombre} ${profesor?.apellido ?: ""}".trim()
+                        if (nombreCompleto.isNotEmpty()) nombres.add(nombreCompleto)
+                    }
+                }
+                if (nombres.isNotEmpty()) {
+                    textView.text = nombres.joinToString(", ")
                     textView.setTextColor(ContextCompat.getColor(context, R.color.azul_oscuro))
                 } else {
-                    textView.text = "Sin profesor"
+                    textView.text = "Sin profesores"
                     textView.setTextColor(ContextCompat.getColor(context, R.color.gris_oscuro))
                 }
             } catch (e: Exception) {
-                Log.e("AsignaturasAdapter", "Error fetching profesor name: ${e.message}")
-                textView.text = "Error al cargar"
+                Log.e("AsignaturasAdapter", "Error fetching professor names: ${e.message}")
+                textView.text = "Error al cargar profesores"
                 textView.setTextColor(ContextCompat.getColor(context, R.color.rojo_error))
             }
         }
