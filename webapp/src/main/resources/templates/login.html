@@ -1,0 +1,109 @@
+<!-- src/main/resources/templates/login.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - CompuTronica</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 00; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h2 { text-align: center; color: #1D4E89; margin-bottom: 1.5rem; }
+        .input-group { position: relative; margin-bottom: 1rem; }
+        .input-group i { position: absolute; left: 12px; top: 14px; color: #666; }
+        .input-group input { width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+        .btn { width: 100%; padding: 12px; background: #00A6A6; color: white; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .error { color: red; text-align: center; margin: 1rem 0; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>CompuTronica</h2>
+    <div id="error" class="error" th:text="${error}" style="display: none;"></div>
+
+    <form onsubmit="event.preventDefault(); login();">
+        <div class="input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="email" placeholder="Correo" required>
+        </div>
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="password" placeholder="Contraseña" required>
+        </div>
+        <button type="submit" id="btnLogin" class="btn">
+            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+        </button>
+    </form>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBJOegf7zNc3YD1vo4sc9caG2IHrvIfFz0",
+        authDomain: "computronica-2206d.firebaseapp.com",
+        projectId: "computronica-2206d",
+        storageBucket: "computronica-2206d.firebasestorage.app",
+        messagingSenderId: "821260830773",
+        appId: "1:821260830773:web:809ae58b854ff2f1b6097c"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    window.login = async function() {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const btn = document.getElementById("btnLogin");
+        const error = document.getElementById("error");
+
+        if (!email || !password) {
+            error.textContent = "Completa todos los campos";
+            error.style.display = "block";
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
+
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const idToken = await userCredential.user.getIdToken();
+
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'idToken=' + idToken
+            });
+
+            if (response.ok) {
+                window.location.href = '/home';
+            } else {
+                throw new Error("Error del servidor");
+            }
+        } catch (err) {
+            let msg = "Error desconocido";
+            if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+                msg = "Correo o contraseña incorrectos";
+            } else if (err.code === 'auth/invalid-email') {
+                msg = "Correo inválido";
+            } else {
+                msg = err.message;
+            }
+            error.textContent = msg;
+            error.style.display = "block";
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión';
+        }
+    };
+</script>
+
+</body>
+</html>
