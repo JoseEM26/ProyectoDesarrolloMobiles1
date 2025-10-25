@@ -71,11 +71,15 @@ class MisNotasFragment : Fragment() {
             currentUser?.tipo == TipoUsuario.administrativo ||
                     currentUser?.tipo == TipoUsuario.profesor
 
-        // Configurar click del FAB si es necesario
+
         binding.btnCreateCalificacion.setOnClickListener {
-            // Aquí puedes agregar la lógica para crear calificaciones
-            // Por ejemplo, navegar a un fragment de creación
+            mostrarDialogoCrearCalificacion()
         }
+    }
+
+    private fun mostrarDialogoCrearCalificacion() {
+        val dialog = CrearCalificacionDialogFragment()
+        dialog.show(parentFragmentManager, "CrearCalificacionDialog")
     }
 
     private fun cargarCursosDelUsuario() {
