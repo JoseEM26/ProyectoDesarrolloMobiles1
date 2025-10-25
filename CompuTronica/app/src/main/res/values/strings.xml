@@ -171,4 +171,12 @@
     <string name="text_nombre_usuario">Nombre Usuario</string>
     <string name="text_email_ejemplo">email@ejemplo.com</string>
     <string name="text_abrir_chat">Abrir chat</string>
+    <string name="create_tema">Crear Tema</string>
+    <string name="tema_nombre">Nombre del Tema</string>
+    <string name="tema_descripcion">Descripción</string>
+    <string name="save">Guardar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="no_temas_available">No hay temas disponibles</string>
+    <string name="error_loading_temas">Error al cargar temas</string>
+
 </resources>
