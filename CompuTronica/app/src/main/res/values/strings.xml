@@ -126,4 +126,12 @@
     <string name="average_by_subject">Promedios por Asignatura</string>
     <string name="my_average_by_subject">Mis Promedios por Asignatura</string>
     <string name="class_average_by_subject">Promedio del Aula por Asignatura</string>
+    <string name="create_tema">Crear Tema</string>
+    <string name="tema_nombre">Nombre del Tema</string>
+    <string name="tema_descripcion">Descripción</string>
+    <string name="save">Guardar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="no_temas_available">No hay temas disponibles</string>
+    <string name="error_loading_temas">Error al cargar temas</string>
+
 </resources>
