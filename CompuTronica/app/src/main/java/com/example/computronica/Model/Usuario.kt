@@ -2,6 +2,7 @@ package com.example.computronica.Model
 
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ServerTimestamp
+import java.io.Serializable
 
 data class Usuario(
     var id: String = "",
@@ -15,7 +16,7 @@ data class Usuario(
     var estado: Boolean = true,
     @ServerTimestamp var createdAt: Timestamp? = null,
     var updatedAt: Timestamp? = null
-)
+) : Serializable
 
 enum class TipoUsuario {
     estudiante,
