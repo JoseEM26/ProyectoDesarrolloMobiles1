@@ -44,7 +44,7 @@
                 android:textColor="@color/azul_oscuro"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                tools:text="Juan Pérez" />
+                tools:text="@string/text_more_menu_nav" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnPerfil"

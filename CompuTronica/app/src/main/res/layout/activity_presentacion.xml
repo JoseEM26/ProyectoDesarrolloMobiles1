@@ -126,7 +126,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/separator"
-                    tools:text="El Instituto CompuTronica ofrece educación de calidad..." />
+                    tools:text="@string/text_presentacion" />
 
                 <!-- Título: Visión -->
                 <com.google.android.material.textview.MaterialTextView
@@ -135,7 +135,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="24dp"
                     android:fontFamily="sans-serif-medium"
-                    android:text="Visión"
+                    android:text="@string/text_vision"
                     android:textColor="@color/azul_profundo"
                     android:textSize="18sp"
                     android:textStyle="bold"
@@ -166,7 +166,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="24dp"
                     android:fontFamily="sans-serif-medium"
-                    android:text="Misión"
+                    android:text="@string/text_mision"
                     android:textColor="@color/azul_profundo"
                     android:textSize="18sp"
                     android:textStyle="bold"

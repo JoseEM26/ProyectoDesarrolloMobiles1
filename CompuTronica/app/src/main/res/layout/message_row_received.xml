@@ -35,7 +35,7 @@
                 android:textSize="16sp"
                 android:lineSpacingExtra="2dp"
                 android:maxWidth="260dp"
-                android:text="Mensaje recibido"/>
+                android:text="@string/text_mensaje_recibido"/>
 
         </RelativeLayout>
 
