@@ -1,0 +1,62 @@
+<div class="dashboard-container animate__animated animate__fadeIn">
+  <!-- Summary Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-md-4">
+      <a [routerLink]="['/users']" class="card shadow-sm text-center text-decoration-none">
+        <div class="card-body">
+          <i class="bi bi-people-fill card-icon"></i>
+          <h5 class="card-title">{{ (studentsCount$ | async) || '-' }}</h5>
+          <p class="card-text text-muted">Estudiantes</p>
+        </div>
+      </a>
+    </div>
+    <div class="col-12 col-sm-6 col-md-4">
+      <a [routerLink]="['/grades']" class="card shadow-sm text-center text-decoration-none">
+        <div class="card-body">
+          <i class="bi bi-journal-check card-icon" style="color: var(--secondary);"></i>
+          <h5 class="card-title">{{ (gradesCount$ | async) || '-' }}</h5>
+          <p class="card-text text-muted">Calificaciones</p>
+        </div>
+      </a>
+    </div>
+    <div class="col-12 col-sm-6 col-md-4">
+      <a [routerLink]="['/courses']" class="card shadow-sm text-center text-decoration-none">
+        <div class="card-body">
+          <i class="bi bi-book-fill card-icon" style="color: var(--accent);"></i>
+          <h5 class="card-title">{{ (subjectsCount$ | async) || '-' }}</h5>
+          <p class="card-text text-muted">Asignaturas</p>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Averages by Subject -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h4 class="card-title">Promedios por Asignatura</h4>
+      <div *ngIf="!(averageBySubject$ | async)?.length" class="alert alert-info">
+        No hay promedios disponibles
+      </div>
+      <ul class="list-group list-group-flush">
+        <li *ngFor="let avg of averageBySubject$ | async" class="list-group-item">
+          {{ avg.subjectId }}: {{ avg.average }}
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Recent Grades -->
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h4 class="card-title">Últimas Calificaciones</h4>
+      <div *ngIf="!(recentGrades$ | async)?.length" class="alert alert-info">
+        No hay calificaciones disponibles
+      </div>
+      <ul class="list-group list-group-flush">
+        <li *ngFor="let grade of recentGrades$ | async" class="list-group-item">
+          {{ grade.nombre }}: {{ grade.nota }}
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

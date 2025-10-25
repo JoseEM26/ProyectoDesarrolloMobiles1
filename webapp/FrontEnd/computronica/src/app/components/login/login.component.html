@@ -1,0 +1,96 @@
+<div class="container-fluid login-container">
+  <div class="gradient-background"></div>
+  <div class="overlay"></div>
+  <div class="header text-center mb-4 animate__animated animate__fadeInDown">
+    <img src="assets/logo-computronica.png" alt="CompuTronica Logo" class="logo mb-3">
+    <h1 class="title">CompuTronica</h1>
+    <p class="subtitle">Inicia sesión para explorar el futuro digital</p>
+  </div>
+  <div class="card login-card animate__animated animate__fadeInUp">
+    <div class="card-body p-4">
+      <form (ngSubmit)="login()">
+        <div class="mb-3 input-container">
+          <label for="correo" class="form-label">Código de Estudiante</label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="bi bi-person-fill"></i>
+            </span>
+            <input
+              type="text"
+              id="correo"
+              class="form-control"
+              [(ngModel)]="correo"
+              name="correo"
+              placeholder="Ejemplo: 20230145"
+              [ngClass]="{'is-invalid': errorMessage && !correo}"
+              required
+            />
+          </div>
+        </div>
+        <div class="mb-3 input-container">
+          <label for="contrasena" class="form-label">Contraseña</label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="bi bi-lock-fill"></i>
+            </span>
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              id="contrasena"
+              class="form-control"
+              [(ngModel)]="contrasena"
+              name="contrasena"
+              placeholder="••••••••"
+              [ngClass]="{'is-invalid': errorMessage && (!contrasena || contrasena.length < 6)}"
+              required
+            />
+            <button
+              type="button"
+              class="btn btn-outline-secondary toggle-password"
+              (click)="togglePasswordVisibility()"
+            >
+              <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+            </button>
+          </div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="form-check">
+            <input
+              type="checkbox"
+              class="form-check-input"
+              id="rememberMe"
+              [(ngModel)]="rememberMe"
+              name="rememberMe"
+            />
+            <label class="form-check-label" for="rememberMe">Recordarme</label>
+          </div>
+          <a href="#" class="text-secondary forgot-password">¿Olvidaste tu contraseña?</a>
+        </div>
+        <ngb-alert
+          *ngIf="errorMessage"
+          type="danger"
+          [dismissible]="true"
+          (closed)="errorMessage = ''"
+          class="mb-3 animate__animated animate__shakeX"
+        >
+          {{ errorMessage }}
+        </ngb-alert>
+        <button
+          type="submit"
+          class="btn btn-primary w-100 login-button"
+          [disabled]="loading"
+        >
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          {{ loading ? 'Iniciando...' : 'Iniciar Sesión' }}
+        </button>
+      </form>
+      <div class="text-center mt-3">
+        <p class="text-muted">
+          ¿No tienes una cuenta? <a [routerLink]="['/register']" class="text-secondary">Regístrate</a>
+        </p>
+      </div>
+      <p class="text-center text-muted mt-3 small">
+        Accede a tus cursos y calificaciones desde cualquier lugar.
+      </p>
+    </div>
+  </div>
+</div>

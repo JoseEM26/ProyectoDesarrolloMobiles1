@@ -1,0 +1,107 @@
+:host {
+  display: block;
+}
+
+.login-container {
+  position: relative;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--white);
+  opacity: 0.15;
+  z-index: 1;
+}
+
+.header {
+  position: relative;
+  z-index: 2;
+}
+
+.title {
+  font-family: 'Roboto', sans-serif;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: var(--white);
+  text-shadow: 0 2px 4px var(--dark);
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: var(--white);
+  opacity: 0.85;
+}
+
+.login-card {
+  max-width: 400px;
+  width: 100%;
+  border: none;
+  border-radius: 24px;
+  background-color: var(--white);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+}
+
+.form-label {
+  color: var(--dark);
+  font-weight: 500;
+}
+
+.input-group-text {
+  background-color: var(--white);
+  border-color: var(--secondary);
+}
+
+.form-control {
+  border-radius: 12px;
+  border-color: var(--secondary);
+}
+
+.form-control:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
+}
+
+.is-invalid {
+  border-color: var(--danger);
+}
+
+.btn-primary {
+  border-radius: 18px;
+  font-weight: 500;
+  padding: 12px;
+}
+
+.btn-outline-secondary {
+  border: none;
+}
+
+.form-check-input:checked {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+.text-secondary {
+  color: var(--secondary);
+}
+
+.text-secondary:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+@media (max-width: 576px) {
+  .login-card {
+    margin: 16px;
+    padding: 16px;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+}
