@@ -1,0 +1,38 @@
+:root {
+  --primary: #1D4E89; /* azul_profundo */
+  --secondary: #4A90E2; /* azul_suave */
+  --background: #FAFAFA; /* BackGround */
+  --text: #212121; /* negro */
+  --accent: #00A6A6; /* azul_verdoso */
+  --success: #4CAF50; /* verde_exito */
+  --danger: #F44336; /* rojo_error */
+  --gray: #A6A6A6; /* gris_claro */
+  --dark: #0A2647; /* azul_oscuro */
+  --white: #FFFFFF; /* white */
+  --muted: #546E7A; /* gris_oscuro */
+  --info: #3F51B5; /* azul_oscuro_night */
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text);
+  font-family: 'Roboto', sans-serif;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--dark);
+  border-color: var(--dark);
+}
+
+.text-secondary {
+  color: var(--secondary);
+}
+
+.text-secondary:hover {
+  color: var(--accent);
+}
