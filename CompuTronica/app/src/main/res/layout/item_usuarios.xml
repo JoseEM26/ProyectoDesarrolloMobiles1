@@ -54,7 +54,7 @@
                 android:textColor="@color/azul_oscuro"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                tools:text="Juan Pérez López" />
+                tools:text="@string/text_juan_perez_lopez" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/txtUsuariosTipo"
@@ -65,7 +65,7 @@
                 android:text="@string/user_type_student"
                 android:textColor="@color/azul_profundo"
                 android:textSize="14sp"
-                tools:text="Estudiante" />
+                tools:text="@string/user_type_student" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/txtUsuariosSede"
@@ -76,7 +76,7 @@
                 android:text="@string/user_details"
                 android:textColor="@color/gris_oscuro"
                 android:textSize="12sp"
-                tools:text="Sede Lima - COD: 20230145" />
+                tools:text="@string/text_sede_lima" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/txtUsuariosCreated"
@@ -87,7 +87,7 @@
                 android:text="@string/user_created"
                 android:textColor="@color/gris_claro"
                 android:textSize="12sp"
-                tools:text="Creado: 10/10/2025" />
+                tools:text="@string/text_creado" />
         </LinearLayout>
 
         <!-- Estado del usuario -->
@@ -117,7 +117,7 @@
                 android:textColor="@color/verde_exito"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                tools:text="Activo" />
+                tools:text="@string/user_active" />
         </LinearLayout>
 
         <!-- Botón de opciones -->

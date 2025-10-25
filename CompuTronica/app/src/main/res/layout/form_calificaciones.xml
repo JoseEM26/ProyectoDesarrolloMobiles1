@@ -16,7 +16,7 @@
             android:id="@+id/tvEstudianteLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Estudiante"
+            android:text="@string/text_estudiante"
             android:textColor="@android:color/black"
             android:textSize="14sp"
             android:layout_marginTop="8dp" />
@@ -32,7 +32,7 @@
             android:id="@+id/tvAsignaturaLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Asignatura"
+            android:text="@string/tabAsignatura"
             android:textColor="@android:color/black"
             android:textSize="14sp"
             android:layout_marginTop="8dp" />
@@ -48,7 +48,7 @@
             android:id="@+id/tvEvaluacionLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Tipo de Evaluación"
+            android:text="@string/text_tipo_evaluaciono"
             android:textColor="@android:color/black"
             android:textSize="14sp"
             android:layout_marginTop="8dp" />
@@ -64,7 +64,7 @@
             android:id="@+id/titNota"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Nota (0 - 20)">
+            android:hint="@string/hint_nota">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etNota"

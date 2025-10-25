@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/rounded_background_white"
-        android:hint="Código de Asignatura">
+        android:hint="@string/hint_codigo_asignatura">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etCodigoAsignatura"
@@ -28,7 +28,7 @@
         android:id="@+id/tilNombre"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Nombre de la Asignatura">
+        android:hint="@string/subject_name">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etNombre"
@@ -42,7 +42,7 @@
         android:id="@+id/tilDescripcion"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Descripción">
+        android:hint="@string/text_descripcion_asignatura">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etDescripcion"
@@ -58,7 +58,7 @@
         android:id="@+id/tilCreditos"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Créditos">
+        android:hint="@string/text_credito_asignatura">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etCreditos"
@@ -73,7 +73,7 @@
         android:id="@+id/tvProfesorLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Profesores"
+        android:text="@string/text_profesores_asignatura"
         android:textColor="@android:color/black"
         android:textSize="14sp"
         android:layout_marginTop="8dp" />
@@ -82,7 +82,7 @@
         android:id="@+id/tilProfesores"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Seleccionar profesores activos"
+        android:hint="@string/hint_seleccionar_profesores_activos"
         android:background="@drawable/rounded_background_white">
 
         <MultiAutoCompleteTextView
@@ -101,7 +101,7 @@
         android:id="@+id/tvEstudiantesLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Estudiantes"
+        android:text="@string/students"
         android:textColor="@android:color/black"
         android:textSize="14sp"
         android:layout_marginTop="8dp" />
@@ -110,7 +110,7 @@
         android:id="@+id/tilEstudiantes"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Seleccionar estudiantes activos"
+        android:hint="@string/hint_seleccionar_estudiantes_activos"
         android:background="@drawable/rounded_background_white">
 
         <MultiAutoCompleteTextView

@@ -64,7 +64,7 @@
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:textColor="@color/azul_oscuro"
-                        android:text="Nombre de la Asignatura"
+                        android:text="@string/subject_name" />
                         android:contentDescription="Nombre de la asignatura" />
 
                     <TextView
@@ -74,7 +74,7 @@
                         android:textSize="16sp"
                         android:textColor="@color/gris_oscuro"
                         android:layout_marginTop="8dp"
-                        android:text="Código"
+                        android:text="@string/text_codigo_asignatura" 
                         android:contentDescription="Código de la asignatura" />
 
                     <TextView
@@ -84,7 +84,7 @@
                         android:textSize="16sp"
                         android:textColor="@color/gris_oscuro"
                         android:layout_marginTop="8dp"
-                        android:text="Créditos"
+                        android:text="@string/text_credito_asignatura"
                         android:contentDescription="Créditos de la asignatura" />
 
                     <TextView
@@ -94,14 +94,14 @@
                         android:textSize="16sp"
                         android:textColor="@color/negro"
                         android:layout_marginTop="8dp"
-                        android:text="Descripción"
+                        android:text="@string/text_descripcion_asignatura"
                         android:contentDescription="Descripción de la asignatura" />
 
                     <TextView
                         android:id="@+id/tvProfesoresLabel"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Profesores"
+                        android:text="@string/text_profesores_asignatura"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@color/azul_oscuro"
@@ -115,14 +115,14 @@
                         android:textSize="16sp"
                         android:layout_marginTop="4dp"
                         android:textColor="@color/azul_oscuro"
-                        android:text="Cargando profesores..."
+                        android:text="@string/text_cargando_profesores"
                         android:contentDescription="Lista de profesores" />
-
+                  
                     <TextView
                         android:id="@+id/tvEstudiantesLabel"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Estudiantes Inscritos"
+                        android:text="@string/text_estudiantes_inscritos"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@color/azul_oscuro"
@@ -136,7 +136,7 @@
                         android:textSize="16sp"
                         android:layout_marginTop="4dp"
                         android:textColor="@color/azul_oscuro"
-                        android:text="Cargando estudiantes..."
+                        android:text="@string/text_cargando_estudiantes"
                         android:contentDescription="Lista de estudiantes inscritos" />
 
                 </LinearLayout>
@@ -147,7 +147,7 @@
                 android:id="@+id/tvTemasLabel"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Temas"
+                android:text="@string/text_temas"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@color/azul_oscuro"
@@ -162,7 +162,7 @@
                 android:id="@+id/tvEmptyTemas"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@string/no_temas_available"
+                android:text="@string/text_no_hay_temas_disponible"
                 android:textSize="16sp"
                 android:textColor="@color/gris_oscuro"
                 android:visibility="gone"
@@ -193,7 +193,7 @@
         android:layout_height="wrap_content"
         android:src="@drawable/ic_add"
         app:backgroundTint="@color/azul_profundo"
-        android:contentDescription="@string/create_tema"
+        android:contentDescription="@string/text_crear_temas"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_margin="16dp" />

@@ -21,7 +21,7 @@
             android:layout_height="48dp"
             android:src="@drawable/vectotr_usuario"
             android:tint="@color/azul_profundo"
-            android:contentDescription="Usuario"/>
+            android:contentDescription="@string/text_Usuario"/>
 
         <LinearLayout
             android:layout_width="0dp"
@@ -34,7 +34,7 @@
                 android:id="@+id/username"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Nombre Usuario"
+                android:text="@string/text_nombre_usuario"
                 android:textColor="@color/azul_oscuro"
                 android:textSize="16sp"
                 android:textStyle="bold"/>
@@ -43,7 +43,7 @@
                 android:id="@+id/useremail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="email@ejemplo.com"
+                android:text="@string/text_email_ejemplo"
                 android:textColor="@android:color/darker_gray"
                 android:textSize="14sp"
                 android:layout_marginTop="4dp"/>
@@ -56,7 +56,7 @@
             android:layout_height="24dp"
             android:src="@drawable/baseline_navigate_next_24"
             android:tint="@color/azul_profundo"
-            android:contentDescription="Abrir chat"/>
+            android:contentDescription="@string/text_abrir_chat"/>
 
     </LinearLayout>
 

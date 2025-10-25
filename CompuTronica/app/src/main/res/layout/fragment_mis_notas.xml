@@ -27,7 +27,7 @@
         android:id="@+id/tvEmpty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="No hay calificaciones disponibles"
+        android:text="@string/text_no_hay_calificaciones_disponibles"
         android:textColor="@color/rojo_error"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="@id/rvMisNotas"
@@ -44,7 +44,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_margin="16dp"
-        android:contentDescription="Crear calificación"
+        android:contentDescription="@string/text_crear_calificacion"
         android:visibility="gone" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
