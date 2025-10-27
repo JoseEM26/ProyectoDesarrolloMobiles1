@@ -1,8 +1,118 @@
-<div class="grades-container animate__animated animate__fadeIn">
-  <h2>Calificaciones</h2>
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <p class="text-muted">Lista de calificaciones. (Implementar lógica para mostrar calificaciones desde Firestore)</p>
+<!-- src/app/components/grades/grades.component.html -->
+<section class="grades-page">
+  <header class="section-header">
+    <h1 class="section-title">Calificaciones</h1>
+    <div class="section-controls">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Filtrar por estudiante..."
+        [(ngModel)]="estudianteFilter"
+        (ngModelChange)="applyFilters()"
+        aria-label="Filtrar calificaciones por estudiante"
+      />
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Filtrar por asignatura..."
+        [(ngModel)]="asignaturaFilter"
+        (ngModelChange)="applyFilters()"
+        aria-label="Filtrar calificaciones por asignatura"
+      />
     </div>
+  </header>
+
+  <div class="section-card">
+    <div class="section-body">
+      <div class="table-responsive">
+        <table class="grades-table" aria-label="Tabla de calificaciones">
+          <thead>
+            <tr>
+              <th scope="col">Estudiante</th>
+              <th scope="col">Asignatura</th>
+              <th scope="col">Evaluación</th>
+              <th scope="col">Nota</th>
+              <th scope="col">Fecha</th>
+              <th scope="col" *ngIf="user?.tipo === tipoUsuario.administrativo">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let calificacion of paginatedCalificaciones">
+              <td>{{ calificacion.estudianteNombre || calificacion.estudianteId }}</td>
+              <td>{{ calificacion.asignaturaNombre || calificacion.asignaturaId }}</td>
+              <td>{{ calificacion.evaluacion }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [ngClass]="{
+                    'bg-success': calificacion.nota >= 3.0,
+                    'bg-danger': calificacion.nota < 3.0
+                  }"
+                >
+                  {{ calificacion.nota | number: '1.1-1' }}
+                </span>
+              </td>
+              <td>{{ calificacion.fechaRegistro || 'Sin fecha' }}</td>
+              <td *ngIf="user?.tipo === tipoUsuario.administrativo">
+                <button
+                  class="btn btn-outline-secondary btn-sm me-2"
+                  (click)="editCalificacion(calificacion)"
+                  aria-label="Editar calificación"
+                >
+                  <i class="bi bi-pencil-fill"></i>
+                </button>
+                <button
+                  class="btn btn-outline-danger btn-sm"
+                  (click)="confirmDelete(calificacion.id!)"
+                  aria-label="Eliminar calificación"
+                >
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="loading text-center" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Cargando calificaciones...</p>
+      </div>
+
+      <div class="empty text-center" *ngIf="!loading && calificaciones.length === 0">
+        <i class="bi bi-file-earmark-text"></i>
+        <p>No se encontraron calificaciones.</p>
+      </div>
+    </div>
+
+    <footer class="section-footer" *ngIf="calificaciones.length > 0">
+      <span class="pagination-info">
+        Mostrando {{ (currentPage - 1) * pageSize + 1 }}-{{
+          Math.min(currentPage * pageSize, totalItems)
+        }}
+        de {{ totalItems }} calificaciones
+      </span>
+      <nav aria-label="Paginación de calificaciones">
+        <ul class="pagination">
+          <li class="page-item" [ngClass]="{ disabled: currentPage === 1 }">
+            <button class="page-link" (click)="changePage(currentPage - 1)" aria-label="Página anterior">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+          </li>
+          <li
+            class="page-item"
+            *ngFor="let page of getPages()"
+            [ngClass]="{ active: page === currentPage }"
+          >
+            <button class="page-link" (click)="changePage(page)">{{ page }}</button>
+          </li>
+          <li class="page-item" [ngClass]="{ disabled: currentPage === totalPages }">
+            <button class="page-link" (click)="changePage(currentPage + 1)" aria-label="Página siguiente">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </footer>
   </div>
-</div>
+</section>
