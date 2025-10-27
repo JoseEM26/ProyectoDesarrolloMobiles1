@@ -1,0 +1,128 @@
+<!-- src/app/components/users/users.component.html -->
+<div class="users-page">
+  <!-- HEADER -->
+  <div class="section-header mb-4">
+    <h1 class="section-title">
+      <i class="bi bi-people-fill me-3"></i>
+      Gestión de Usuarios
+    </h1>
+    <div class="section-controls d-flex gap-3 align-items-center">
+      <input
+        [formControl]="searchControl"
+        class="form-control"
+        placeholder="Buscar por nombre, apellido o correo..."
+        aria-label="Buscar usuarios"
+      >
+      <select [formControl]="tipoFilter" class="form-select" aria-label="Filtrar por tipo de usuario">
+        <option value="all">Todos los tipos</option>
+        <option value="estudiante">Estudiantes</option>
+        <option value="profesor">Profesores</option>
+        <option value="administrativo">Administrativos</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- CONTENEDOR PARA ASYNC -->
+  <ng-container *ngIf="filteredUsers$ | async as users">
+    <!-- LOADING -->
+    <div *ngIf="isLoading" class="loading text-center my-5">
+      <div class="spinner"></div>
+      <p>Cargando usuarios...</p>
+    </div>
+
+    <!-- SIN DATOS -->
+    <div *ngIf="!isLoading && users.length === 0" class="empty text-center my-5">
+      <i class="bi bi-inbox display-1 text-muted"></i>
+      <p>No se encontraron usuarios</p>
+    </div>
+
+    <!-- TABLA -->
+    <div class="section-card" *ngIf="!isLoading && users.length > 0" data-aos="fade-up">
+      <div class="section-body">
+        <div class="table-responsive">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th><i class="bi bi-person-circle me-2"></i>Usuario</th>
+                <th><i class="bi bi-hash me-2"></i>Código</th>
+                <th><i class="bi bi-envelope me-2"></i>Correo</th>
+                <th><i class="bi bi-person-vcard me-2"></i>Tipo</th>
+                <th><i class="bi bi-building me-2"></i>Sede</th>
+                <th><i class="bi bi-toggle-on me-2"></i>Estado</th>
+                <th class="text-end"><i class="bi bi-calendar-event me-2"></i>Creación</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let user of users; let i = index"
+                  [attr.data-aos]="'fade-up'" [attr.data-aos-delay]="i * 80">
+                <td class="user-cell">
+                  <div class="user-info d-flex align-items-center">
+                    <div class="avatar me-2">
+                      <i [ngClass]="getAvatarIcon(user.id || 'default')"
+                         [style.color]="getAvatarColor(user.id || 'default')"></i>
+                    </div>
+                    <div>
+                      <div class="name">{{ user.nombre }} {{ user.apellido }}</div>
+                      <small class="id text-muted">{{ user.id }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ user.codigoInstitucional }}</td>
+                <td>{{ user.correoInstitucional }}</td>
+                <td>
+                  <span class="badge"
+                        [ngClass]="{
+                          'bg-primary': user.tipo === tipoUsuario.estudiante,
+                          'bg-success': user.tipo === tipoUsuario.profesor,
+                          'bg-info': user.tipo === tipoUsuario.administrativo
+                        }">
+                    {{ user.tipo | titlecase }}
+                  </span>
+                </td>
+                <td>{{ user.sede }}</td>
+                <td>
+                  <i class="bi" [ngClass]="user.estado ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"
+                     [class]="getStatusClass(user.estado)"></i>
+                  {{ user.estado ? 'Activo' : 'Inactivo' }}
+                </td>
+                <td class="text-end">
+                  <ng-container *ngIf="getCreatedAtDate(user)">
+                    {{ getCreatedAtDate(user) | date:'dd MMM, yyyy' : 'es-ES' }}
+                  </ng-container>
+                  <ng-container *ngIf="!getCreatedAtDate(user)">N/A</ng-container>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PAGINACIÓN -->
+      <div class="section-footer mt-4 d-flex justify-content-between align-items-center">
+        <div class="pagination-info">
+          Mostrando {{ (currentPage - 1) * pageSize + 1 }} -
+          {{ (currentPage * pageSize) > users.length ? users.length : (currentPage * pageSize) }}
+          de {{ users.length }} usuarios
+        </div>
+        <nav aria-label="Paginación de usuarios">
+          <ul class="pagination">
+            <li class="page-item" [class.disabled]="currentPage === 1">
+              <button class="page-link" (click)="changePage(currentPage - 1)" aria-label="Página anterior">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+            </li>
+            <li class="page-item" *ngFor="let page of pages"
+                [class.active]="page === currentPage">
+              <button class="page-link" (click)="changePage(page)">{{ page }}</button>
+            </li>
+            <li class="page-item" [class.disabled]="currentPage === totalPages">
+              <button class="page-link" (click)="changePage(currentPage + 1)" aria-label="Página siguiente">
+                <i class="bi bi-chevron-right"></i>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </ng-container>
+</div>

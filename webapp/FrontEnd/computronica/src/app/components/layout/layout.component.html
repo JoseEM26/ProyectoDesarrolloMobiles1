@@ -1,108 +1,257 @@
-<div class="layout-container">
-  <!-- Header -->
-  <header class="header animate__animated animate__fadeInDown">
-    <div class="container-fluid d-flex justify-content-between align-items-center">
-      <div class="d-flex align-items-center">
-        <button
-          class="btn btn-outline-light d-lg-none me-3"
-          (click)="toggleSidebar()"
-          aria-label="Toggle sidebar"
-        >
-          <i class="bi bi-list"></i>
-        </button>
-        <img src="assets/logo-computronica.png" alt="CompuTronica Logo" class="logo">
-      </div>
-      <div class="user-info">
-        <span *ngIf="user" class="text-white">{{ user.nombre }} {{ user.apellido }}</span>
-        <button class="btn btn-outline-light ms-3" (click)="logout()">
-          <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
-        </button>
+<!-- src/app/components/layout/layout.component.html -->
+<div class="layout-wrapper" [ngClass]="{ 'dark-mode': isDarkMode }">
+
+  <!-- Sidebar Desktop -->
+  <aside
+    class="sidebar"
+    [class.collapsed]="isSidebarCollapsed"
+    role="navigation"
+    aria-label="Navegación principal"
+  >
+    <!-- Logo / Título -->
+    <div class="sidebar-header">
+      <div class="logo-container">
+        <i class="bi bi-cpu-fill logo-icon"></i>
+        <span class="app-title" [class.hidden]="isSidebarCollapsed">Computronica</span>
       </div>
     </div>
-  </header>
 
-  <!-- Sidebar (Desktop) -->
-  <div class="sidebar-container" [ngClass]="{'collapsed': isSidebarCollapsed}">
-    <nav class="sidebar animate__animated animate__slideInLeft">
-      <ul class="nav flex-column">
+    <!-- Menú de navegación -->
+    <nav class="sidebar-nav" aria-label="Menú principal">
+      <ul class="nav-list">
         <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/dashboard']" routerLinkActive="active">
-            <i class="bi bi-house-fill"></i> Dashboard
+          <a
+            class="nav-link"
+            routerLink="/dashboard"
+            routerLinkActive="active"
+            (click)="onNavClick()"
+            [attr.aria-label]="'Ir al Dashboard'"
+          >
+            <i class="bi bi-house-door-fill icon"></i>
+            <span class="nav-text">Dashboard</span>
           </a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/courses']" routerLinkActive="active">
-            <i class="bi bi-book-fill"></i> Cursos
+
+        <li class="nav-item" *ngIf="user?.tipo === tipoUsuario.administrativo">
+          <a
+            class="nav-link"
+            routerLink="/users"
+            routerLinkActive="active"
+            (click)="onNavClick()"
+            [attr.aria-label]="'Gestionar usuarios'"
+          >
+            <i class="bi bi-people-fill icon"></i>
+            <span class="nav-text">Usuarios</span>
           </a>
         </li>
+
         <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/grades']" routerLinkActive="active">
-            <i class="bi bi-journal-check"></i> Calificaciones
+          <a
+            class="nav-link"
+            routerLink="/subjects"
+            routerLinkActive="active"
+            (click)="onNavClick()"
+            [attr.aria-label]="'Gestionar asignaturas'"
+          >
+            <i class="bi bi-journal-text icon"></i>
+            <span class="nav-text">Asignaturas</span>
           </a>
         </li>
+
         <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/profile']" routerLinkActive="active">
-            <i class="bi bi-person-fill"></i> Perfil
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/chat']" routerLinkActive="active">
-            <i class="bi bi-chat-fill"></i> Chat
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/presentation']" routerLinkActive="active">
-            <i class="bi bi-info-circle-fill"></i> Presentación
+          <a
+            class="nav-link"
+            routerLink="/grades"
+            routerLinkActive="active"
+            (click)="onNavClick()"
+            [attr.aria-label]="'Gestionar calificaciones'"
+          >
+            <i class="bi bi-clipboard2-data-fill icon"></i>
+            <span class="nav-text">Calificaciones</span>
           </a>
         </li>
       </ul>
     </nav>
+
+    <!-- Botón colapsar (solo visible en desktop) -->
+    <button
+      class="collapse-btn"
+      (click)="toggleSidebar()"
+      [attr.aria-label]="isSidebarCollapsed ? 'Expandir menú' : 'Colapsar menú'"
+      [attr.title]="isSidebarCollapsed ? 'Expandir' : 'Colapsar'"
+    >
+      <i class="bi" [ngClass]="isSidebarCollapsed ? 'bi-arrow-right-square' : 'bi-arrow-left-square'"></i>
+    </button>
+  </aside>
+
+  <!-- Contenido principal -->
+  <div class="main-container">
+    <!-- Header -->
+    <header class="main-header" role="banner">
+      <div class="header-left">
+        <!-- Botón móvil -->
+        <button
+          class="menu-toggle d-lg-none"
+          (click)="toggleSidebar()"
+          aria-label="Abrir menú"
+        >
+          <i class="bi bi-list"></i>
+        </button>
+      </div>
+
+      <div class="header-right">
+        <!-- Dark Mode Toggle -->
+        <button
+          class="btn-icon"
+          (click)="toggleDarkMode()"
+          [attr.aria-label]="'Activar modo ' + (isDarkMode ? 'claro' : 'oscuro')"
+          [title]="isDarkMode ? 'Modo Claro' : 'Modo Oscuro'"
+        >
+          <i class="bi" [ngClass]="isDarkMode ? 'bi-sun-fill' : 'bi-moon-fill'"></i>
+        </button>
+
+   <!-- User Dropdown -->
+<div class="user-dropdown" ngbDropdown>
+  <button
+    class="user-btn d-flex align-items-center"
+    ngbDropdownToggle
+    id="userDropdown"
+    [attr.aria-label]="'Menú de usuario: ' + (user?.nombre || 'Usuario')"
+  >
+    <!-- AVATAR CON ICONO ALEATORIO -->
+    <div class="avatar me-2" *ngIf="user">
+      <i [class]="getRandomAvatarIcon(user.id || 'default')"
+         [style.color]="getRandomAvatarColor(user.id || 'default')"></i>
+    </div>
+
+    <!-- NOMBRE Y APELLIDO -->
+    <span class="user-name d-none d-md-inline fw-medium">
+      {{ user?.nombre }} {{ user?.apellido }}
+    </span>
+    <i class="bi bi-chevron-down ms-1 d-none d-md-inline"></i>
+  </button>
+
+  <!-- MENÚ DESPLEGABLE -->
+  <div ngbDropdownMenu aria-labelledby="userDropdown" class="dropdown-menu-end shadow-lg border-0 p-0">
+    <!-- ENCABEZADO -->
+    <div class="dropdown-header px-3 py-3 bg-gradient-primary text-white">
+      <div class="d-flex align-items-center">
+        <div class="avatar me-3">
+          <i [class]="getRandomAvatarIcon(user?.id || 'default')"
+             [style.color]="getRandomAvatarColor(user?.id || 'default')"></i>
+        </div>
+        <div>
+          <div class="fw-bold">{{ user?.nombre }} {{ user?.apellido }}</div>
+          <small class="opacity-90">{{ user?.correoInstitucional }}</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="dropdown-divider m-0"></div>
+
+    <!-- OPCIÓN: PERFIL -->
+    <a class="dropdown-item py-2 px-3" routerLink="/profile" (click)="onNavClick()">
+      <i class="bi bi-person-circle text-primary me-2"></i>
+      Mi Perfil
+    </a>
+
+    <!-- OPCIÓN: CONFIGURACIÓN -->
+    <a class="dropdown-item py-2 px-3" routerLink="/settings" (click)="onNavClick()">
+      <i class="bi bi-gear-fill text-info me-2"></i>
+      Configuración
+    </a>
+
+    <div class="dropdown-divider m-0"></div>
+
+    <!-- CERRAR SESIÓN -->
+    <button class="dropdown-item py-2 px-3 text-danger fw-medium" (click)="confirmLogout()">
+      <i class="bi bi-box-arrow-right me-2"></i>
+      Cerrar Sesión
+    </button>
+  </div>
+</div>
+      </div>
+    </header>
+
+    <!-- Contenido dinámico -->
+    <main class="main-content" role="main">
+      <router-outlet></router-outlet>
+    </main>
   </div>
 
-  
+  <!-- Offcanvas Móvil -->
+  <div
+    class="offcanvas offcanvas-start sidebar-offcanvas"
+    tabindex="-1"
+    id="sidebarOffcanvas"
+    aria-labelledby="sidebarOffcanvasLabel"
+  >
     <div class="offcanvas-header">
-      <h5 class="offcanvas-title">CompuTronica</h5>
-      <button type="button" class="btn-close" (click)="isSidebarCollapsed = false" aria-label="Close"></button>
+      <div class="logo-container">
+        <i class="bi bi-cpu-fill logo-icon"></i>
+        <h5 class="offcanvas-title app-title">Computronica</h5>
+      </div>
+      <button
+        type="button"
+        class="btn-close btn-close-white"
+        data-bs-dismiss="offcanvas"
+        (click)="closeSidebar()"
+        aria-label="Cerrar menú"
+      ></button>
     </div>
-    <div class="offcanvas-body">
-      <ul class="nav flex-column">
-        <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/dashboard']" routerLinkActive="active" (click)="isSidebarCollapsed = false">
-            <i class="bi bi-house-fill"></i> Dashboard
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/courses']" routerLinkActive="active" (click)="isSidebarCollapsed = false">
-            <i class="bi bi-book-fill"></i> Cursos
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/grades']" routerLinkActive="active" (click)="isSidebarCollapsed = false">
-            <i class="bi bi-journal-check"></i> Calificaciones
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/profile']" routerLinkActive="active" (click)="isSidebarCollapsed = false">
-            <i class="bi bi-person-fill"></i> Perfil
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/chat']" routerLinkActive="active" (click)="isSidebarCollapsed = false">
-            <i class="bi bi-chat-fill"></i> Chat
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/presentation']" routerLinkActive="active" (click)="isSidebarCollapsed = false">
-            <i class="bi bi-info-circle-fill"></i> Presentación
-          </a>
-        </li>
-      </ul>
+    <div class="offcanvas-body p-0">
+      <nav class="sidebar-nav p-3" aria-label="Menú móvil">
+        <ul class="nav-list">
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              routerLink="/dashboard"
+              routerLinkActive="active"
+              data-bs-dismiss="offcanvas"
+              (click)="closeSidebar()"
+            >
+              <i class="bi bi-house-door-fill icon"></i>
+              <span class="nav-text">Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item" *ngIf="user?.tipo === tipoUsuario.administrativo">
+            <a
+              class="nav-link"
+              routerLink="/users"
+              routerLinkActive="active"
+              data-bs-dismiss="offcanvas"
+              (click)="closeSidebar()"
+            >
+              <i class="bi bi-people-fill icon"></i>
+              <span class="nav-text">Usuarios</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              routerLink="/subjects"
+              routerLinkActive="active"
+              data-bs-dismiss="offcanvas"
+              (click)="closeSidebar()"
+            >
+              <i class="bi bi-journal-text icon"></i>
+              <span class="nav-text">Asignaturas</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              routerLink="/grades"
+              routerLinkActive="active"
+              data-bs-dismiss="offcanvas"
+              (click)="closeSidebar()"
+            >
+              <i class="bi bi-clipboard2-data-fill icon"></i>
+              <span class="nav-text">Calificaciones</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
     </div>
-
-  <!-- Main Content -->
-  <main class="main-content">
-    <div class="container-fluid">
-      <router-outlet></router-outlet>
-    </div>
-  </main>
+  </div>
 </div>

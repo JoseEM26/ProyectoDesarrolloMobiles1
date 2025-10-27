@@ -1,62 +1,303 @@
-<div class="dashboard-container animate__animated animate__fadeIn">
-  <!-- Summary Cards -->
-  <div class="row g-3 mb-4">
-    <div class="col-12 col-sm-6 col-md-4">
-      <a [routerLink]="['/users']" class="card shadow-sm text-center text-decoration-none">
-        <div class="card-body">
-          <i class="bi bi-people-fill card-icon"></i>
-          <h5 class="card-title">{{ (studentsCount$ | async) || '-' }}</h5>
-          <p class="card-text text-muted">Estudiantes</p>
-        </div>
-      </a>
+<!-- src/app/components/dashboard/dashboard.component.html -->
+<div class="dashboard-page">
+
+  <!-- HEADER -->
+  <div class="dashboard-header mb-6">
+    <div class="header-content">
+      <h1 class="dashboard-title">
+        <i class="bi bi-speedometer2 me-3"></i>
+        Panel de Control Académico
+      </h1>
+      <p class="dashboard-subtitle">
+        Análisis en tiempo real del rendimiento estudiantil
+      </p>
     </div>
-    <div class="col-12 col-sm-6 col-md-4">
-      <a [routerLink]="['/grades']" class="card shadow-sm text-center text-decoration-none">
-        <div class="card-body">
-          <i class="bi bi-journal-check card-icon" style="color: var(--secondary);"></i>
-          <h5 class="card-title">{{ (gradesCount$ | async) || '-' }}</h5>
-          <p class="card-text text-muted">Calificaciones</p>
-        </div>
-      </a>
-    </div>
-    <div class="col-12 col-sm-6 col-md-4">
-      <a [routerLink]="['/courses']" class="card shadow-sm text-center text-decoration-none">
-        <div class="card-body">
-          <i class="bi bi-book-fill card-icon" style="color: var(--accent);"></i>
-          <h5 class="card-title">{{ (subjectsCount$ | async) || '-' }}</h5>
-          <p class="card-text text-muted">Asignaturas</p>
-        </div>
-      </a>
+    <div class="header-actions">
+      <button class="btn-refresh" (click)="refreshGrades()" [disabled]="isLoadingGrades">
+        <i class="bi bi-arrow-clockwise" [class.spin]="isLoadingGrades"></i>
+        Actualizar
+      </button>
+      <button class="btn-export ms-2" (click)="exportReport()">
+        <i class="bi bi-file-earmark-pdf-fill"></i>
+        Exportar PDF
+      </button>
     </div>
   </div>
 
-  <!-- Averages by Subject -->
-  <div class="card shadow-sm mb-4">
-    <div class="card-body">
-      <h4 class="card-title">Promedios por Asignatura</h4>
-      <div *ngIf="!(averageBySubject$ | async)?.length" class="alert alert-info">
-        No hay promedios disponibles
+  <!-- ESTADÍSTICAS -->
+  <div class="stats-grid mb-6">
+    <!-- Estudiantes -->
+    <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+      <div class="stat-icon bg-primary bg-opacity-15 text-primary">
+        <i class="bi bi-people-fill"></i>
       </div>
-      <ul class="list-group list-group-flush">
-        <li *ngFor="let avg of averageBySubject$ | async" class="list-group-item">
-          {{ avg.subjectId }}: {{ avg.average }}
-        </li>
-      </ul>
+      <div class="stat-body">
+        <h3 class="stat-number">{{ studentsCount$ | async | number }}</h3>
+        <p class="stat-label">Estudiantes</p>
+      </div>
+      <div class="stat-footer">
+        <span class="trend up"><i class="bi bi-arrow-up"></i> +12%</span>
+      </div>
+    </div>
+
+    <!-- Asignaturas -->
+    <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
+      <div class="stat-icon bg-success bg-opacity-15 text-success">
+        <i class="bi bi-journal-text"></i>
+      </div>
+      <div class="stat-body">
+        <h3 class="stat-number">{{ subjectsCount$ | async | number }}</h3>
+        <p class="stat-label">Asignaturas</p>
+      </div>
+      <div class="stat-footer">
+        <span class="trend up"><i class="bi bi-arrow-up"></i> +5%</span>
+      </div>
+    </div>
+
+    <!-- Calificaciones -->
+    <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
+      <div class="stat-icon bg-accent bg-opacity-15 text-accent">
+        <i class="bi bi-clipboard2-data-fill"></i>
+      </div>
+      <div class="stat-body">
+        <h3 class="stat-number">{{ gradesCount$ | async | number }}</h3>
+        <p class="stat-label">Calificaciones</p>
+      </div>
+      <div class="stat-footer">
+        <span class="trend stable"><i class="bi bi-dash"></i> Estable</span>
+      </div>
+    </div>
+
+    <!-- Promedio General -->
+    <div class="stat-card" data-aos="fade-up" data-aos-delay="400">
+      <div class="stat-icon bg-info bg-opacity-15 text-info">
+        <i class="bi bi-graph-up-arrow"></i>
+      </div>
+      <div class="stat-body">
+        <h3 class="stat-number">{{ overallAverage$ | async | number:'1.2-2' }}</h3>
+        <p class="stat-label">Promedio General</p>
+      </div>
+      <div class="stat-footer">
+        <span class="trend up"><i class="bi bi-arrow-up"></i> +0.5</span>
+      </div>
     </div>
   </div>
 
-  <!-- Recent Grades -->
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <h4 class="card-title">Últimas Calificaciones</h4>
-      <div *ngIf="!(recentGrades$ | async)?.length" class="alert alert-info">
-        No hay calificaciones disponibles
+  <!-- CALIFICACIONES RECIENTES -->
+  <div class="section-card mb-6" data-aos="fade-up">
+    <div class="section-header">
+      <h2 class="section-title">
+        <i class="bi bi-clock-history me-2"></i>
+        Calificaciones Recientes
+      </h2>
+      <div class="section-controls">
+        <select [(ngModel)]="gradeFilter" (ngModelChange)="filterGrades()"
+                class="form-select form-select-sm" [disabled]="isLoadingGrades">
+          <option value="all">Todas</option>
+          <option value="recent">Más recientes</option>
+          <option value="high">Mejores notas</option>
+          <option value="low">Peores notas</option>
+        </select>
       </div>
-      <ul class="list-group list-group-flush">
-        <li *ngFor="let grade of recentGrades$ | async" class="list-group-item">
-          {{ grade.nombre }}: {{ grade.nota }}
-        </li>
-      </ul>
+    </div>
+
+    <div class="section-body">
+      <!-- Loading -->
+      <div *ngIf="isLoadingGrades" class="loading">
+        <div class="spinner"></div>
+        <p>Cargando calificaciones...</p>
+      </div>
+
+      <!-- Sin datos -->
+      <div *ngIf="!isLoadingGrades && !(filteredGrades$ | async)?.length" class="empty">
+        <i class="bi bi-inbox display-1 text-muted"></i>
+        <p>No hay calificaciones recientes</p>
+      </div>
+
+      <!-- Tabla -->
+      <div class="table-responsive" *ngIf="(filteredGrades$ | async)?.length">
+        <table class="grades-table">
+          <thead>
+            <tr>
+              <th><i class="bi bi-person-circle me-2"></i>Estudiante</th>
+              <th><i class="bi bi-book me-2"></i>Asignatura</th>
+              <th><i class="bi bi-card-text me-2"></i>Evaluación</th>
+              <th class="text-center"><i class="bi bi-award me-2"></i>Nota</th>
+              <th class="text-end"><i class="bi bi-calendar-event me-2"></i>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let grade of filteredGrades$ | async; let i = index"
+                [attr.data-aos]="'fade-up'" [attr.data-aos-delay]="i * 80">
+
+              <!-- ESTUDIANTE CON AVATAR -->
+              <td class="student-cell">
+                <div class="student-info">
+                  <!-- AVATAR REAL (pravatar.cc) -->
+                <div class="avatar">
+  <i [class]="getRandomAvatarIcon(grade.estudianteId)"
+     [style.color]="getRandomAvatarColor(grade.estudianteId)"></i>
+</div>
+                  <!-- INFO -->
+                  <div>
+                    <div class="name">
+                      <i class="bi bi-person-fill text-primary me-1"></i>
+                      {{ grade.estudianteNombre }}
+                    </div>
+                    <small class="id text-muted">
+                      <i class="bi bi-hash"></i> {{ grade.estudianteId }}
+                    </small>
+                  </div>
+                </div>
+              </td>
+
+              <!-- ASIGNATURA -->
+              <td>
+                <span class="subject-badge">
+                  <i class="bi bi-journal-text me-1"></i>
+                  {{ grade.asignaturaNombre }}
+                </span>
+              </td>
+
+              <!-- EVALUACIÓN -->
+              <td>
+                <i class="bi bi-file-earmark-text text-info me-1"></i>
+                {{ grade.evaluacion }}
+              </td>
+
+              <!-- NOTA -->
+              <td class="text-center">
+                <span class="grade" [ngClass]="getGradeClass(grade.nota)">
+                  <i [class]="getGradeIcon(grade.nota)" class="me-1"></i>
+                  {{ grade.nota.toFixed(1) }}
+                </span>
+              </td>
+
+              <!-- FECHA -->
+              <td class="text-end text-muted">
+                <i class="bi bi-calendar3 text-warning me-1"></i>
+                {{ grade.fechaRegistroDate | date:'dd MMM, yyyy' : 'es-ES' }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP 5 ESTUDIANTES CON MEDALLAS -->
+  <div class="section-card mb-6" data-aos="fade-up">
+    <div class="section-header">
+      <h2 class="section-title">
+        <i class="bi bi-trophy-fill me-2 text-warning"></i>
+        Top 5 Estudiantes
+      </h2>
+    </div>
+    <div class="section-body p-4">
+      <!-- Sin datos -->
+      <div *ngIf="(topStudents$ | async)?.length === 0" class="empty">
+        <i class="bi bi-people display-1 text-muted"></i>
+        <p>No hay datos de estudiantes</p>
+      </div>
+
+      <!-- Lista de estudiantes -->
+      <div class="top-students-list" *ngIf="(topStudents$ | async)?.length">
+        <div *ngFor="let student of topStudents$ | async; let i = index"
+             class="top-student-item" [attr.data-aos]="'fade-up'" [attr.data-aos-delay]="i * 100">
+
+          <!-- Medalla -->
+          <div class="medal" [ngClass]="'medal-' + (i + 1)">
+            <i [class]="getMedalIcon(i)"></i>
+          </div>
+
+          <!-- Información -->
+          <div class="student-rank-info">
+            <div class="rank-number">#{{ i + 1 }}</div>
+            <div class="student-name">
+              <i class="bi bi-person-badge-fill text-primary me-2"></i>
+              {{ student.estudianteNombre }}
+            </div>
+            <div class="student-average">
+              <span class="grade" [ngClass]="getGradeClass(student.average)">
+                <i class="bi bi-star-fill me-1"></i>
+                {{ student.average.toFixed(2) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRÁFICOS (4) -->
+  <div class="charts-grid">
+
+    <!-- 1. Promedio por Asignatura -->
+    <div class="chart-card" data-aos="fade-right">
+      <div class="chart-header">
+        <h3 class="chart-title">
+          <i class="bi bi-bar-chart-line-fill me-2"></i>
+          Promedio por Asignatura
+        </h3>
+      </div>
+      <div class="chart-body">
+        <canvas #averagesChart ></canvas>
+        <div *ngIf="isLoadingAverages || !(averageBySubject$ | async)?.length" class="chart-empty">
+          <i class="bi bi-bar-chart-line display-1 text-muted"></i>
+          <p>Sin datos</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Distribución de Notas -->
+    <div class="chart-card" data-aos="fade-left">
+      <div class="chart-header">
+        <h3 class="chart-title">
+          <i class="bi bi-pie-chart-fill me-2"></i>
+          Distribución de Notas
+        </h3>
+      </div>
+      <div class="chart-body">
+        <canvas #gradesDistributionChart ></canvas>
+        <div *ngIf="isLoadingAverages || !(gradesDistribution$ | async)?.length" class="chart-empty">
+          <i class="bi bi-pie-chart display-1 text-muted"></i>
+          <p>Sin datos</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Notas por Mes -->
+    <div class="chart-card" data-aos="fade-right">
+      <div class="chart-header">
+        <h3 class="chart-title">
+          <i class="bi bi-calendar-month-fill me-2"></i>
+          Notas por Mes
+        </h3>
+      </div>
+      <div class="chart-body">
+        <canvas #monthlyGradesChart ></canvas>
+        <div *ngIf="isLoadingAverages || !(monthlyGrades$ | async)?.length" class="chart-empty">
+          <i class="bi bi-calendar-x display-1 text-muted"></i>
+          <p>Sin datos</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Asignaturas Más Difíciles -->
+    <div class="chart-card" data-aos="fade-left">
+      <div class="chart-header">
+        <h3 class="chart-title">
+          <i class="bi bi-exclamation-triangle-fill me-2 text-danger"></i>
+          Asignaturas Más Difíciles
+        </h3>
+      </div>
+      <div class="chart-body">
+        <canvas #hardestSubjectsChart ></canvas>
+        <div *ngIf="isLoadingAverages || !(hardestSubjects$ | async)?.length" class="chart-empty">
+          <i class="bi bi-patch-question display-1 text-muted"></i>
+          <p>Sin datos</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>

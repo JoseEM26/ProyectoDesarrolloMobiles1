@@ -1,1 +1,327 @@
-<p>user-profile works!</p>
+<div class="profile-page">
+  <!-- HEADER -->
+  <div class="dashboard-header mb-6">
+    <div class="header-content">
+      <h1 class="dashboard-title">
+        <i class="bi bi-person-circle me-3"></i>
+        Perfil de Usuario
+      </h1>
+      <p class="dashboard-subtitle">
+        Gestiona tu información personal y revisa tu actividad académica
+      </p>
+    </div>
+    <div class="header-actions">
+      <button
+        class="btn btn-primary btn-edit"
+        (click)="toggleEdit()"
+        [disabled]="isLoading"
+        [attr.aria-label]="isEditing ? 'Cancelar edición' : 'Editar perfil'"
+      >
+        <i class="bi" [ngClass]="isEditing ? 'bi-x-circle' : 'bi-pencil-fill'"></i>
+        {{ isEditing ? 'Cancelar' : 'Editar' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- PROFILE STATS -->
+  <div class="stats-grid mb-6">
+    <!-- Cursos Matriculados -->
+    <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+      <div class="stat-icon bg-primary bg-opacity-15 text-primary">
+        <i class="bi bi-book-fill"></i>
+      </div>
+      <div class="stat-body">
+        <h3 class="stat-number">{{ enrolledCoursesCount$ | async | number }}</h3>
+        <p class="stat-label">Cursos Matriculados</p>
+      </div>
+      <div class="stat-footer">
+        <span class="trend up"><i class="bi bi-arrow-up"></i> +2</span>
+      </div>
+    </div>
+
+    <!-- Actividades Recientes -->
+    <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
+      <div class="stat-icon bg-success bg-opacity-15 text-success">
+        <i class="bi bi-clock-history"></i>
+      </div>
+      <div class="stat-body">
+        <h3 class="stat-number">{{ recentActivitiesCount$ | async | number }}</h3>
+        <p class="stat-label">Actividades Recientes</p>
+      </div>
+      <div class="stat-footer">
+        <span class="trend stable"><i class="bi bi-dash"></i> Estable</span>
+      </div>
+    </div>
+
+    <!-- Promedio Académico -->
+    <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
+      <div class="stat-icon bg-info bg-opacity-15 text-info">
+        <i class="bi bi-graph-up-arrow"></i>
+      </div>
+      <div class="stat-body">
+        <h3 class="stat-number">{{ academicAverage$ | async | number:'1.2-2' }}</h3>
+        <p class="stat-label">Promedio Académico</p>
+      </div>
+      <div class="stat-footer">
+        <span class="trend up"><i class="bi bi-arrow-up"></i> +0.3</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE CARD -->
+  <div class="section-card mb-6" data-aos="fade-up" data-aos-duration="800">
+    <div class="section-header">
+      <h2 class="section-title">
+        <i class="bi bi-person-badge me-2"></i>
+        Información Personal
+      </h2>
+    </div>
+    <div class="section-body">
+      <!-- Loading -->
+      <div *ngIf="isLoading" class="loading">
+        <div class="spinner"></div>
+        <p class="loading-text">Cargando perfil...</p>
+      </div>
+
+      <!-- No User -->
+      <div *ngIf="!user && !isLoading" class="empty">
+        <i class="bi bi-person-x display-1 text-muted" aria-hidden="true"></i>
+        <p>No se pudo cargar el perfil</p>
+      </div>
+
+      <!-- Profile Content -->
+      <div *ngIf="user && !isLoading" class="profile-content">
+        <div class="profile-header">
+          <div class="profile-avatar">
+            <i
+              [class]="getRandomAvatarIcon(user.id, user.correoInstitucional)"
+              [style.color]="getRandomAvatarColor(user.id, user.correoInstitucional)"
+              class="avatar-icon"
+              aria-hidden="true"
+            ></i>
+          </div>
+          <div class="profile-info-header">
+            <h3 class="profile-name">{{ user.nombre }} {{ user.apellido }}</h3>
+            <p class="profile-role">{{ tipoUsuario[user.tipo] }}</p>
+          </div>
+        </div>
+
+        <!-- View Mode -->
+        <div *ngIf="!isEditing" class="profile-info" data-aos="fade-up" data-aos-delay="200" data-aos-duration="600">
+          <div class="info-item">
+            <label class="info-label"><i class="bi bi-person-fill me-2"></i>Nombre Completo</label>
+            <p class="info-value">{{ user.nombre }} {{ user.apellido }}</p>
+          </div>
+          <div class="info-item">
+            <label class="info-label"><i class="bi bi-hash me-2"></i>Código Institucional</label>
+            <p class="info-value">{{ user.codigoInstitucional }}</p>
+          </div>
+          <div class="info-item">
+            <label class="info-label"><i class="bi bi-envelope-fill me-2"></i>Correo</label>
+            <p class="info-value">{{ user.correoInstitucional }}</p>
+          </div>
+          <div class="info-item">
+            <label class="info-label"><i class="bi bi-building me-2"></i>Sede</label>
+            <p class="info-value">{{ user.sede }}</p>
+          </div>
+          <div class="info-item">
+            <label class="info-label"><i class="bi bi-person-check-fill me-2"></i>Tipo</label>
+            <p class="info-value">{{ tipoUsuario[user.tipo] }}</p>
+          </div>
+          <div class="info-item">
+            <label class="info-label"><i class="bi bi-shield-check me-2"></i>Estado</label>
+            <p class="info-value" [ngClass]="user.estado ? 'text-success' : 'text-danger'">
+              {{ user.estado ? 'Activo' : 'Inactivo' }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Edit Mode -->
+        <form
+          *ngIf="isEditing"
+          class="profile-form"
+          (ngSubmit)="saveProfile()"
+          data-aos="fade-up"
+          data-aos-delay="200"
+          data-aos-duration="600"
+          #profileForm="ngForm"
+        >
+          <div class="row g-4">
+            <div class="col-md-6">
+              <label for="nombre" class="form-label">
+                <i class="bi bi-person-fill me-2"></i>Nombre
+              </label>
+              <input
+                id="nombre"
+                [(ngModel)]="editedUser.nombre"
+                name="nombre"
+                class="form-control"
+                required
+                minlength="2"
+                #nombre="ngModel"
+                [disabled]="isLoading"
+                aria-describedby="nombre-error"
+              />
+              <div *ngIf="nombre.invalid && nombre.touched" class="invalid-feedback" id="nombre-error">
+                El nombre debe tener al menos 2 caracteres.
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label for="apellido" class="form-label">
+                <i class="bi bi-person-fill me-2"></i>Apellido
+              </label>
+              <input
+                id="apellido"
+                [(ngModel)]="editedUser.apellido"
+                name="apellido"
+                class="form-control"
+                required
+                minlength="2"
+                #apellido="ngModel"
+                [disabled]="isLoading"
+                aria-describedby="apellido-error"
+              />
+              <div *ngIf="apellido.invalid && apellido.touched" class="invalid-feedback" id="apellido-error">
+                El apellido debe tener al menos 2 caracteres.
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label for="codigoInstitucional" class="form-label">
+                <i class="bi bi-hash me-2"></i>Código Institucional
+              </label>
+              <input
+                id="codigoInstitucional"
+                [(ngModel)]="editedUser.codigoInstitucional"
+                name="codigoInstitucional"
+                class="form-control"
+                required
+                minlength="3"
+                #codigoInstitucional="ngModel"
+                [disabled]="isLoading"
+                aria-describedby="codigo-error"
+              />
+              <div *ngIf="codigoInstitucional.invalid && codigoInstitucional.touched" class="invalid-feedback" id="codigo-error">
+                El código institucional debe tener al menos 3 caracteres.
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label for="sede" class="form-label">
+                <i class="bi bi-building me-2"></i>Sede
+              </label>
+              <input
+                id="sede"
+                [(ngModel)]="editedUser.sede"
+                name="sede"
+                class="form-control"
+                required
+                minlength="2"
+                #sede="ngModel"
+                [disabled]="isLoading"
+                aria-describedby="sede-error"
+              />
+              <div *ngIf="sede.invalid && sede.touched" class="invalid-feedback" id="sede-error">
+                La sede debe tener al menos 2 caracteres.
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label for="correo" class="form-label">
+                <i class="bi bi-envelope-fill me-2"></i>Correo
+              </label>
+              <input
+                id="correo"
+                [ngModel]="user.correoInstitucional"
+                name="correo"
+                class="form-control"
+                disabled
+                aria-describedby="correo-info"
+              />
+              <small id="correo-info" class="form-text text-muted">
+                El correo no se puede modificar.
+              </small>
+            </div>
+            <div class="col-md-6">
+              <label for="tipo" class="form-label">
+                <i class="bi bi-person-check-fill me-2"></i>Tipo
+              </label>
+              <input
+                id="tipo"
+                [ngModel]="tipoUsuario[user.tipo]"
+                name="tipo"
+                class="form-control"
+                disabled
+                aria-describedby="tipo-info"
+              />
+              <small id="tipo-info" class="form-text text-muted">
+                El tipo de usuario es asignado por el sistema.
+              </small>
+            </div>
+          </div>
+          <div class="form-actions mt-4">
+            <button
+              type="submit"
+              class="btn btn-primary btn-save"
+              [disabled]="isLoading || profileForm.invalid"
+              [attr.aria-label]="'Guardar cambios'"
+            >
+              <i class="bi bi-save-fill me-2"></i>Guardar
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-secondary btn-cancel ms-2"
+              (click)="toggleEdit()"
+              [disabled]="isLoading"
+              [attr.aria-label]="'Cancelar edición'"
+            >
+              <i class="bi bi-x-circle-fill me-2"></i>Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECENT ACTIVITY -->
+  <div class="section-card mb-6" data-aos="fade-up">
+    <div class="section-header">
+      <h2 class="section-title">
+        <i class="bi bi-clock-history me-2"></i>
+        Actividad Reciente
+      </h2>
+      <div class="section-controls">
+        <select [(ngModel)]="activityFilter" (ngModelChange)="filterActivities()" class="form-select form-select-sm" [disabled]="isLoadingActivities">
+          <option value="all">Todas</option>
+          <option value="recent">Más recientes</option>
+          <option value="courses">Cursos</option>
+          <option value="grades">Calificaciones</option>
+        </select>
+      </div>
+    </div>
+    <div class="section-body">
+      <!-- Loading -->
+      <div *ngIf="isLoadingActivities" class="loading">
+        <div class="spinner"></div>
+        <p class="loading-text">Cargando actividad...</p>
+      </div>
+      <!-- No Data -->
+      <div *ngIf="!isLoadingActivities && !(filteredActivities$ | async)?.length" class="empty">
+        <i class="bi bi-inbox display-1 text-muted" aria-hidden="true"></i>
+        <p>No hay actividad reciente</p>
+      </div>
+      <!-- Activity List -->
+      <div *ngIf="(filteredActivities$ | async)?.length" class="activity-list">
+        <div *ngFor="let activity of filteredActivities$ | async; let i = index" class="activity-item" [attr.data-aos]="'fade-up'" [attr.data-aos-delay]="i * 80">
+          <div class="activity-icon" [ngClass]="getActivityIconClass(activity.type)">
+            <i [class]="getActivityIcon(activity.type)"></i>
+          </div>
+          <div class="activity-details">
+            <p class="activity-description">{{ activity.description }}</p>
+            <small class="activity-date text-muted">
+              <i class="bi bi-calendar3 me-1"></i>
+              {{ activity.date | date:'dd MMM, yyyy' : 'es-ES' }}
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

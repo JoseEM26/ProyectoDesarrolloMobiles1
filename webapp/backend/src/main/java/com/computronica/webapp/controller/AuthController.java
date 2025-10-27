@@ -1,4 +1,3 @@
-// src/main/java/com/computronica/webapp/controller/AuthController.java
 package com.computronica.webapp.controller;
 
 import com.computronica.webapp.dto.AuthResponse;
@@ -7,14 +6,22 @@ import com.computronica.webapp.dto.RegisterRequest;
 import com.computronica.webapp.model.Usuario;
 import com.computronica.webapp.model.TipoUsuario;
 import com.computronica.webapp.service.UsuarioService;
-import com.google.firebase.auth.*;
+import com.google.cloud.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseToken;
+import com.google.firebase.auth.UserRecord;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
+@Validated
 public class AuthController {
 
     @Autowired
@@ -27,9 +34,19 @@ public class AuthController {
     // 1. REGISTRO
     // ====================
     @PostMapping("/registro")
-    public ResponseEntity<?> registro(@RequestBody RegisterRequest request) {
+    public ResponseEntity<?> registro(@Valid @RequestBody RegisterRequest request) {
         try {
-            // Crear en Firebase Auth
+            // Validar si el correo ya existe en Firebase Auth
+            try {
+                firebaseAuth.getUserByEmail(request.getCorreoInstitucional());
+                return ResponseEntity.badRequest().body("El correo ya está registrado");
+            } catch (FirebaseAuthException e) {
+                if (!e.getErrorCode().equals("user-not-found")) {
+                    throw e; // Re-lanzar si no es "user-not-found"
+                }
+            }
+
+            // Crear usuario en Firebase Auth
             UserRecord.CreateRequest createRequest = new UserRecord.CreateRequest()
                     .setEmail(request.getCorreoInstitucional())
                     .setPassword(request.getContrasena())
@@ -37,7 +54,7 @@ public class AuthController {
 
             UserRecord user = firebaseAuth.createUser(createRequest);
 
-            // Crear en Firestore
+            // Crear usuario en Firestore
             Usuario usuario = new Usuario();
             usuario.setId(user.getUid());
             usuario.setCodigoInstitucional(request.getCodigoInstitucional());
@@ -45,44 +62,47 @@ public class AuthController {
             usuario.setNombre(request.getNombre());
             usuario.setApellido(request.getApellido());
             usuario.setCorreoInstitucional(request.getCorreoInstitucional());
+            usuario.setContrasena(request.getContrasena());
             usuario.setTipo(request.getTipo() != null ? request.getTipo() : TipoUsuario.estudiante);
-            usuario.setEstado(true );
+            usuario.setEstado(true);
+            usuario.setCreatedAt(Timestamp.now());
+            usuario.setUpdatedAt(Timestamp.now());
 
             usuarioService.save(usuario);
 
-            return ResponseEntity.ok(buildResponse(usuario, "Registro exitoso (sin token)"));
+            // Generar custom token
+            String customToken = firebaseAuth.createCustomToken(user.getUid());
+
+            return ResponseEntity.ok(buildResponse(usuario, customToken));
 
         } catch (FirebaseAuthException e) {
-            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Error en registro: " + e.getMessage());
         }
     }
 
     // ====================
-    // 2. LOGIN (SIN TOKEN - SOLO EMAIL + PASS)
+    // 2. LOGIN
     // ====================
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {
-            // 1. Buscar usuario por email
-            UserRecord user = firebaseAuth.getUserByEmail(request.getCorreoInstitucional());
+            // Verificar el ID token
+            FirebaseToken decodedToken = firebaseAuth.verifyIdToken(request.getIdToken());
+            String uid = decodedToken.getUid();
 
-            // 2. Firebase Admin NO puede validar contraseña directamente
-            // → SOLUCIÓN: Usar Custom Token (pero necesita frontend)
-            // → OPCIÓN INSEGURA: Asumir que si existe → login OK (solo para pruebas)
-
-            // BUSCAR EN FIRESTORE
-            Usuario usuario = usuarioService.findByCorreoInstitucional(request.getCorreoInstitucional());
+            // Buscar usuario en Firestore
+            Usuario usuario = usuarioService.findById(uid);
             if (usuario == null) {
                 return ResponseEntity.status(404).body("Usuario no encontrado en sistema");
             }
+            if (!usuario.isEstado()) {
+                return ResponseEntity.status(403).body("Cuenta desactivada");
+            }
 
-            // GENERAR UN TOKEN SIMPLE (NO SEGURO)
-            String fakeToken = "FAKE-TOKEN-" + user.getUid();
-
-            return ResponseEntity.ok(buildResponse(usuario, fakeToken));
+            return ResponseEntity.ok(buildResponse(usuario, request.getIdToken()));
 
         } catch (FirebaseAuthException e) {
-            return ResponseEntity.status(401).body("Credenciales inválidas");
+            return ResponseEntity.status(401).body("Token inválido: " + e.getMessage());
         }
     }
 
@@ -90,8 +110,37 @@ public class AuthController {
     // 3. LOGOUT
     // ====================
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
-        return ResponseEntity.ok("Sesión cerrada (simulada)");
+    public ResponseEntity<String> logout(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.TEXT_PLAIN);
+
+        // Handle missing or invalid Authorization header
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body("Sesión cerrada exitosamente");
+        }
+
+        try {
+            // Extract and verify token
+            String idToken = authHeader.replace("Bearer ", "");
+            FirebaseToken decodedToken = firebaseAuth.verifyIdToken(idToken);
+            String uid = decodedToken.getUid();
+
+            // Revoke refresh tokens
+            firebaseAuth.revokeRefreshTokens(uid);
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body("Sesión cerrada exitosamente");
+
+        } catch (FirebaseAuthException e) {
+            // Log error but return success to ensure client can proceed
+            System.err.println("Error verifying token during logout: " + e.getMessage());
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body("Sesión cerrada exitosamente");
+        }
     }
 
     // ====================
@@ -107,7 +156,7 @@ public class AuthController {
         res.setCorreoInstitucional(usuario.getCorreoInstitucional());
         res.setTipo(usuario.getTipo());
         res.setEstado(usuario.isEstado());
-        res.setToken(token); // Token falso o vacío
+        res.setToken(token);
         return res;
     }
 }
