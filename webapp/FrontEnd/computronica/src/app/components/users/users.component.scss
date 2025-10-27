@@ -1,0 +1,157 @@
+// src/app/components/users/users.component.scss
+.users-page {
+  padding: 1.5rem;
+
+  .section-title {
+    color: var(--text);
+    font-size: 1.8rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+  }
+
+  .section-controls {
+    .form-control, .form-select {
+      border-color: var(--gray);
+      background-color: var(--white);
+      color: var(--text);
+
+      &:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(var(--primary-rgb), 0.25);
+      }
+    }
+
+    .form-control::placeholder {
+      color: var(--muted);
+    }
+  }
+
+  .section-card {
+    background-color: var(--white);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+
+    .section-body {
+      padding: 1rem;
+    }
+  }
+
+  .users-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    thead {
+      background-color: var(--primary);
+      color: var(--white);
+
+      th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 500;
+      }
+    }
+
+    tbody {
+      tr {
+        border-bottom: 1px solid var(--gray);
+
+        &:hover {
+          background-color: rgba(var(--secondary-rgb), 0.1);
+        }
+      }
+
+      td {
+        padding: 1rem;
+        vertical-align: middle;
+      }
+
+      .user-cell {
+        .user-info {
+          .avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: var(--background);
+            font-size: 1.2rem;
+          }
+
+          .name {
+            font-weight: 500;
+            color: var(--text);
+          }
+
+          .id {
+            font-size: 0.85rem;
+          }
+        }
+      }
+
+      .badge {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.8rem;
+      }
+    }
+  }
+
+  .pagination-info {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .pagination {
+    .page-item {
+      &.active .page-link {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        color: var(--white);
+      }
+
+      &.disabled .page-link {
+        color: var(--gray);
+        cursor: not-allowed;
+      }
+
+      .page-link {
+        color: var(--primary);
+        border-color: var(--gray);
+        background-color: var(--white);
+        margin: 0 0.2rem;
+        border-radius: 0.3rem;
+
+        &:hover {
+          background-color: var(--secondary);
+          color: var(--white);
+          border-color: var(--secondary);
+        }
+      }
+    }
+  }
+
+  .loading {
+    .spinner {
+      width: 3rem;
+      height: 3rem;
+      border: 0.3rem solid var(--primary);
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+  }
+
+  .empty {
+    color: var(--muted);
+    text-align: center;
+    padding: 2rem;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}

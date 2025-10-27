@@ -1,0 +1,43 @@
+/* src/app/components/user-profile/user-profile.component.scss */
+.user-profile-page {
+  padding: 2rem;
+
+  .section-header {
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .form-control {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      transition: all 0.3s ease;
+
+      &::placeholder {
+        color: var(--text-muted);
+      }
+    }
+  }
+
+  .section-card {
+    background: var(--card-bg);
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow-sm);
+    color: var(--text);
+
+    .section-body {
+      padding: 1.5rem;
+    }
+  }
+
+  .loading, .empty {
+    color: var(--text-muted);
+
+    i {
+      font-size: 4rem;
+      color: var(--text-muted);
+    }
+  }
+}
