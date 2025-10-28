@@ -1,12 +1,7 @@
-// src/main/java/com/computronica/webapp/dto/RegisterRequest.java
 package com.computronica.webapp.dto;
 
-import com.computronica.webapp.model.TipoUsuario;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
-
 
 @Data
 public class RegisterRequest {
@@ -33,5 +28,5 @@ public class RegisterRequest {
     @Size(min = 6, max = 100, message = "La contraseña debe tener entre 6 y 100 caracteres")
     private String contrasena;
 
-    private TipoUsuario tipo;
+    private String tipo; // ← String
 }

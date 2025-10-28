@@ -1,4 +1,3 @@
-// src/main/java/com/computronica/webapp/service/UsuarioService.java
 package com.computronica.webapp.service;
 
 import com.computronica.webapp.model.Usuario;
@@ -21,13 +20,9 @@ public class UsuarioService {
         this.db = FirestoreClient.getFirestore(firebaseApp);
     }
 
-    /**
-     * Busca un usuario por su correo institucional en Firestore.
-     *
-     * @param correo Correo institucional del usuario.
-     * @return Usuario encontrado o null si no existe.
-     * @throws RuntimeException si ocurre un error al consultar Firestore.
-     */
+    // ====================
+    // BUSCAR POR CORREO
+    // ====================
     public Usuario findByCorreoInstitucional(String correo) {
         if (correo == null || correo.trim().isEmpty()) {
             throw new IllegalArgumentException("El correo institucional no puede ser nulo o vacío");
@@ -41,65 +36,56 @@ public class UsuarioService {
                     .get();
 
             if (!query.isEmpty()) {
-                DocumentSnapshot document = query.getDocuments().get(0);
-                Usuario usuario = document.toObject(Usuario.class);
-                usuario.setId(document.getId());
+                DocumentSnapshot doc = query.getDocuments().get(0);
+                Usuario usuario = doc.toObject(Usuario.class);
+                usuario.setId(doc.getId());
                 return usuario;
             }
             return null;
         } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException("Error al buscar usuario por correo: " + e.getMessage(), e);
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Error al buscar por correo: " + e.getMessage(), e);
         }
     }
 
-    /**
-     * Busca un usuario por su ID (UID de Firebase Auth) en Firestore.
-     *
-     * @param id ID del usuario (UID).
-     * @return Usuario encontrado o null si no existe.
-     * @throws RuntimeException si ocurre un error al consultar Firestore.
-     */
+    // ====================
+    // BUSCAR POR ID (UID)
+    // ====================
     public Usuario findById(String id) {
         if (id == null || id.trim().isEmpty()) {
-            throw new IllegalArgumentException("El ID del usuario no puede ser nulo o vacío");
+            throw new IllegalArgumentException("El ID no puede ser nulo o vacío");
         }
 
         try {
-            DocumentSnapshot document = db.collection(COLLECTION_NAME)
+            DocumentSnapshot doc = db.collection(COLLECTION_NAME)
                     .document(id)
                     .get()
                     .get();
 
-            if (document.exists()) {
-                Usuario usuario = document.toObject(Usuario.class);
-                usuario.setId(document.getId());
+            if (doc.exists()) {
+                Usuario usuario = doc.toObject(Usuario.class);
+                usuario.setId(doc.getId());
                 return usuario;
             }
             return null;
         } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException("Error al buscar usuario por ID: " + e.getMessage(), e);
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Error al buscar por ID: " + e.getMessage(), e);
         }
     }
 
-    /**
-     * Guarda un usuario en Firestore, actualizando los timestamps y asegurando compatibilidad.
-     *
-     * @param usuario Objeto Usuario a guardar.
-     * @throws IllegalArgumentException si el usuario tiene datos inválidos.
-     * @throws RuntimeException si ocurre un error al guardar en Firestore.
-     */
+    // ====================
+    // GUARDAR / ACTUALIZAR
+    // ====================
     public void save(Usuario usuario) {
         if (usuario == null) {
             throw new IllegalArgumentException("El usuario no puede ser nulo");
         }
+        if (usuario.getId() == null || usuario.getId().trim().isEmpty()) {
+            throw new IllegalArgumentException("El ID (UID) es obligatorio");
+        }
         if (usuario.getCorreoInstitucional() == null || usuario.getCorreoInstitucional().trim().isEmpty()) {
             throw new IllegalArgumentException("El correo institucional es obligatorio");
-        }
-        if (usuario.getNombre() == null || usuario.getNombre().trim().isEmpty()) {
-            throw new IllegalArgumentException("El nombre es obligatorio");
-        }
-        if (usuario.getApellido() == null || usuario.getApellido().trim().isEmpty()) {
-            throw new IllegalArgumentException("El apellido es obligatorio");
         }
 
         try {
@@ -109,17 +95,18 @@ public class UsuarioService {
             }
             usuario.setUpdatedAt(now);
 
-            // NO GUARDAR CONTRASEÑA (manteniendo tu lógica actual)
-            usuario.setContrasena(null);
+            // NO BORRAR CONTRASEÑA → Firebase Auth ya la tiene
+            // usuario.setContrasena(null); ← ELIMINAR ESTA LÍNEA
 
-            String id = usuario.getId();
-            if (id == null || id.trim().isEmpty()) {
-                id = db.collection(COLLECTION_NAME).document().getId();
-                usuario.setId(id);
-            }
+            String id = usuario.getId(); // ← USAR UID DE FIREBASE AUTH
 
-            db.collection(COLLECTION_NAME).document(id).set(usuario).get();
+            db.collection(COLLECTION_NAME)
+                    .document(id)
+                    .set(usuario)
+                    .get();
+
         } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException("Error al guardar usuario: " + e.getMessage(), e);
         }
     }

@@ -14,7 +14,7 @@ public class Usuario {
     private String apellido;
     private String correoInstitucional;
     private String contrasena;
-    private TipoUsuario tipo = TipoUsuario.estudiante;
+    private String tipo = "estudiante"; // ← String, NO enum
     private boolean estado = true;
     private Timestamp createdAt;
     private Timestamp updatedAt;
