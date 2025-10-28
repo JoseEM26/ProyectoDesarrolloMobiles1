@@ -1,10 +1,10 @@
+// src/main/java/com/computronica/webapp/controller/AuthController.java
 package com.computronica.webapp.controller;
 
 import com.computronica.webapp.dto.AuthResponse;
 import com.computronica.webapp.dto.LoginRequest;
 import com.computronica.webapp.dto.RegisterRequest;
 import com.computronica.webapp.model.Usuario;
-import com.computronica.webapp.model.TipoUsuario;
 import com.computronica.webapp.service.UsuarioService;
 import com.google.cloud.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
@@ -36,17 +36,15 @@ public class AuthController {
     @PostMapping("/registro")
     public ResponseEntity<?> registro(@Valid @RequestBody RegisterRequest request) {
         try {
-            // Validar si el correo ya existe en Firebase Auth
+            // 1. VERIFICAR SI EL CORREO YA EXISTE
             try {
                 firebaseAuth.getUserByEmail(request.getCorreoInstitucional());
                 return ResponseEntity.badRequest().body("El correo ya está registrado");
             } catch (FirebaseAuthException e) {
-                if (!e.getErrorCode().equals("user-not-found")) {
-                    throw e; // Re-lanzar si no es "user-not-found"
-                }
+
             }
 
-            // Crear usuario en Firebase Auth
+            // 2. CREAR EN FIREBASE AUTH
             UserRecord.CreateRequest createRequest = new UserRecord.CreateRequest()
                     .setEmail(request.getCorreoInstitucional())
                     .setPassword(request.getContrasena())
@@ -54,7 +52,7 @@ public class AuthController {
 
             UserRecord user = firebaseAuth.createUser(createRequest);
 
-            // Crear usuario en Firestore
+            // 3. CREAR EN FIRESTORE
             Usuario usuario = new Usuario();
             usuario.setId(user.getUid());
             usuario.setCodigoInstitucional(request.getCodigoInstitucional());
@@ -63,20 +61,33 @@ public class AuthController {
             usuario.setApellido(request.getApellido());
             usuario.setCorreoInstitucional(request.getCorreoInstitucional());
             usuario.setContrasena(request.getContrasena());
-            usuario.setTipo(request.getTipo() != null ? request.getTipo() : TipoUsuario.estudiante);
+
+            // TIPO COMO STRING
+            String tipo = request.getTipo();
+            if (tipo == null || tipo.trim().isEmpty()) {
+                tipo = "estudiante";
+            } else {
+                tipo = tipo.trim().toLowerCase();
+                if (!tipo.matches("^(estudiante|profesor|administrativo)$")) {
+                    tipo = "estudiante"; // fallback
+                }
+            }
+            usuario.setTipo(tipo);
+
             usuario.setEstado(true);
             usuario.setCreatedAt(Timestamp.now());
             usuario.setUpdatedAt(Timestamp.now());
 
             usuarioService.save(usuario);
 
-            // Generar custom token
+            // 4. GENERAR CUSTOM TOKEN
             String customToken = firebaseAuth.createCustomToken(user.getUid());
-
             return ResponseEntity.ok(buildResponse(usuario, customToken));
 
         } catch (FirebaseAuthException e) {
-            return ResponseEntity.badRequest().body("Error en registro: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Error en Firebase: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error interno del servidor: " + e.getMessage());
         }
     }
 
@@ -86,11 +97,9 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {
-            // Verificar el ID token
             FirebaseToken decodedToken = firebaseAuth.verifyIdToken(request.getIdToken());
             String uid = decodedToken.getUid();
 
-            // Buscar usuario en Firestore
             Usuario usuario = usuarioService.findById(uid);
             if (usuario == null) {
                 return ResponseEntity.status(404).body("Usuario no encontrado en sistema");
@@ -114,32 +123,19 @@ public class AuthController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.TEXT_PLAIN);
 
-        // Handle missing or invalid Authorization header
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body("Sesión cerrada exitosamente");
+            return ResponseEntity.ok().headers(headers).body("Sesión cerrada exitosamente");
         }
 
         try {
-            // Extract and verify token
             String idToken = authHeader.replace("Bearer ", "");
             FirebaseToken decodedToken = firebaseAuth.verifyIdToken(idToken);
             String uid = decodedToken.getUid();
-
-            // Revoke refresh tokens
             firebaseAuth.revokeRefreshTokens(uid);
-
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body("Sesión cerrada exitosamente");
-
+            return ResponseEntity.ok().headers(headers).body("Sesión cerrada exitosamente");
         } catch (FirebaseAuthException e) {
-            // Log error but return success to ensure client can proceed
-            System.err.println("Error verifying token during logout: " + e.getMessage());
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body("Sesión cerrada exitosamente");
+            System.err.println("Error en logout: " + e.getMessage());
+            return ResponseEntity.ok().headers(headers).body("Sesión cerrada exitosamente");
         }
     }
 
@@ -154,7 +150,7 @@ public class AuthController {
         res.setNombre(usuario.getNombre());
         res.setApellido(usuario.getApellido());
         res.setCorreoInstitucional(usuario.getCorreoInstitucional());
-        res.setTipo(usuario.getTipo());
+        res.setTipo(usuario.getTipo());  // ← String
         res.setEstado(usuario.isEstado());
         res.setToken(token);
         return res;

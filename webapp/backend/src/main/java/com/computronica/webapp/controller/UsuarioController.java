@@ -2,6 +2,7 @@ package com.computronica.webapp.controller;
 
 import com.computronica.webapp.model.Usuario;
 import com.computronica.webapp.service.FirestoreService;
+import com.computronica.webapp.service.UsuarioService;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.WriteResult;
@@ -17,6 +18,9 @@ public class UsuarioController {
 
     @Autowired
     private FirestoreService firestoreService;
+
+    @Autowired
+    private UsuarioService usuarioService;
 
     @Autowired
     private Firestore firestore;
@@ -41,22 +45,57 @@ public class UsuarioController {
         List<Usuario> usuarios = firestoreService.getAll("usuarios", Usuario.class);
         return ResponseEntity.ok(usuarios);
     }
+// src/main/java/com/computronica/webapp/controller/UsuarioController.java
 
-    // UPDATE
+    @GetMapping("/tipo/{tipo}")
+    public ResponseEntity<List<Usuario>> getByTipo(@PathVariable String tipo) throws Exception {
+        // Validar tipo permitido
+        if (!List.of("estudiante", "profesor", "administrativo").contains(tipo)) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<Usuario> usuarios = firestoreService.filterByField(
+                "usuarios", "tipo", tipo, Usuario.class
+        );
+
+        // Asignar ID a cada usuario
+        usuarios.forEach(u -> {
+            try {
+                // Si no tiene ID, buscarlo por correo o UID
+                if (u.getId() == null) {
+                    Usuario found = usuarioService.findByCorreoInstitucional(u.getCorreoInstitucional());
+                    if (found != null) u.setId(found.getId());
+                }
+            } catch (Exception e) {
+                // Ignorar
+            }
+        });
+
+        return ResponseEntity.ok(usuarios);
+    }
     @PutMapping("/{id}")
-    public ResponseEntity<Void> update(@PathVariable String id, @RequestBody Map<String, Object> updates) throws Exception {
+    public ResponseEntity<Usuario> update(@PathVariable String id, @RequestBody Map<String, Object> updates) throws Exception {
         DocumentReference docRef = firestore.collection("usuarios").document(id);
-        Map<String, Object> updateData = new HashMap<>();
 
-        // Only include provided fields
-        if (updates.containsKey("nombre")) updateData.put("nombre", updates.get("nombre"));
-        if (updates.containsKey("apellido")) updateData.put("apellido", updates.get("apellido"));
-        if (updates.containsKey("codigoInstitucional")) updateData.put("codigoInstitucional", updates.get("codigoInstitucional"));
-        if (updates.containsKey("sede")) updateData.put("sede", updates.get("sede"));
-        updateData.put("updatedAt", com.google.cloud.Timestamp.now());
+        // Obtener el usuario actual
+        Usuario usuario = firestoreService.getById("usuarios", id, Usuario.class);
+        if (usuario == null) {
+            return ResponseEntity.notFound().build();
+        }
 
-        WriteResult result = docRef.update(updateData).get();
-        return ResponseEntity.ok().build();
+        // Aplicar actualizaciones
+        if (updates.containsKey("nombre")) usuario.setNombre((String) updates.get("nombre"));
+        if (updates.containsKey("apellido")) usuario.setApellido((String) updates.get("apellido"));
+        if (updates.containsKey("codigoInstitucional")) usuario.setCodigoInstitucional((String) updates.get("codigoInstitucional"));
+        if (updates.containsKey("sede")) usuario.setSede((String) updates.get("sede"));
+        if (updates.containsKey("tipo")) usuario.setTipo((String) updates.get("tipo"));
+
+        usuario.setUpdatedAt(com.google.cloud.Timestamp.now());
+
+        // Guardar
+        docRef.set(usuario).get();
+
+        return ResponseEntity.ok(usuario); // ← DEVUELVE EL USUARIO
     }
 
     // DELETE

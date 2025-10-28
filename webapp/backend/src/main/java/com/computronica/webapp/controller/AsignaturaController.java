@@ -10,16 +10,18 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/asignaturas")
+@CrossOrigin(origins = "http://localhost:4200") // Permite Angular
 public class AsignaturaController {
 
     @Autowired
     private FirestoreService firestoreService;
 
-    // CREATE
+    // CREATE → Devuelve la asignatura con ID
     @PostMapping
-    public ResponseEntity<String> create(@RequestBody Asignatura asignatura) throws Exception {
+    public ResponseEntity<Asignatura> create(@RequestBody Asignatura asignatura) throws Exception {
         String id = firestoreService.create("asignaturas", asignatura);
-        return ResponseEntity.ok(id);
+        asignatura.setId(id); // Asigna el ID generado
+        return ResponseEntity.ok(asignatura);
     }
 
     // READ BY ID
@@ -36,11 +38,12 @@ public class AsignaturaController {
         return ResponseEntity.ok(asignaturas);
     }
 
-    // UPDATE
+    // UPDATE → Devuelve la asignatura actualizada
     @PutMapping("/{id}")
-    public ResponseEntity<Void> update(@PathVariable String id, @RequestBody Asignatura asignatura) throws Exception {
+    public ResponseEntity<Asignatura> update(@PathVariable String id, @RequestBody Asignatura asignatura) throws Exception {
+        asignatura.setId(id); // Asegura que el ID esté presente
         firestoreService.update("asignaturas", id, asignatura);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(asignatura);
     }
 
     // DELETE

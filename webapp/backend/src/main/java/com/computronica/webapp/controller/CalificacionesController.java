@@ -17,9 +17,10 @@ public class CalificacionesController {
     private FirestoreService firestoreService;
 
     @PostMapping
-    public ResponseEntity<String> create(@RequestBody Calificaciones calificacion) throws Exception {
+    public ResponseEntity<Calificaciones> create(@RequestBody Calificaciones calificacion) throws Exception {
         String id = firestoreService.create("calificaciones", calificacion);
-        return ResponseEntity.ok(id);
+        calificacion.setId(id); // ← ASIGNA EL ID
+        return ResponseEntity.ok(calificacion);
     }
 
     @GetMapping("/{id}")
@@ -35,9 +36,10 @@ public class CalificacionesController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> update(@PathVariable String id, @RequestBody Calificaciones calificacion) throws Exception {
+    public ResponseEntity<Calificaciones> update(@PathVariable String id, @RequestBody Calificaciones calificacion) throws Exception {
         firestoreService.update("calificaciones", id, calificacion);
-        return ResponseEntity.ok().build();
+        calificacion.setId(id);
+        return ResponseEntity.ok(calificacion);
     }
 
     @DeleteMapping("/{id}")
