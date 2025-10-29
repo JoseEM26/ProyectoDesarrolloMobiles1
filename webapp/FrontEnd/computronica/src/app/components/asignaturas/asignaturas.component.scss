@@ -1,173 +1,66 @@
 /* src/app/components/asignaturas/asignaturas.component.scss */
 .asignaturas-page {
-  padding: 2rem;
-  color: var(--text);
-  transition: color 0.3s ease;
-
-  .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-
-    .section-title {
-      font-size: 1.8rem;
-      font-weight: 600;
-      color: var(--primary);
-    }
-
-    .section-controls {
-      .form-control {
-        min-width: 200px;
-        background: var(--card-bg);
-        border: 1px solid var(--border);
-        color: var(--text);
-        border-radius: 0.5rem;
-        transition: all 0.3s ease;
-
-        &::placeholder {
-          color: var(--text-muted);
-        }
-
-        &:focus {
-          border-color: var(--primary);
-          box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
-        }
+  .card {
+    .table {
+      thead th { font-size: 0.95rem; border-bottom: 2px solid var(--border); }
+      tbody tr {
+        transition: all 0.2s ease;
+        &:hover { background: rgba(var(--primary-rgb), 0.03); }
+        .avatar { width: 36px; height: 36px; font-size: 1.2rem; }
+        .badge { font-size: 0.85rem; border-radius: 0.5rem; }
       }
     }
-  }
-
-  .section-card {
-    background: var(--card-bg);
-    border-radius: 0.5rem;
-    box-shadow: var(--shadow-sm);
-    overflow: hidden;
-    transition: background 0.3s ease;
-
-    .section-body {
-      padding: 1.5rem;
-
-      .asignaturas-table {
-        width: 100%;
-        border-collapse: collapse;
-
-        th,
-        td {
-          padding: 0.75rem;
-          text-align: left;
-          border-bottom: 1px solid var(--border);
-          color: var(--text);
-        }
-
-        th {
-          background: var(--light);
-          font-weight: 600;
-        }
-
-        td {
-          vertical-align: middle;
-
-          .badge {
-            font-size: 0.8rem;
-            padding: 0.4em 0.6em;
-            border-radius: 0.25rem;
-          }
-
-          .bg-success {
-            background-color: var(--success) !important;
-            color: var(--bg);
-          }
-
-          .bg-info {
-            background-color: var(--info) !important;
-            color: var(--bg);
-          }
-
-          .text-muted {
-            color: var(--text-muted) !important;
-          }
-        }
-      }
-    }
-
-    .section-footer {
-      padding: 1rem 1.5rem;
-      background: var(--light);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-
-      .pagination-info {
-        font-size: 0.9rem;
-        color: var(--text-muted);
-      }
-
+    .card-footer {
       .pagination {
-        margin: 0;
-
-        .page-item {
-          .page-link {
-            cursor: pointer;
-            border-radius: 0.25rem;
-            margin: 0 0.2rem;
-            color: var(--primary);
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            transition: all 0.2s ease;
-          }
-
-          &.active .page-link {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: var(--bg);
-          }
-
-          &.disabled .page-link {
-            cursor: not-allowed;
-            opacity: 0.5;
-            background: var(--light);
-            color: var(--text-muted);
-          }
+        .page-link {
+          border: none; color: var(--primary); background: transparent; border-radius: 0.5rem; margin: 0 2px;
+          transition: all 0.2s ease;
+          &:hover:not(.disabled) { background: rgba(var(--primary-rgb), 0.1); }
+          &.active { background: var(--primary); color: white; }
+          .disabled { opacity: 0.5; cursor: not-allowed; }
         }
       }
     }
   }
 
-  .loading {
-    .spinner {
-      border: 4px solid var(--light);
-      border-top: 4px solid var(--primary);
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto;
+  .modal-content {
+    .modal-header { background: linear-gradient(135deg, var(--primary), rgba(var(--primary-rgb), 0.9)); }
+    .form-control, .form-select {
+      border-radius: 0.75rem; padding: 0.65rem 1rem; font-size: 0.95rem; transition: all 0.3s ease;
+      &:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2); }
+      &.is-invalid { border-color: #dc3545; }
+    }
+    .invalid-feedback { font-size: 0.8rem; }
+
+    .chip-list {
+      display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; min-height: 38px;
+      padding: 0.5rem; border: 1px solid var(--border); border-radius: 0.75rem; background: #fff;
+      .chip {
+        display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0.75rem;
+        background: var(--primary); color: white; border-radius: 1rem; font-size: 0.85rem; cursor: pointer;
+        i.bi-x { font-size: 1rem; opacity: 0.7; &:hover { opacity: 1; } }
+      }
+      .chip-input { flex: 1; min-width: 120px; border: none; outline: none; font-size: 0.95rem; padding: 0.5rem 0; }
     }
 
-    p {
-      margin-top: 1rem;
-      color: var(--text-muted);
+    .suggestions {
+      position: absolute; z-index: 1000; background: white; border: 1px solid var(--border);
+      border-radius: 0.5rem; max-height: 200px; overflow-y: auto; box-shadow: var(--shadow-sm);
+      width: 100%; margin-top: 0.25rem;
+      .suggestion {
+        padding: 0.5rem 1rem; cursor: pointer; transition: background 0.2s ease;
+        &:hover { background: rgba(var(--primary-rgb), 0.1); }
+        small { font-size: 0.75rem; }
+      }
     }
   }
 
-  .empty {
-    i {
-      font-size: 4rem;
-      color: var(--text-muted);
+  @media (max-width: 768px) {
+    .table-responsive {
+      .table { th, td { font-size: 0.85rem; &.text-center { text-align: left !important; } } }
+      .avatar { width: 30px; height: 30px; font-size: 1rem; }
+      .btn-group .btn { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
     }
-
-    p {
-      margin-top: 1rem;
-      color: var(--text-muted);
-    }
-  }
-
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
+    .modal-dialog { margin: 1rem; .modal-body { padding: 1rem; } }
   }
 }

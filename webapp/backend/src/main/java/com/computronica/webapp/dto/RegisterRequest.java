@@ -1,7 +1,10 @@
+// src/main/java/com/computronica/webapp/dto/RegisterRequest.java
 package com.computronica.webapp.dto;
 
 import jakarta.validation.constraints.*;
+
 import lombok.Data;
+
 
 @Data
 public class RegisterRequest {
@@ -29,4 +32,5 @@ public class RegisterRequest {
     private String contrasena;
 
     private String tipo; // ← String
+
 }

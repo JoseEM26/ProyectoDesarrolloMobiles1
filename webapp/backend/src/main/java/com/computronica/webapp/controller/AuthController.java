@@ -1,4 +1,3 @@
-// src/main/java/com/computronica/webapp/controller/AuthController.java
 package com.computronica.webapp.controller;
 
 import com.computronica.webapp.dto.AuthResponse;
@@ -37,6 +36,7 @@ public class AuthController {
     public ResponseEntity<?> registro(@Valid @RequestBody RegisterRequest request) {
         try {
             // 1. VERIFICAR SI EL CORREO YA EXISTE
+
             try {
                 firebaseAuth.getUserByEmail(request.getCorreoInstitucional());
                 return ResponseEntity.badRequest().body("El correo ya está registrado");
@@ -45,6 +45,7 @@ public class AuthController {
             }
 
             // 2. CREAR EN FIREBASE AUTH
+
             UserRecord.CreateRequest createRequest = new UserRecord.CreateRequest()
                     .setEmail(request.getCorreoInstitucional())
                     .setPassword(request.getContrasena())
@@ -53,6 +54,7 @@ public class AuthController {
             UserRecord user = firebaseAuth.createUser(createRequest);
 
             // 3. CREAR EN FIRESTORE
+
             Usuario usuario = new Usuario();
             usuario.setId(user.getUid());
             usuario.setCodigoInstitucional(request.getCodigoInstitucional());
@@ -74,6 +76,7 @@ public class AuthController {
             }
             usuario.setTipo(tipo);
 
+
             usuario.setEstado(true);
             usuario.setCreatedAt(Timestamp.now());
             usuario.setUpdatedAt(Timestamp.now());
@@ -88,6 +91,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Error en Firebase: " + e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error interno del servidor: " + e.getMessage());
+
         }
     }
 
@@ -99,6 +103,7 @@ public class AuthController {
         try {
             FirebaseToken decodedToken = firebaseAuth.verifyIdToken(request.getIdToken());
             String uid = decodedToken.getUid();
+
 
             Usuario usuario = usuarioService.findById(uid);
             if (usuario == null) {
@@ -136,6 +141,7 @@ public class AuthController {
         } catch (FirebaseAuthException e) {
             System.err.println("Error en logout: " + e.getMessage());
             return ResponseEntity.ok().headers(headers).body("Sesión cerrada exitosamente");
+
         }
     }
 

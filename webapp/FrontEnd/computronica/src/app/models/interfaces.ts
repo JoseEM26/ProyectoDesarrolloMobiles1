@@ -5,14 +5,17 @@ export interface Calificaciones {
   id?: string;
   estudianteId: string;
   asignaturaId: string;
-  evaluacion: string;
+  evaluacion: TipoEvaluacion;
   nota: number;
   fechaRegistro: string | null;
   estudianteNombre?: string;
   asignaturaNombre?: string;
   fechaRegistroDate?: Date | null; // Mantenido como en tu código
 }
-
+// src/app/models/tipos-evaluacion.ts
+export const TIPOS_EVALUACION = ['Examen', 'Tarea', 'Proyecto', 'Parcial', 'Final'] as const;
+export type TipoEvaluacion = typeof TIPOS_EVALUACION[number];
+export type Sede = 'Campus Central' | 'Campus Norte' | 'Campus Sur' | 'Campus Este';
 export interface Asignatura {
   id?: string;
   nombre: string;
@@ -33,6 +36,22 @@ export enum TipoUsuario {
   estudiante = 'estudiante',
   profesor = 'profesor',
   administrativo = 'administrativo'
+}
+export interface ActivityDetails {
+  courseId?: string;
+  courseName?: string;
+  grade?: number;
+  evaluation?: string;
+  assignmentId?: string;
+  asignaturaId?: string;
+}
+
+ export interface Activity {
+  id: string;
+  type: 'course' | 'grade' | 'profile' | 'assignment';
+  description: string;
+  date: Date;
+  details?: ActivityDetails;
 }
 
 export interface Usuario {

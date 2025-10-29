@@ -1,13 +1,17 @@
+<!-- src/app/components/user-profile/user-profile.component.html -->
 <div class="profile-page">
   <!-- HEADER -->
   <div class="dashboard-header mb-6">
     <div class="header-content">
       <h1 class="dashboard-title">
         <i class="bi bi-person-circle me-3"></i>
-        Perfil de Usuario
+        Perfil de {{ user?.tipo === tipoUsuario.estudiante ? 'Estudiante' :
+                      user?.tipo === tipoUsuario.profesor ? 'Profesor' : 'Usuario' }}
       </h1>
       <p class="dashboard-subtitle">
-        Gestiona tu información personal y revisa tu actividad académica
+        {{ user?.tipo === tipoUsuario.estudiante ? 'Gestiona tu información y revisa tu actividad académica' :
+           user?.tipo === tipoUsuario.profesor ? 'Gestiona tu perfil y revisa la actividad de tus asignaturas' :
+           'Administra tu información y actividad del sistema' }}
       </p>
     </div>
     <div class="header-actions">
@@ -25,21 +29,21 @@
 
   <!-- PROFILE STATS -->
   <div class="stats-grid mb-6">
-    <!-- Cursos Matriculados -->
     <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
       <div class="stat-icon bg-primary bg-opacity-15 text-primary">
         <i class="bi bi-book-fill"></i>
       </div>
       <div class="stat-body">
         <h3 class="stat-number">{{ enrolledCoursesCount$ | async | number }}</h3>
-        <p class="stat-label">Cursos Matriculados</p>
+        <p class="stat-label">
+          {{ user?.tipo === tipoUsuario.estudiante ? 'Tus Cursos Matriculados' :
+             user?.tipo === tipoUsuario.profesor ? 'Cursos Asignados' : 'Cursos Matriculados' }}
+        </p>
       </div>
       <div class="stat-footer">
         <span class="trend up"><i class="bi bi-arrow-up"></i> +2</span>
       </div>
     </div>
-
-    <!-- Actividades Recientes -->
     <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
       <div class="stat-icon bg-success bg-opacity-15 text-success">
         <i class="bi bi-clock-history"></i>
@@ -52,18 +56,31 @@
         <span class="trend stable"><i class="bi bi-dash"></i> Estable</span>
       </div>
     </div>
-
-    <!-- Promedio Académico -->
-    <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
+    <div *ngIf="user?.tipo !== tipoUsuario.administrativo" class="stat-card" data-aos="fade-up" data-aos-delay="300">
       <div class="stat-icon bg-info bg-opacity-15 text-info">
         <i class="bi bi-graph-up-arrow"></i>
       </div>
       <div class="stat-body">
         <h3 class="stat-number">{{ academicAverage$ | async | number:'1.2-2' }}</h3>
-        <p class="stat-label">Promedio Académico</p>
+        <p class="stat-label">
+          {{ user?.tipo === tipoUsuario.estudiante ? 'Tu Promedio Académico' :
+             user?.tipo === tipoUsuario.profesor ? 'Promedio de Tus Asignaturas' : 'Promedio Académico' }}
+        </p>
       </div>
       <div class="stat-footer">
         <span class="trend up"><i class="bi bi-arrow-up"></i> +0.3</span>
+      </div>
+    </div>
+    <div *ngIf="user?.tipo === tipoUsuario.administrativo" class="stat-card" data-aos="fade-up" data-aos-delay="300">
+      <div class="stat-icon bg-info bg-opacity-15 text-info">
+        <i class="bi bi-person-check-fill"></i>
+      </div>
+      <div class="stat-body">
+        <h3 class="stat-number">{{ profileCompletion$ | async | number }}</h3>
+        <p class="stat-label">Completitud del Perfil (%)</p>
+      </div>
+      <div class="stat-footer">
+        <span class="trend stable"><i class="bi bi-dash"></i> Estable</span>
       </div>
     </div>
   </div>
@@ -208,20 +225,25 @@
               <label for="sede" class="form-label">
                 <i class="bi bi-building me-2"></i>Sede
               </label>
-              <input
+              <select
                 id="sede"
                 [(ngModel)]="editedUser.sede"
                 name="sede"
-                class="form-control"
+                class="form-control form-select"
                 required
-                minlength="2"
                 #sede="ngModel"
-                [disabled]="isLoading"
-                aria-describedby="sede-error"
-              />
+                [disabled]="isLoading || user.tipo !== tipoUsuario.administrativo"
+                aria-describedby="sede-error sede-info"
+              >
+                <option value="" disabled>Seleccionar...</option>
+                <option *ngFor="let sedeOption of sedes" [value]="sedeOption">{{ sedeOption }}</option>
+              </select>
               <div *ngIf="sede.invalid && sede.touched" class="invalid-feedback" id="sede-error">
-                La sede debe tener al menos 2 caracteres.
+                Debe seleccionar una sede válida.
               </div>
+              <small *ngIf="user?.tipo !== tipoUsuario.administrativo" id="sede-info" class="form-text text-muted">
+                Solo los administrativos pueden modificar la sede.
+              </small>
             </div>
             <div class="col-md-6">
               <label for="correo" class="form-label">
@@ -285,29 +307,34 @@
     <div class="section-header">
       <h2 class="section-title">
         <i class="bi bi-clock-history me-2"></i>
-        Actividad Reciente
+        {{ user?.tipo === tipoUsuario.estudiante ? 'Tu Actividad Reciente' :
+           user?.tipo === tipoUsuario.profesor ? 'Actividad de Tus Asignaturas' :
+           'Actividad del Sistema' }}
       </h2>
       <div class="section-controls">
         <select [(ngModel)]="activityFilter" (ngModelChange)="filterActivities()" class="form-select form-select-sm" [disabled]="isLoadingActivities">
           <option value="all">Todas</option>
           <option value="recent">Más recientes</option>
-          <option value="courses">Cursos</option>
-          <option value="grades">Calificaciones</option>
+          <option value="courses" *ngIf="user?.tipo === tipoUsuario.estudiante || user?.tipo === tipoUsuario.administrativo">Cursos</option>
+          <option value="grades" *ngIf="user?.tipo !== tipoUsuario.administrativo">Calificaciones</option>
+          <option value="profile">Perfil</option>
+          <option value="assignments" *ngIf="user?.tipo !== tipoUsuario.administrativo">Tareas</option>
         </select>
       </div>
     </div>
     <div class="section-body">
-      <!-- Loading -->
       <div *ngIf="isLoadingActivities" class="loading">
         <div class="spinner"></div>
         <p class="loading-text">Cargando actividad...</p>
       </div>
-      <!-- No Data -->
       <div *ngIf="!isLoadingActivities && !(filteredActivities$ | async)?.length" class="empty">
         <i class="bi bi-inbox display-1 text-muted" aria-hidden="true"></i>
-        <p>No hay actividad reciente</p>
+        <p>
+          {{ user?.tipo === tipoUsuario.estudiante ? 'No tienes actividad reciente' :
+             user?.tipo === tipoUsuario.profesor ? 'No hay actividad reciente en tus asignaturas' :
+             'No hay actividad reciente' }}
+        </p>
       </div>
-      <!-- Activity List -->
       <div *ngIf="(filteredActivities$ | async)?.length" class="activity-list">
         <div *ngFor="let activity of filteredActivities$ | async; let i = index" class="activity-item" [attr.data-aos]="'fade-up'" [attr.data-aos-delay]="i * 80">
           <div class="activity-icon" [ngClass]="getActivityIconClass(activity.type)">
@@ -317,7 +344,7 @@
             <p class="activity-description">{{ activity.description }}</p>
             <small class="activity-date text-muted">
               <i class="bi bi-calendar3 me-1"></i>
-              {{ activity.date | date:'dd MMM, yyyy' : 'es-ES' }}
+              {{ activity.date | date:'dd MMM, yyyy HH:mm' : 'es-ES' }}
             </small>
           </div>
         </div>

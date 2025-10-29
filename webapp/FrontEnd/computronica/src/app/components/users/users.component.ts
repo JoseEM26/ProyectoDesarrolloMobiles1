@@ -1,76 +1,192 @@
-// src/app/components/users/users.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { Observable, combineLatest, of } from 'rxjs';
-import { map, startWith, catchError } from 'rxjs/operators';
-import { Usuario, TipoUsuario } from '../../models/interfaces';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { map, startWith, catchError, finalize } from 'rxjs/operators';
+import { Usuario, TipoUsuario, RegisterRequest } from '../../models/interfaces';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AsyncPipe, NgFor, NgIf, DatePipe, CommonModule } from '@angular/common';
-import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { Timestamp } from 'firebase/firestore';
 import { UsuarioService } from '../../services/UsuarioService';
+import { AuthService } from '../../services/AuthService';
+import Swal from 'sweetalert2';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-users',
   standalone: true,
   imports: [
-    CommonModule,
-    AsyncPipe,
-    NgFor,
-    NgIf,
-    FormsModule,
-    ReactiveFormsModule,
-    DatePipe,
-    NgbDropdownModule
+    CommonModule, AsyncPipe, NgFor, NgIf, DatePipe,
+     ReactiveFormsModule, FormsModule
   ],
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss']
 })
 export class UsersComponent implements OnInit {
+  @ViewChild('userModal') userModal!: TemplateRef<any>;
+
   users$!: Observable<Usuario[]>;
   filteredUsers$!: Observable<Usuario[]>;
-  pageSize: number = 10;
-  currentPage: number = 1;
-  totalPages: number = 1;
-  pages: number[] = []; // Propiedad para almacenar las páginas
+  pageSize = 10;
+  currentPage = 1;
+  totalPages = 1;
+  pages: number[] = [];
   searchControl = new FormControl('');
   tipoFilter = new FormControl('all');
   tipoUsuario = TipoUsuario;
   isLoading = true;
+  isSaving = false;
+  isEditMode = false;
+  modalRef!: NgbModalRef;
+  userForm!: FormGroup;
+  currentUserId: string | null = null;
+totalFilteredUsers = 0; // Añade esta propiedad
 
-  constructor(private usuarioService: UsuarioService) {}
+  sedes = ['Lima Centro', 'San Juan de Lurigancho', 'Miraflores'];
+
+  constructor(
+    private usuarioService: UsuarioService,
+    private authService: AuthService,
+    private fb: FormBuilder,
+    private modalService: NgbModal
+  ) {
+    this.createForm();
+  }
 
   ngOnInit(): void {
     this.loadUsers();
     this.setupFilters();
   }
 
+  createForm(): void {
+    this.userForm = this.fb.group({
+      nombre: ['', [Validators.required, Validators.minLength(2)]],
+      apellido: ['', [Validators.required, Validators.minLength(2)]],
+      codigoInstitucional: ['', [Validators.required, Validators.minLength(3)]],
+      sede: ['', Validators.required],
+      correoInstitucional: ['', [Validators.required, Validators.email]],
+      contrasena: ['', [Validators.minLength(6)]],
+      tipo: [TipoUsuario.estudiante]
+    });
+  }
+getEndIndex(): number {
+  return Math.min(this.currentPage * this.pageSize, this.totalFilteredUsers);
+}
+  openCreateModal(): void {
+    this.isEditMode = false;
+    this.currentUserId = null;
+    this.userForm.reset({ sede: '', tipo: TipoUsuario.estudiante });
+    this.userForm.get('contrasena')?.setValidators([Validators.required, Validators.minLength(6)]);
+    this.userForm.get('contrasena')?.updateValueAndValidity();
+    this.modalRef = this.modalService.open(this.userModal, { size: 'lg', backdrop: 'static' });
+  }
+
+  openEditModal(user: Usuario): void {
+    this.isEditMode = true;
+    this.currentUserId = user.id || null;
+    this.userForm.patchValue({
+      nombre: user.nombre,
+      apellido: user.apellido,
+      codigoInstitucional: user.codigoInstitucional,
+      sede: user.sede,
+      correoInstitucional: user.correoInstitucional,
+      tipo: user.tipo
+    });
+    this.userForm.get('contrasena')?.clearValidators();
+    this.userForm.get('contrasena')?.updateValueAndValidity();
+    this.modalRef = this.modalService.open(this.userModal, { size: 'lg', backdrop: 'static' });
+  }
+// users.component.ts
+getInitials(user: any): string {
+  return `${user.nombre.charAt(0)}${user.apellido.charAt(0)}`.toUpperCase();
+}
+
+
+  saveUser(): void {
+    if (this.userForm.invalid || (this.isEditMode && !this.currentUserId)) return;
+
+    this.isSaving = true;
+    const formValue = this.userForm.value;
+
+   if (this.isEditMode) {
+  const payload: Partial<Usuario> = {
+    nombre: formValue.nombre,
+    apellido: formValue.apellido,
+    codigoInstitucional: formValue.codigoInstitucional,
+    sede: formValue.sede,
+    tipo: formValue.tipo
+    // NO envíes correoInstitucional ni contrasena → Firebase Auth no lo permite
+  };
+
+  this.usuarioService.update(this.currentUserId!, payload).pipe(
+    finalize(() => { this.isSaving = false; this.currentUserId = null; })
+  ).subscribe({
+    next: (updatedUser) => {
+      this.showToast('success', 'Usuario actualizado');
+
+      // ACTUALIZAR USUARIO ACTUAL SI ES ÉL MISMO
+      const currentUser = this.authService.getUser();
+      if (currentUser?.id === updatedUser.id) {
+        this.authService.updateUser(updatedUser);
+      }
+
+      this.modalRef.close();
+      this.loadUsers();
+    },
+    error: (err) => this.showToast('error', err.message || 'Error al actualizar')
+  });
+}else {
+      // CREAR
+      const request: RegisterRequest = {
+        codigoInstitucional: formValue.codigoInstitucional,
+        sede: formValue.sede,
+        nombre: formValue.nombre,
+        apellido: formValue.apellido,
+        correoInstitucional: formValue.correoInstitucional,
+        contrasena: formValue.contrasena,
+        tipo: formValue.tipo
+      };
+
+      this.authService.register(request).pipe(
+        finalize(() => { this.isSaving = false; })
+      ).subscribe({
+        next: () => {
+          this.showToast('success', 'Usuario creado y sesión iniciada');
+          this.modalRef.close();
+          this.loadUsers();
+        },
+        error: (err) => this.showToast('error', err.message || 'Error al crear')
+      });
+    }
+  }
+
+  toggleUserStatus(user: Usuario): void {
+    Swal.fire({
+      title: user.estado ? 'Desactivar usuario' : 'Activar usuario',
+      text: `¿${user.estado ? 'desactivar' : 'activar'} a ${user.nombre}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: user.estado ? 'Desactivar' : 'Activar',
+      cancelButtonText: 'Cancelar'
+    }).then(result => {
+      if (result.isConfirmed && user.id) {
+        this.usuarioService.update(user.id, { estado: !user.estado }).pipe(
+          finalize(() => this.loadUsers())
+        ).subscribe({
+          next: () => this.showToast('success', `Usuario ${!user.estado ? 'activado' : 'desactivado'}`),
+          error: () => this.showToast('error', 'Error al cambiar estado')
+        });
+      }
+    });
+  }
+
   loadUsers(): void {
+    this.isLoading = true;
     this.users$ = this.usuarioService.getAll().pipe(
-      catchError(error => {
-        console.error('Error al obtener usuarios:', error); // Log 3
-        this.isLoading = false;
-        return of([]);
-      }),
-      map(users => {
-        console.log('Usuarios recibidos del servicio:', users); // Log 4
-        if (!Array.isArray(users)) {
-          console.error('Error: Los datos recibidos no son un array:', users); // Log 5
-          return [];
-        }
-        const validUsers = users.filter(user => typeof user === 'object' && user !== null && 'nombre' in user && 'codigoInstitucional' in user);
-        console.log('Usuarios válidos:', validUsers); // Log 6
-        return validUsers
-          .sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''))
-          .map(user => {
-            const convertedUser = {
-              ...user,
-              createdAt: this.convertToDate(user.createdAt),
-              updatedAt: this.convertToDate(user.updatedAt)
-            };
-            console.log('Usuario convertido:', convertedUser); // Log 7
-            return convertedUser;
-          });
-      })
+      map(users => users.map(u => ({
+        ...u,
+        createdAt: this.convertToDate(u.createdAt),
+        updatedAt: this.convertToDate(u.updatedAt)
+      }))),
+      catchError(() => of([]))
     );
 
     this.filteredUsers$ = combineLatest([
@@ -79,142 +195,79 @@ export class UsersComponent implements OnInit {
       this.tipoFilter.valueChanges.pipe(startWith('all'))
     ]).pipe(
       map(([users, search, tipo]) => {
-        console.log('Datos para filtrar:', { usersCount: users.length, search, tipo }); // Log 8
         let filtered = users;
-
         if (search) {
-          const searchLower = search.toLowerCase();
-          filtered = users.filter(user =>
-            (user.nombre?.toLowerCase()?.includes(searchLower) || false) ||
-            (user.apellido?.toLowerCase()?.includes(searchLower) || false) ||
-            (user.correoInstitucional?.toLowerCase()?.includes(searchLower) || false) ||
-            (user.codigoInstitucional?.toLowerCase()?.includes(searchLower) || false)
+          const term = search.toLowerCase();
+          filtered = filtered.filter(u =>
+            [u.nombre, u.apellido, u.correoInstitucional, u.codigoInstitucional]
+              .some(f => f?.toLowerCase().includes(term))
           );
-          console.log('Usuarios después de búsqueda:', filtered); // Log 9
         }
-
-        if (tipo !== 'all') {
-          filtered = filtered.filter(user => user.tipo?.toLowerCase() === tipo?.toLowerCase());
-          console.log('Usuarios después de filtro por tipo:', filtered); // Log 10
-        }
-
+        if (tipo !== 'all') filtered = filtered.filter(u => u.tipo === tipo);
+this.totalFilteredUsers = filtered.length; // AÑADE ESTO
         this.totalPages = Math.max(1, Math.ceil(filtered.length / this.pageSize));
-        console.log('Total páginas calculadas:', this.totalPages); // Log 11
-        console.log('currentPage:', this.currentPage); // Log 12
-
-        if (this.currentPage > this.totalPages) {
-          this.currentPage = this.totalPages;
-          console.log('currentPage ajustado a:', this.currentPage); // Log 13
-        } else if (this.currentPage < 1) {
-          this.currentPage = 1;
-          console.log('currentPage ajustado a:', this.currentPage); // Log 13
-        }
-
-        // Generar páginas directamente
+        this.currentPage = Math.min(this.currentPage, this.totalPages);
         this.pages = this.generatePages(this.totalPages, this.currentPage);
-        console.log('Páginas generadas (componente):', this.pages); // Log 14
-
-        const startIndex = (this.currentPage - 1) * this.pageSize;
-        const paginatedUsers = filtered.slice(startIndex, startIndex + this.pageSize);
-        console.log('Usuarios paginados:', paginatedUsers); // Log 15
-        return paginatedUsers;
+        const start = (this.currentPage - 1) * this.pageSize;
+        return filtered.slice(start, start + this.pageSize);
       }),
-      map(users => {
-        this.isLoading = false;
-        console.log('Usuarios finales para la tabla:', users); // Log 16
-        return users;
-      })
+      map(users => { this.isLoading = false; return users; })
     );
   }
 
-  // Nueva función para generar páginas
-  private generatePages(totalPages: number, currentPage: number | null): number[] {
+  setupFilters(): void {
+    this.searchControl.valueChanges.subscribe(() => this.currentPage = 1);
+    this.tipoFilter.valueChanges.subscribe(() => this.currentPage = 1);
+  }
+
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) this.currentPage = page;
+  }
+
+  private generatePages(total: number, current: number): number[] {
     const pages: number[] = [];
-    const maxPagesToShow = 5;
-    const validTotalPages = totalPages > 0 ? totalPages : 1;
-    const validCurrentPage = currentPage && currentPage > 0 ? currentPage : 1;
-
-    let startPage: number, endPage: number;
-
-    if (validTotalPages <= maxPagesToShow) {
-      startPage = 1;
-      endPage = validTotalPages;
-    } else {
-      const maxPagesBeforeCurrent = Math.floor(maxPagesToShow / 2);
-      const maxPagesAfterCurrent = Math.ceil(maxPagesToShow / 2) - 1;
-
-      startPage = Math.max(1, validCurrentPage - maxPagesBeforeCurrent);
-      endPage = Math.min(validTotalPages, validCurrentPage + maxPagesAfterCurrent);
-
-      if (endPage - startPage < maxPagesToShow - 1) {
-        if (startPage === 1) {
-          endPage = startPage + maxPagesToShow - 1;
-        } else if (endPage === validTotalPages) {
-          startPage = endPage - maxPagesToShow + 1;
-        }
-      }
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-
-    console.log('Páginas generadas:', pages); // Log 20
+    const max = 5;
+    let start = Math.max(1, current - Math.floor(max / 2));
+    let end = Math.min(total, start + max - 1);
+    if (end - start < max - 1) start = Math.max(1, end - max + 1);
+    for (let i = start; i <= end; i++) pages.push(i);
     return pages;
   }
 
-  private convertToDate(value: string | Date | Timestamp | null | undefined): string | Date | Timestamp | null | undefined {
-    if (value == null) return null;
-    if (value instanceof Timestamp) return value;
+  private convertToDate(value: any): any {
+    if (value instanceof Timestamp) return value.toDate();
     if (typeof value === 'string') {
-      const parsedDate = new Date(value);
-      return isNaN(parsedDate.getTime()) ? value : parsedDate;
+      const d = new Date(value);
+      return isNaN(d.getTime()) ? value : d;
     }
     return value;
   }
 
   getCreatedAtDate(user: Usuario): Date | null {
-    const value = user.createdAt;
-    if (!value) return null;
-    if (value instanceof Timestamp) return value.toDate();
-    if (typeof value === 'string') {
-      const parsedDate = new Date(value);
-      return isNaN(parsedDate.getTime()) ? null : parsedDate;
-    }
-    return value instanceof Date ? value : null;
+    const d = this.convertToDate(user.createdAt);
+    return d instanceof Date ? d : null;
   }
 
-  setupFilters(): void {
-    this.searchControl.valueChanges.subscribe(() => {
-      this.currentPage = 1;
-      console.log('Filtro de búsqueda cambiado:', this.searchControl.value); // Log 17
-    });
-    this.tipoFilter.valueChanges.subscribe(() => {
-      this.currentPage = 1;
-      console.log('Filtro de tipo cambiado:', this.tipoFilter.value); // Log 18
-    });
-  }
-
-  changePage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-      console.log('Página cambiada a:', page); // Log 19
-    }
-  }
-
-  getAvatarIcon(userId: string): string {
+  getAvatarIcon(id: string): string {
     const icons = ['bi-person-fill', 'bi-person-circle', 'bi-person-badge'];
-    const index = userId.length % icons.length;
-    return icons[index];
+    return icons[Math.abs(this.hash(id)) % icons.length];
   }
 
-  getAvatarColor(userId: string): string {
-    const colors = ['var(--primary)', 'var(--secondary)', 'var(--accent)'];
-    const index = userId.length % colors.length;
-    return colors[index];
+  getAvatarColor(id: string): string {
+    const colors = ['#4361ee', '#7209b7', '#f72585'];
+    return colors[Math.abs(this.hash(id)) % colors.length];
+  }
+
+  private hash(str: string): number {
+    let h = 0; for (let i = 0; i < str.length; i++) h = (h << 5) - h + str.charCodeAt(i);
+    return h & h;
   }
 
   getStatusClass(estado: boolean): string {
     return estado ? 'text-success' : 'text-danger';
+  }
+
+  private showToast(icon: 'success' | 'error', title: string): void {
+    Swal.fire({ icon, title, toast: true, position: 'top-end', timer: 3000, showConfirmButton: false });
   }
 }

@@ -1,6 +1,5 @@
 <!-- src/app/components/dashboard/dashboard.component.html -->
 <div class="dashboard-page">
-
   <!-- HEADER -->
   <div class="dashboard-header mb-6">
     <div class="header-content">
@@ -9,7 +8,9 @@
         Panel de Control Académico
       </h1>
       <p class="dashboard-subtitle">
-        Análisis en tiempo real del rendimiento estudiantil
+        {{ user?.tipo === tipoUsuario.estudiante ? 'Tu rendimiento académico' :
+           user?.tipo === tipoUsuario.profesor ? 'Rendimiento de tus asignaturas' :
+           'Análisis en tiempo real del rendimiento estudiantil' }}
       </p>
     </div>
     <div class="header-actions">
@@ -17,8 +18,9 @@
         <i class="bi bi-arrow-clockwise" [class.spin]="isLoadingGrades"></i>
         Actualizar
       </button>
-      <button class="btn-export ms-2" (click)="exportReport()">
-        <i class="bi bi-file-earmark-pdf-fill"></i>
+      <button *ngIf="user?.tipo === tipoUsuario.administrativo" class="btn-export ms-2" (click)="exportReport()" [disabled]="isExporting">
+        <span class="spinner-border spinner-border-sm" *ngIf="isExporting"></span>
+        <i class="bi bi-file-earmark-pdf-fill" *ngIf="!isExporting"></i>
         Exportar PDF
       </button>
     </div>
@@ -26,8 +28,8 @@
 
   <!-- ESTADÍSTICAS -->
   <div class="stats-grid mb-6">
-    <!-- Estudiantes -->
-    <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+    <!-- Estudiantes (Solo Admin) -->
+    <div *ngIf="user?.tipo === tipoUsuario.administrativo" class="stat-card" data-aos="fade-up" data-aos-delay="100">
       <div class="stat-icon bg-primary bg-opacity-15 text-primary">
         <i class="bi bi-people-fill"></i>
       </div>
@@ -68,14 +70,14 @@
       </div>
     </div>
 
-    <!-- Promedio General -->
+    <!-- Promedio Personal/General -->
     <div class="stat-card" data-aos="fade-up" data-aos-delay="400">
       <div class="stat-icon bg-info bg-opacity-15 text-info">
         <i class="bi bi-graph-up-arrow"></i>
       </div>
       <div class="stat-body">
-        <h3 class="stat-number">{{ overallAverage$ | async | number:'1.2-2' }}</h3>
-        <p class="stat-label">Promedio General</p>
+        <h3 class="stat-number">{{ overallAverage$ | async | number:'1.1-1' }}</h3>
+        <p class="stat-label">{{ user?.tipo === tipoUsuario.estudiante ? 'Tu Promedio' : 'Promedio General' }}</p>
       </div>
       <div class="stat-footer">
         <span class="trend up"><i class="bi bi-arrow-up"></i> +0.5</span>
@@ -88,7 +90,9 @@
     <div class="section-header">
       <h2 class="section-title">
         <i class="bi bi-clock-history me-2"></i>
-        Calificaciones Recientes
+        {{ user?.tipo === tipoUsuario.estudiante ? 'Tus Calificaciones Recientes' :
+           user?.tipo === tipoUsuario.profesor ? 'Calificaciones de Tus Asignaturas' :
+           'Calificaciones Recientes' }}
       </h2>
       <div class="section-controls">
         <select [(ngModel)]="gradeFilter" (ngModelChange)="filterGrades()"
@@ -111,7 +115,9 @@
       <!-- Sin datos -->
       <div *ngIf="!isLoadingGrades && !(filteredGrades$ | async)?.length" class="empty">
         <i class="bi bi-inbox display-1 text-muted"></i>
-        <p>No hay calificaciones recientes</p>
+        <p>{{ user?.tipo === tipoUsuario.estudiante ? 'No tienes calificaciones registradas' :
+              user?.tipo === tipoUsuario.profesor ? 'No hay calificaciones en tus asignaturas' :
+              'No hay calificaciones recientes' }}</p>
       </div>
 
       <!-- Tabla -->
@@ -129,16 +135,13 @@
           <tbody>
             <tr *ngFor="let grade of filteredGrades$ | async; let i = index"
                 [attr.data-aos]="'fade-up'" [attr.data-aos-delay]="i * 80">
-
-              <!-- ESTUDIANTE CON AVATAR -->
+              <!-- ESTUDIANTE -->
               <td class="student-cell">
                 <div class="student-info">
-                  <!-- AVATAR REAL (pravatar.cc) -->
-                <div class="avatar">
-  <i [class]="getRandomAvatarIcon(grade.estudianteId)"
-     [style.color]="getRandomAvatarColor(grade.estudianteId)"></i>
-</div>
-                  <!-- INFO -->
+                  <div class="avatar">
+                    <i [class]="getRandomAvatarIcon(grade.estudianteId)"
+                       [style.color]="getRandomAvatarColor(grade.estudianteId)"></i>
+                  </div>
                   <div>
                     <div class="name">
                       <i class="bi bi-person-fill text-primary me-1"></i>
@@ -150,7 +153,6 @@
                   </div>
                 </div>
               </td>
-
               <!-- ASIGNATURA -->
               <td>
                 <span class="subject-badge">
@@ -158,21 +160,17 @@
                   {{ grade.asignaturaNombre }}
                 </span>
               </td>
-
               <!-- EVALUACIÓN -->
               <td>
                 <i class="bi bi-file-earmark-text text-info me-1"></i>
                 {{ grade.evaluacion }}
               </td>
-
-              <!-- NOTA -->
+              <!-- NOTA CON COLOR -->
               <td class="text-center">
-                <span class="grade" [ngClass]="getGradeClass(grade.nota)">
-                  <i [class]="getGradeIcon(grade.nota)" class="me-1"></i>
-                  {{ grade.nota.toFixed(1) }}
+                <span class="grade-badge" [ngClass]="getNotaBadgeClass(grade.nota)">
+                  {{ grade.nota | number:'1.1-1' }}
                 </span>
               </td>
-
               <!-- FECHA -->
               <td class="text-end text-muted">
                 <i class="bi bi-calendar3 text-warning me-1"></i>
@@ -185,63 +183,110 @@
     </div>
   </div>
 
-  <!-- TOP 5 ESTUDIANTES CON MEDALLAS -->
+  <!-- HALL OF FAME: ESTUDIANTES ≥17.0 -->
   <div class="section-card mb-6" data-aos="fade-up">
     <div class="section-header">
       <h2 class="section-title">
         <i class="bi bi-trophy-fill me-2 text-warning"></i>
-        Top 5 Estudiantes
+        {{ user?.tipo === tipoUsuario.estudiante ? 'Tu Posición en el Ranking' :
+           user?.tipo === tipoUsuario.profesor ? 'Estrellas en Tus Asignaturas' :
+           'Hall of Fame: Estrellas Académicas' }}
       </h2>
+      <small class="text-muted">Solo estudiantes con promedio ≥17.0</small>
     </div>
+
     <div class="section-body p-4">
-      <!-- Sin datos -->
-      <div *ngIf="(topStudents$ | async)?.length === 0" class="empty">
-        <i class="bi bi-people display-1 text-muted"></i>
-        <p>No hay datos de estudiantes</p>
+      <!-- MENSAJE DE DEPURACIÓN -->
+      <div *ngIf="!(topEliteStudents$ | async)?.length && !isLoadingGrades" class="empty">
+        <i class="bi bi-star display-1 text-warning opacity-50"></i>
+        <p class="text-muted">
+          {{ user?.tipo === tipoUsuario.estudiante ? 'No estás en el ranking (promedio < 17.0)' :
+             user?.tipo === tipoUsuario.profesor ? 'No hay estudiantes con promedio ≥17.0 en tus asignaturas' :
+             'No se encontraron estudiantes con promedio ≥17.0' }}
+        </p>
       </div>
 
-      <!-- Lista de estudiantes -->
-      <div class="top-students-list" *ngIf="(topStudents$ | async)?.length">
-        <div *ngFor="let student of topStudents$ | async; let i = index"
-             class="top-student-item" [attr.data-aos]="'fade-up'" [attr.data-aos-delay]="i * 100">
-
-          <!-- Medalla -->
-          <div class="medal" [ngClass]="'medal-' + (i + 1)">
-            <i [class]="getMedalIcon(i)"></i>
+      <!-- PODIO DE ESTRELLAS -->
+      <ng-container *ngIf="topEliteStudents$ | async as students">
+        <div class="hall-of-fame" *ngIf="students.length > 0">
+          <div class="podium-container">
+            <!-- ITERAR SOBRE LOS PRIMEROS TRES ESTUDIANTES -->
+            <div *ngFor="let student of students | slice:0:3; let i = index"
+                 class="podium-item"
+                 [ngClass]="{
+                   'podium-1': i === 0,
+                   'podium-2': i === 1,
+                   'podium-3': i === 2
+                 }"
+                 data-aos="zoom-in"
+                 [attr.data-aos-delay]="100 + i * 100">
+              <!-- CORONA PARA EL PRIMER LUGAR -->
+              <div class="podium-crown" *ngIf="i === 0">
+                <i class="bi bi-crown-fill text-warning"></i>
+              </div>
+              <!-- RANK -->
+              <div class="podium-rank" [ngClass]="{'text-warning': i === 0}">
+                #{{ i + 1 }}
+              </div>
+              <!-- AVATAR -->
+              <div class="podium-avatar" [ngClass]="{'podium-winner': i === 0}">
+                <i [class]="getRandomAvatarIcon(student.estudianteId)"
+                   [style.color]="getRandomAvatarColor(student.estudianteId)"></i>
+                <div class="winner-glow" *ngIf="i === 0"></div>
+              </div>
+              <!-- NOMBRE -->
+              <div class="podium-name">{{ student.estudianteNombre }}</div>
+              <!-- PUNTAJE -->
+              <div class="podium-score"
+                   [ngClass]="{
+                     'medal-gold': i === 0,
+                     'medal-silver': i === 1,
+                     'medal-bronze': i === 2
+                   }">
+                <i [class]="getMedalIcon(i)"></i>
+                {{ student.average | number:'1.1-1' }}
+              </div>
+            </div>
           </div>
 
-          <!-- Información -->
-          <div class="student-rank-info">
-            <div class="rank-number">#{{ i + 1 }}</div>
-            <div class="student-name">
-              <i class="bi bi-person-badge-fill text-primary me-2"></i>
-              {{ student.estudianteNombre }}
-            </div>
-            <div class="student-average">
-              <span class="grade" [ngClass]="getGradeClass(student.average)">
-                <i class="bi bi-star-fill me-1"></i>
-                {{ student.average.toFixed(2) }}
-              </span>
+          <!-- MENCIONES HONORÍFICAS -->
+          <div class="honorable-mentions mt-5" *ngIf="students.length > 3">
+            <h4 class="text-center text-muted mb-3">Menciones Honoríficas</h4>
+            <div class="d-flex justify-content-center gap-4 flex-wrap">
+              <div *ngFor="let student of students.slice(3); let i = index"
+                   class="honorable-item"
+                   data-aos="fade-up"
+                   [attr.data-aos-delay]="(i + 4) * 100">
+                <div class="rank-badge">#{{ i + 4 }}</div>
+                <div class="honorable-name">
+                  <i class="bi bi-person-badge-fill text-primary me-1"></i>
+                  {{ student.estudianteNombre }}
+                </div>
+                <div class="honorable-score">
+                  {{ student.average | number:'1.1-1' }}
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </ng-container>
     </div>
   </div>
 
-  <!-- GRÁFICOS (4) -->
+  <!-- GRÁFICOS -->
   <div class="charts-grid">
-
-    <!-- 1. Promedio por Asignatura -->
+    <!-- Promedio por Asignatura -->
     <div class="chart-card" data-aos="fade-right">
       <div class="chart-header">
         <h3 class="chart-title">
           <i class="bi bi-bar-chart-line-fill me-2"></i>
-          Promedio por Asignatura
+          {{ user?.tipo === tipoUsuario.estudiante ? 'Tu Promedio por Asignatura' :
+             user?.tipo === tipoUsuario.profesor ? 'Promedio en Tus Asignaturas' :
+             'Promedio por Asignatura' }}
         </h3>
       </div>
       <div class="chart-body">
-        <canvas #averagesChart ></canvas>
+        <canvas #averagesChart></canvas>
         <div *ngIf="isLoadingAverages || !(averageBySubject$ | async)?.length" class="chart-empty">
           <i class="bi bi-bar-chart-line display-1 text-muted"></i>
           <p>Sin datos</p>
@@ -249,16 +294,18 @@
       </div>
     </div>
 
-    <!-- 2. Distribución de Notas -->
+    <!-- Distribución de Notas -->
     <div class="chart-card" data-aos="fade-left">
       <div class="chart-header">
         <h3 class="chart-title">
           <i class="bi bi-pie-chart-fill me-2"></i>
-          Distribución de Notas
+          {{ user?.tipo === tipoUsuario.estudiante ? 'Distribución de Tus Notas' :
+             user?.tipo === tipoUsuario.profesor ? 'Distribución de Notas en Tus Asignaturas' :
+             'Distribución de Notas' }}
         </h3>
       </div>
       <div class="chart-body">
-        <canvas #gradesDistributionChart ></canvas>
+        <canvas #gradesDistributionChart></canvas>
         <div *ngIf="isLoadingAverages || !(gradesDistribution$ | async)?.length" class="chart-empty">
           <i class="bi bi-pie-chart display-1 text-muted"></i>
           <p>Sin datos</p>
@@ -266,16 +313,18 @@
       </div>
     </div>
 
-    <!-- 3. Notas por Mes -->
+    <!-- Notas por Mes -->
     <div class="chart-card" data-aos="fade-right">
       <div class="chart-header">
         <h3 class="chart-title">
           <i class="bi bi-calendar-month-fill me-2"></i>
-          Notas por Mes
+          {{ user?.tipo === tipoUsuario.estudiante ? 'Tus Notas por Mes' :
+             user?.tipo === tipoUsuario.profesor ? 'Notas por Mes en Tus Asignaturas' :
+             'Notas por Mes' }}
         </h3>
       </div>
       <div class="chart-body">
-        <canvas #monthlyGradesChart ></canvas>
+        <canvas #monthlyGradesChart></canvas>
         <div *ngIf="isLoadingAverages || !(monthlyGrades$ | async)?.length" class="chart-empty">
           <i class="bi bi-calendar-x display-1 text-muted"></i>
           <p>Sin datos</p>
@@ -283,16 +332,17 @@
       </div>
     </div>
 
-    <!-- 4. Asignaturas Más Difíciles -->
-    <div class="chart-card" data-aos="fade-left">
+    <!-- Asignaturas Más Difíciles (Solo Admin y Profesores) -->
+    <div *ngIf="user?.tipo !== tipoUsuario.estudiante" class="chart-card" data-aos="fade-left">
       <div class="chart-header">
         <h3 class="chart-title">
           <i class="bi bi-exclamation-triangle-fill me-2 text-danger"></i>
-          Asignaturas Más Difíciles
+          {{ user?.tipo === tipoUsuario.profesor ? 'Asignaturas Más Difíciles (Tus Asignaturas)' :
+             'Asignaturas Más Difíciles' }}
         </h3>
       </div>
       <div class="chart-body">
-        <canvas #hardestSubjectsChart ></canvas>
+        <canvas #hardestSubjectsChart></canvas>
         <div *ngIf="isLoadingAverages || !(hardestSubjects$ | async)?.length" class="chart-empty">
           <i class="bi bi-patch-question display-1 text-muted"></i>
           <p>Sin datos</p>

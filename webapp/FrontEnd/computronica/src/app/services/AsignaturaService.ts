@@ -13,11 +13,19 @@ export class AsignaturaService {
 
   constructor(private http: HttpClient) {}
 
-  create(asignatura: Asignatura): Observable<string> {
-    return this.http.post<string>(this.apiUrl, asignatura).pipe(
-      catchError(this.handleError)
-    );
-  }
+// src/app/services/asignatura.service.ts
+
+create(asignatura: Asignatura): Observable<Asignatura> {  // ← Asignatura
+  return this.http.post<Asignatura>(this.apiUrl, asignatura).pipe(
+    catchError(this.handleError)
+  );
+}
+
+update(id: string, asignatura: Asignatura): Observable<Asignatura> {  // ← También Asignatura
+  return this.http.put<Asignatura>(`${this.apiUrl}/${id}`, asignatura).pipe(
+    catchError(this.handleError)
+  );
+}
 
   getById(id: string): Observable<Asignatura> {
     return this.http.get<Asignatura>(`${this.apiUrl}/${id}`).pipe(
@@ -31,11 +39,6 @@ export class AsignaturaService {
     );
   }
 
-  update(id: string, asignatura: Asignatura): Observable<void> {
-    return this.http.put<void>(`${this.apiUrl}/${id}`, asignatura).pipe(
-      catchError(this.handleError)
-    );
-  }
 
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(

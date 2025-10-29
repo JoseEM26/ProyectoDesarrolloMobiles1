@@ -1,15 +1,9 @@
+// src/app/services/UsuarioService.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { Usuario } from '../models/interfaces';
-
-interface Activity {
-  id: string;
-  type: 'course' | 'grade';
-  description: string;
-  date: Date;
-}
+import { Usuario, Activity, ActivityDetails } from '../models/interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +11,7 @@ interface Activity {
 export class UsuarioService {
   private apiUrl = 'http://localhost:8080/api/usuarios';
 
-  constructor(private http: HttpClient) {}
+  constructor( private http: HttpClient) {}
 
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
@@ -26,74 +20,62 @@ export class UsuarioService {
     });
   }
 
-  create(usuario: Usuario): Observable<string> {
-    return this.http.post<string>(this.apiUrl, usuario).pipe(
+  // CREAR
+  create(usuario: Usuario): Observable<Usuario> {
+    return this.http.post<Usuario>(this.apiUrl, usuario).pipe(
       catchError(this.handleError)
     );
   }
 
+  getAll(): Observable<Usuario[]> {
+    return this.http.get<any>(this.apiUrl).pipe(
+      map(res => {
+        const users = res?.data || res;
+        return Array.isArray(users) ? users : [];
+      }),
+      catchError(() => of([]))
+    );
+  }
+
+  // OBTENER POR ID
   getById(id: string): Observable<Usuario> {
     return this.http.get<Usuario>(`${this.apiUrl}/${id}`).pipe(
       catchError(this.handleError)
     );
   }
 
-getAll(): Observable<Usuario[]> {
-    return this.http.get(this.apiUrl).pipe(
-      map(response => {
-        console.log('Datos crudos de la API:', response); // Log 0
-        if (typeof response === 'string') {
-          try {
-            const parsed = JSON.parse(response);
-            console.log('Datos parseados:', parsed); // Log 1
-            if (!Array.isArray(parsed)) {
-              console.error('Error: Los datos parseados no son un array:', parsed);
-              return [];
-            }
-            return parsed as Usuario[];
-          } catch (e) {
-            console.error('Error al parsear respuesta JSON:', e);
-            return [];
-          }
-        }
-        if (!Array.isArray(response)) {
-          console.error('Error: La respuesta de la API no es un array:', response);
-          return [];
-        }
-        console.log('Datos válidos:', response); // Log 1
-        return response as Usuario[];
-      }),
-      catchError(error => {
-        console.error('Error en la API:', error); // Log 2
-        return of([]); // Retorna un array vacío en caso de error
-      })
+  update(id: string, usuario: Partial<Usuario>): Observable<Usuario> {
+    return this.http.put<Usuario>(`${this.apiUrl}/${id}`, usuario, { headers: this.getHeaders() }).pipe(
+      catchError(err => { throw err.error?.message || 'Error al actualizar'; })
     );
   }
 
-
-  update(id: string, usuario: Partial<Usuario>): Observable<void> {
-    return this.http.put<void>(`${this.apiUrl}/${id}`, usuario).pipe(
-      catchError(this.handleError)
-    );
+  getEstudiantes(): Observable<Usuario[]> {
+    return this.http.get<Usuario[]>(`${this.apiUrl}/tipo/estudiante`);
   }
 
+  getProfesores(): Observable<Usuario[]> {
+    return this.http.get<Usuario[]>(`${this.apiUrl}/tipo/profesor`);
+  }
+
+  // ELIMINAR (opcional)
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
       catchError(this.handleError)
     );
   }
 
+  // BUSCAR POR EMAIL
   filterByEmail(email: string): Observable<Usuario[]> {
     return this.http.get<Usuario[]>(`${this.apiUrl}/search?email=${encodeURIComponent(email)}`).pipe(
       catchError(this.handleError)
     );
   }
 
+  // ESTADÍSTICAS
   getUserStats(userId: string): Observable<{ enrolledCourses: number, recentActivities: number, academicAverage: number }> {
-    return this.http.get<{ enrolledCourses: number, recentActivities: number, academicAverage: number }>(
-      `${this.apiUrl}/${userId}/stats`,
-      { headers: this.getHeaders() }
-    ).pipe(
+    return this.http.get<any>(`${this.apiUrl}/${userId}/stats`, { headers: this.getHeaders() }).pipe(
+      map(res => res?.data || res),
       catchError(this.handleError)
     );
   }
@@ -101,18 +83,22 @@ getAll(): Observable<Usuario[]> {
   getUserActivities(userId: string): Observable<Activity[]> {
     return this.http.get<any[]>(`${this.apiUrl}/${userId}/activities`, { headers: this.getHeaders() }).pipe(
       map(activities => activities.map(act => ({
-        id: act.id,
-        type: act.type as 'course' | 'grade',
-        description: act.description,
-        date: new Date(act.date)
+        id: act.id || '',
+        type: ['course', 'grade', 'profile', 'assignment'].includes(act.type)
+          ? act.type as 'course' | 'grade' | 'profile' | 'assignment'
+          : 'profile',
+        description: act.description || '',
+        date: act.date ? new Date(act.date) : new Date(),
+        details: act.details as ActivityDetails | undefined
       }))),
       catchError(this.handleError)
     );
   }
 
+  // MANEJO DE ERRORES
   private handleError(error: any): Observable<never> {
     console.error('Error in UsuarioService:', error);
-    const message = error.error?.message || 'Error al interactuar con la API de usuarios';
+    const message = error.error?.message || error.message || 'Error en el servidor';
     return throwError(() => new Error(message));
   }
 }

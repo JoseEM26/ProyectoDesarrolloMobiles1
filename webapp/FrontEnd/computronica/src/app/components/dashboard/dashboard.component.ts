@@ -1,3 +1,4 @@
+// src/app/components/dashboard/dashboard.component.ts
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -34,16 +35,17 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   filteredGrades$!: Observable<Calificaciones[]>;
   averageBySubject$!: Observable<{ asignaturaNombre: string; average: number }[]>;
   gradesDistribution$!: Observable<{ range: string; count: number }[]>;
-  topStudents$!: Observable<{ estudianteNombre: string; average: number }[]>;
   monthlyGrades$!: Observable<{ month: string; count: number }[]>;
   hardestSubjects$!: Observable<{ asignaturaNombre: string; average: number }[]>;
-
+  topEliteStudents$!: Observable<{ estudianteId: string; estudianteNombre: string; average: number }[]>;
+  topStudents$!: Observable<{ estudianteId: string; estudianteNombre: string; average: number }[]>;
+  isExporting = false;
   isLoadingGrades = true;
   isLoadingAverages = true;
   gradeFilter = 'all';
   user: Usuario | null = null;
-  private loggingOut = false; // Flag to prevent notifications during logout
-
+  tipoUsuario = TipoUsuario; // Expose TipoUsuario for template
+  private loggingOut = false;
   private gradesSubject = new BehaviorSubject<Calificaciones[]>([]);
   private subscriptions = new Subscription();
 
@@ -51,15 +53,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   private gradesDistributionChart: Chart | null = null;
   private monthlyGradesChart: Chart | null = null;
   private hardestSubjectsChart: Chart | null = null;
-
-  constructor(
-    private asignaturaService: AsignaturaService,
-    private usuarioService: UsuarioService,
-    private calificacionesService: CalificacionesService,
-    private authService: AuthService
-  ) {
-    Chart.register(...registerables, ChartDataLabels);
-  }
 
   private avatarIcons = [
     'bi-person-circle', 'bi-person-hearts', 'bi-person-badge', 'bi-person-check',
@@ -72,92 +65,170 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#06b6d4'
   ];
 
-  getRandomAvatarIcon(id: string): string {
-    const hash = this.hashString(id);
-    return this.avatarIcons[hash % this.avatarIcons.length];
-  }
-
-  getRandomAvatarColor(id: string): string {
-    const hash = this.hashString(id);
-    return this.avatarColors[hash % this.avatarColors.length];
-  }
-
-  private hashString(str: string): number {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash;
-    }
-    return Math.abs(hash);
+  constructor(
+    private asignaturaService: AsignaturaService,
+    private usuarioService: UsuarioService,
+    private calificacionesService: CalificacionesService,
+    private authService: AuthService
+  ) {
+    Chart.register(...registerables, ChartDataLabels);
   }
 
   ngOnInit() {
     this.subscriptions.add(
       this.authService.user$.subscribe({
         next: (user) => {
+          console.log('DEPURACIÓN: Usuario autenticado:', user);
           this.user = user;
           if (user && !this.loggingOut) {
+            console.log('DEPURACIÓN: Iniciando carga de datos para usuario:', user.id, user.tipo);
             this.loadAllData();
             this.setupObservables();
+          } else {
+            console.warn('DEPURACIÓN: No hay usuario o se está cerrando sesión');
+            this.showError('Usuario no autenticado');
           }
         },
-        error: () => this.showError('Error al cargar usuario')
+        error: (err) => {
+          console.error('DEPURACIÓN: Error al cargar usuario:', err);
+          this.showError('Error al cargar usuario');
+        }
       })
     );
   }
 
+  ngAfterViewInit() {
+    const safeSubscribe = <T>(
+      obs$: Observable<T>,
+      renderFn: (data: T) => void,
+      canvas: ElementRef<HTMLCanvasElement> | undefined,
+      chartInstance: Chart | null
+    ) => {
+      this.subscriptions.add(
+        obs$.subscribe(data => {
+          if (this.loggingOut) return;
+          if (data && Array.isArray(data) && data.length > 0 && canvas?.nativeElement) {
+            if (chartInstance) chartInstance.destroy();
+            setTimeout(() => renderFn(data), 100);
+          } else {
+            console.warn('DEPURACIÓN: Datos vacíos o inválidos para gráfico:', data);
+          }
+        })
+      );
+    };
+
+    safeSubscribe(this.averageBySubject$, this.renderAveragesChart.bind(this), this.averagesChartCanvas, this.averagesChart);
+    safeSubscribe(this.gradesDistribution$, this.renderGradesDistributionChart.bind(this), this.gradesDistributionChartCanvas, this.gradesDistributionChart);
+    safeSubscribe(this.monthlyGrades$, this.renderMonthlyGradesChart.bind(this), this.monthlyGradesChartCanvas, this.monthlyGradesChart);
+    safeSubscribe(this.hardestSubjects$, this.renderHardestSubjectsChart.bind(this), this.hardestSubjectsChartCanvas, this.hardestSubjectsChart);
+  }
+
+  ngOnDestroy() {
+    console.log('DEPURACIÓN: Destruyendo componente');
+    this.prepareForLogout();
+  }
+
   private setupObservables() {
+    // 1. CONTADORES SIMPLES
     this.studentsCount$ = this.usuarioService.getAll().pipe(
-      map(users => users.filter(u => u.tipo === TipoUsuario.estudiante).length),
-      catchError(() => of(0))
-    );
-
-    this.subjectsCount$ = this.asignaturaService.getAll().pipe(
-      map(subjects => subjects.length),
-      catchError(() => of(0))
-    );
-
-    this.gradesCount$ = this.calificacionesService.getAll().pipe(
-      map(grades => grades.length),
-      catchError(() => of(0))
-    );
-
-    this.overallAverage$ = this.calificacionesService.getAll().pipe(
-      map(grades => {
-        const valid = grades.filter(g => typeof g.nota === 'number' && !isNaN(g.nota));
-        return valid.length ? Number((valid.reduce((sum, g) => sum + g.nota, 0) / valid.length).toFixed(2)) : 0;
+      map(users => {
+        if (this.user?.tipo !== TipoUsuario.administrativo) return 0; // Hide for non-admins
+        const count = users.filter(u => u.tipo === TipoUsuario.estudiante).length;
+        console.log('DEPURACIÓN: Cantidad de estudiantes:', count);
+        return count;
       }),
-      catchError(() => of(0))
+      catchError((err) => {
+        console.error('DEPURACIÓN: Error al cargar estudiantes:', err);
+        return of(0);
+      })
     );
 
+    this.subjectsCount$ = combineLatest([
+      this.asignaturaService.getAll(),
+      this.user ? of(this.user) : this.authService.user$
+    ]).pipe(
+      map(([subjects, user]) => {
+        if (!user) return 0;
+        const filteredSubjects = user.tipo === TipoUsuario.profesor
+          ? subjects.filter(s => s.profesores?.includes(user.correoInstitucional))
+          : subjects;
+        console.log('DEPURACIÓN: Asignaturas filtradas:', filteredSubjects);
+        return filteredSubjects.length;
+      }),
+      catchError((err) => {
+        console.error('DEPURACIÓN: Error al cargar asignaturas:', err);
+        return of(0);
+      })
+    );
+
+    this.gradesCount$ = this.getFilteredGrades().pipe(
+      map(grades => {
+        console.log('DEPURACIÓN: Calificaciones filtradas para conteo:', grades);
+        return grades.length;
+      }),
+      catchError((err) => {
+        console.error('DEPURACIÓN: Error al cargar calificaciones:', err);
+        return of(0);
+      })
+    );
+
+    // 2. PROMEDIO GENERAL
+    this.overallAverage$ = this.getFilteredGrades().pipe(
+      map(grades => {
+        const valid = grades.filter(g => typeof Number(g.nota) === 'number' && !isNaN(Number(g.nota)));
+        console.log('DEPURACIÓN: Calificaciones válidas para promedio:', valid);
+        const avg = valid.length
+          ? Number((valid.reduce((sum, g) => sum + Number(g.nota), 0) / valid.length).toFixed(2))
+          : 0;
+        console.log('DEPURACIÓN: Promedio calculado:', avg);
+        return avg;
+      }),
+      catchError((err) => {
+        console.error('DEPURACIÓN: Error al calcular promedio:', err);
+        return of(0);
+      })
+    );
+
+    // 3. PROMEDIO POR ASIGNATURA
     this.averageBySubject$ = combineLatest([
-      this.calificacionesService.getAll(),
+      this.getFilteredGrades(),
       this.asignaturaService.getAll()
     ]).pipe(
       tap(() => (this.isLoadingAverages = false)),
       map(([grades, asignaturas]) => {
-        const map = new Map(asignaturas.map(a => [a.id!, a.nombre]));
+        console.log('DEPURACIÓN: Calificaciones para promedio por asignatura:', grades);
+        console.log('DEPURACIÓN: Asignaturas:', asignaturas);
+        const asignaturaMap = new Map(asignaturas.map(a => [a.id!, a.nombre]));
         const averages: Record<string, { sum: number; count: number }> = {};
 
         grades.forEach(g => {
-          if (!g.asignaturaId || typeof g.nota !== 'number') return;
+          const nota = Number(g.nota);
+          if (!g.asignaturaId || isNaN(nota)) {
+            console.warn('DEPURACIÓN: Calificación inválida:', g);
+            return;
+          }
           if (!averages[g.asignaturaId]) averages[g.asignaturaId] = { sum: 0, count: 0 };
-          averages[g.asignaturaId].sum += g.nota;
+          averages[g.asignaturaId].sum += nota;
           averages[g.asignaturaId].count += 1;
         });
 
-        return Object.entries(averages)
+        const result = Object.entries(averages)
           .map(([id, { sum, count }]) => ({
-            asignaturaNombre: map.get(id) || id,
-            average: Number((sum / count).toFixed(2))
+            asignaturaNombre: asignaturaMap.get(id) || id,
+            average: count > 0 ? Number((sum / count).toFixed(2)) : 0
           }))
           .sort((a, b) => b.average - a.average);
+        console.log('DEPURACIÓN: Promedio por asignatura:', result);
+        return result;
       }),
-      catchError(() => of([]))
+      catchError((err) => {
+        console.error('DEPURACIÓN: Error al calcular promedio por asignatura:', err);
+        return of([]);
+      })
     );
 
-    this.gradesDistribution$ = this.calificacionesService.getAll().pipe(
+    // 4. DISTRIBUCIÓN DE NOTAS
+    this.gradesDistribution$ = this.getFilteredGrades().pipe(
       map(grades => {
         const ranges = [
           { range: '0-10', min: 0, max: 10, count: 0 },
@@ -165,84 +236,194 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
           { range: '16-20', min: 16, max: 20, count: 0 }
         ];
         grades.forEach(g => {
-          if (typeof g.nota !== 'number') return;
-          const range = ranges.find(r => g.nota >= r.min && g.nota <= r.max);
+          const nota = Number(g.nota);
+          if (isNaN(nota)) {
+            console.warn('DEPURACIÓN: Nota inválida:', g);
+            return;
+          }
+          const range = ranges.find(r => nota >= r.min && nota <= r.max);
           if (range) range.count++;
         });
-        return ranges.filter(r => r.count > 0);
+        const result = ranges.filter(r => r.count > 0);
+        console.log('DEPURACIÓN: Distribución de notas:', result);
+        return result;
       }),
-      catchError(() => of([]))
+      catchError((err) => {
+        console.error('DEPURACIÓN: Error al calcular distribución de notas:', err);
+        return of([]);
+      })
     );
 
+    // 5. TOP 5 ESTUDIANTES
     this.topStudents$ = combineLatest([
-      this.calificacionesService.getAll(),
+      this.getFilteredGrades(),
       this.usuarioService.getAll()
     ]).pipe(
       map(([grades, usuarios]) => {
-        const map = new Map(usuarios.map(u => [u.id!, `${u.nombre} ${u.apellido}`]));
+        console.log('DEPURACIÓN: Calificaciones para top estudiantes:', grades);
+        console.log('DEPURACIÓN: Usuarios:', usuarios);
+        const usuarioMap = new Map(usuarios.map(u => [u.id!, `${u.nombre || ''} ${u.apellido || ''}`.trim() || 'Desconocido']));
         const averages: Record<string, { sum: number; count: number }> = {};
 
         grades.forEach(g => {
-          if (!g.estudianteId || typeof g.nota !== 'number') return;
+          const nota = Number(g.nota);
+          if (!g.estudianteId || isNaN(nota)) {
+            console.warn('DEPURACIÓN: Calificación inválida:', g);
+            return;
+          }
           if (!averages[g.estudianteId]) averages[g.estudianteId] = { sum: 0, count: 0 };
-          averages[g.estudianteId].sum += g.nota;
+          averages[g.estudianteId].sum += nota;
           averages[g.estudianteId].count += 1;
         });
 
-        return Object.entries(averages)
+        const result = Object.entries(averages)
           .map(([id, { sum, count }]) => ({
-            estudianteNombre: map.get(id) || id,
-            average: Number((sum / count).toFixed(2))
+            estudianteId: id,
+            estudianteNombre: usuarioMap.get(id) || 'Estudiante Desconocido',
+            average: count > 0 ? Number((sum / count).toFixed(2)) : 0
           }))
+          .filter(s => s.average > 0)
           .sort((a, b) => b.average - a.average)
           .slice(0, 5);
+        console.log('DEPURACIÓN: Top 5 estudiantes:', result);
+        return result;
       }),
-      catchError(() => of([]))
+      catchError((err) => {
+        console.error('DEPURACIÓN: Error al calcular top estudiantes:', err);
+        return of([]);
+      })
     );
 
-    this.monthlyGrades$ = this.calificacionesService.getAll().pipe(
+    // 6. TOP ÉLITE: SOLO ≥17.0
+    this.topEliteStudents$ = this.topStudents$.pipe(
+      map(students => {
+        let elite = students.filter(s => s.average >= 17.0);
+        if (this.user?.tipo === TipoUsuario.estudiante) {
+          // Only show the student's own position if they qualify
+          elite = elite.filter(s => s.estudianteId === this.user!.id);
+        }
+        console.log('DEPURACIÓN: Top Elite estudiantes:', elite);
+        if (elite.length === 0) {
+          console.warn('DEPURACIÓN: No hay estudiantes con promedio ≥ 17.0');
+        }
+        return elite;
+      }),
+      catchError((err) => {
+        console.error('DEPURACIÓN: Error al calcular top elite estudiantes:', err);
+        return of([]);
+      })
+    );
+
+    // 7. NOTAS POR MES
+    this.monthlyGrades$ = this.getFilteredGrades().pipe(
       map(grades => {
         const map = new Map<string, number>();
         grades.forEach(g => {
-          if (!g.fechaRegistroDate) return;
+          if (!g.fechaRegistroDate) {
+            console.warn('DEPURACIÓN: Fecha de registro inválida:', g);
+            return;
+          }
           const month = g.fechaRegistroDate.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
           map.set(month, (map.get(month) || 0) + 1);
         });
-        return Array.from(map.entries())
+        const result = Array.from(map.entries())
           .map(([month, count]) => ({ month, count }))
           .sort((a, b) => new Date(a.month + ' 1').getTime() - new Date(b.month + ' 1').getTime())
           .slice(-6);
+        console.log('DEPURACIÓN: Notas por mes:', result);
+        return result;
       }),
-      catchError(() => of([]))
+      catchError((err) => {
+        console.error('DEPURACIÓN: Error al calcular notas por mes:', err);
+        return of([]);
+      })
     );
 
+    // 8. ASIGNATURAS MÁS DIFÍCILES
     this.hardestSubjects$ = this.averageBySubject$.pipe(
-      map(subjects => subjects.sort((a, b) => a.average - b.average).slice(0, 5)),
-      catchError(() => of([]))
+      map(subjects => {
+        if (this.user?.tipo === TipoUsuario.estudiante) return []; // Hide for students
+        const result = subjects.sort((a, b) => a.average - b.average).slice(0, 5);
+        console.log('DEPURACIÓN: Asignaturas más difíciles:', result);
+        return result;
+      }),
+      catchError((err) => {
+        console.error('DEPURACIÓN: Error al calcular asignaturas más difíciles:', err);
+        return of([]);
+      })
     );
 
-    this.filteredGrades$ = this.gradesSubject.asObservable();
+    // 9. CALIFICACIONES FILTRADAS
+    this.filteredGrades$ = this.gradesSubject.asObservable().pipe(
+      tap(grades => console.log('DEPURACIÓN: Calificaciones filtradas:', grades))
+    );
+  }
+
+  private getFilteredGrades(): Observable<Calificaciones[]> {
+    if (!this.user) return of([]);
+    if (this.user.tipo === TipoUsuario.estudiante) {
+      return this.calificacionesService.filterByEstudiante(this.user.id!).pipe(
+        tap(grades => console.log('DEPURACIÓN: Calificaciones filtradas por estudiante:', grades)),
+        catchError((err) => {
+          console.error('DEPURACIÓN: Error al filtrar calificaciones por estudiante:', err);
+          return of([]);
+        })
+      );
+    } else if (this.user.tipo === TipoUsuario.profesor) {
+      return combineLatest([
+        this.calificacionesService.getAll(),
+        this.asignaturaService.getAll()
+      ]).pipe(
+        map(([grades, asignaturas]) => {
+          const assignedAsignaturas = asignaturas.filter(asig =>
+            asig.profesores?.includes(this.user!.correoInstitucional)
+          );
+          const assignedAsignaturaIds = assignedAsignaturas.map(asig => asig.id).filter((id): id is string => !!id);
+          const filteredGrades = grades.filter(grade => assignedAsignaturaIds.includes(grade.asignaturaId));
+          console.log('DEPURACIÓN: Calificaciones filtradas por profesor:', filteredGrades);
+          return filteredGrades;
+        }),
+        catchError((err) => {
+          console.error('DEPURACIÓN: Error al filtrar calificaciones por profesor:', err);
+          return of([]);
+        })
+      );
+    } else {
+      return this.calificacionesService.getAll().pipe(
+        tap(grades => console.log('DEPURACIÓN: Todas las calificaciones:', grades)),
+        catchError((err) => {
+          console.error('DEPURACIÓN: Error al cargar todas las calificaciones:', err);
+          return of([]);
+        })
+      );
+    }
   }
 
   private loadAllData() {
-    if (this.loggingOut) return; // Skip if logging out
+    if (this.loggingOut || !this.user) {
+      console.warn('DEPURACIÓN: No se carga datos porque loggingOut es true o no hay usuario');
+      return;
+    }
     this.isLoadingGrades = true;
-    const grades$ = this.user?.tipo === TipoUsuario.estudiante
-      ? this.calificacionesService.filterByEstudiante(this.user.id!)
-      : this.calificacionesService.getAll();
+    console.log('DEPURACIÓN: Tipo de usuario:', this.user.tipo, 'ID:', this.user.id);
 
     this.subscriptions.add(
-      combineLatest([grades$, this.usuarioService.getAll(), this.asignaturaService.getAll()])
+      combineLatest([this.getFilteredGrades(), this.usuarioService.getAll(), this.asignaturaService.getAll()])
         .pipe(
           map(([grades, usuarios, asignaturas]) => {
-            const usuarioMap = new Map(usuarios.map(u => [u.id!, `${u.nombre} ${u.apellido}`]));
+            console.log('DEPURACIÓN: Datos combinados:', { grades, usuarios, asignaturas });
+            const usuarioMap = new Map(usuarios.map(u => [u.id!, `${u.nombre || ''} ${u.apellido || ''}`.trim() || 'Desconocido']));
             const asignaturaMap = new Map(asignaturas.map(a => [a.id!, a.nombre]));
             return this.mapGrades(grades, usuarioMap, asignaturaMap);
           }),
           map(grades => this.filterGradesByType(grades)),
-          catchError(() => of([]))
+          catchError((err) => {
+            console.error('DEPURACIÓN: Error al procesar datos combinados:', err);
+            return of([]);
+          })
         )
         .subscribe(grades => {
+          console.log('DEPURACIÓN: Calificaciones mapeadas y filtradas:', grades);
           this.gradesSubject.next(grades);
           this.isLoadingGrades = false;
           if (!this.loggingOut) {
@@ -256,26 +437,45 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     let filtered = grades.slice(0, 5);
     switch (this.gradeFilter) {
       case 'high':
-        filtered = grades.sort((a, b) => b.nota - a.nota).slice(0, 5);
+        filtered = grades.sort((a, b) => Number(b.nota) - Number(a.nota)).slice(0, 5);
         break;
       case 'low':
-        filtered = grades.sort((a, b) => a.nota - b.nota).slice(0, 5);
+        filtered = grades.sort((a, b) => Number(a.nota) - Number(a.nota)).slice(0, 5);
         break;
       case 'recent':
       default:
         filtered = grades.slice(0, 5);
         break;
     }
+    console.log('DEPURACIÓN: Calificaciones filtradas por tipo:', filtered);
     return filtered;
   }
 
   filterGrades() {
+    console.log('DEPURACIÓN: Filtrando calificaciones con filtro:', this.gradeFilter);
     this.loadAllData();
   }
 
   refreshGrades() {
+    console.log('DEPURACIÓN: Refrescando calificaciones');
     this.gradeFilter = 'all';
     this.loadAllData();
+  }
+
+  getRandomAvatarIcon(id: string): string {
+    const hash = this.hashString(id);
+    return this.avatarIcons[hash % this.avatarIcons.length];
+  }
+
+  getRandomAvatarColor(id: string): string {
+    const hash = this.hashString(id);
+    return this.avatarColors[hash % this.avatarColors.length];
+  }
+
+  getNotaBadgeClass(nota: number): string {
+    if (nota <= 12) return 'bg-danger';
+    if (nota <= 16) return 'bg-warning';
+    return 'bg-success';
   }
 
   getGradeClass(nota: number): string {
@@ -298,14 +498,37 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
            index === 2 ? 'bi bi-medal-fill text-bronze' : 'bi bi-circle-fill text-muted';
   }
 
+  private hashString(str: string): number {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    return Math.abs(hash);
+  }
+
   private parseDate(dateStr: string | null): Date | null {
-    if (!dateStr?.trim()) return null;
+    if (!dateStr?.trim()) {
+      console.warn('DEPURACIÓN: Fecha de registro vacía o inválida:', dateStr);
+      return null;
+    }
     const parts = dateStr.split(/[/\-]/);
-    if (parts.length !== 3) return null;
+    if (parts.length !== 3) {
+      console.warn('DEPURACIÓN: Formato de fecha inválido:', dateStr);
+      return null;
+    }
     const [d, m, y] = parts.map(Number);
-    if (isNaN(d) || isNaN(m) || isNaN(y)) return null;
+    if (isNaN(d) || isNaN(m) || isNaN(y)) {
+      console.warn('DEPURACIÓN: Componentes de fecha inválidos:', dateStr);
+      return null;
+    }
     const date = new Date(y, m - 1, d);
-    return isNaN(date.getTime()) ? null : date;
+    if (isNaN(date.getTime())) {
+      console.warn('DEPURACIÓN: Fecha inválida:', dateStr);
+      return null;
+    }
+    return date;
   }
 
   private mapGrades(
@@ -313,10 +536,18 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     usuarioMap: Map<string, string>,
     asignaturaMap: Map<string, string>
   ): Calificaciones[] {
-    return grades
-      .filter(g => typeof g.nota === 'number' && !isNaN(g.nota))
+    const mappedGrades = grades
+      .filter(g => {
+        const nota = Number(g.nota);
+        const isValid = typeof nota === 'number' && !isNaN(nota) && g.estudianteId;
+        if (!isValid) {
+          console.warn('DEPURACIÓN: Calificación inválida en mapGrades:', g);
+        }
+        return isValid;
+      })
       .map(g => ({
         ...g,
+        nota: Number(g.nota),
         estudianteNombre: usuarioMap.get(g.estudianteId) || g.estudianteId || 'Desconocido',
         asignaturaNombre: asignaturaMap.get(g.asignaturaId) || g.asignaturaId || 'N/A',
         fechaRegistroDate: this.parseDate(g.fechaRegistro)
@@ -324,33 +555,153 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       .sort((a, b) =>
         (b.fechaRegistroDate?.getTime() || 0) - (a.fechaRegistroDate?.getTime() || 0)
       );
+    console.log('DEPURACIÓN: Calificaciones mapeadas:', mappedGrades);
+    return mappedGrades;
   }
 
-  ngAfterViewInit() {
-    const safeSubscribe = <T>(
-      obs$: Observable<T>,
-      renderFn: (data: T) => void,
-      canvas: ElementRef<HTMLCanvasElement> | undefined,
-      chartInstance: Chart | null
-    ) => {
-      this.subscriptions.add(
-        obs$.subscribe(data => {
-          if (this.loggingOut) return; // Skip if logging out
-          if (data && Array.isArray(data) && data.length > 0 && canvas?.nativeElement) {
-            if (chartInstance) chartInstance.destroy();
-            setTimeout(() => renderFn(data), 100);
-          }
-        })
-      );
-    };
+  async exportReport() {
+    if (this.user?.tipo !== TipoUsuario.administrativo) {
+      this.showError('Solo los administrativos pueden exportar reportes');
+      return;
+    }
+    if (this.loggingOut) return;
+    console.log('DEPURACIÓN: Exportando reporte');
+    this.isExporting = true;
+    const doc = new jsPDF();
+    const now = new Date();
 
-    safeSubscribe(this.averageBySubject$, this.renderAveragesChart.bind(this), this.averagesChartCanvas, this.averagesChart);
-    safeSubscribe(this.gradesDistribution$, this.renderGradesDistributionChart.bind(this), this.gradesDistributionChartCanvas, this.gradesDistributionChart);
-    safeSubscribe(this.monthlyGrades$, this.renderMonthlyGradesChart.bind(this), this.monthlyGradesChartCanvas, this.monthlyGradesChart);
-    safeSubscribe(this.hardestSubjects$, this.renderHardestSubjectsChart.bind(this), this.hardestSubjectsChartCanvas, this.hardestSubjectsChart);
+    doc.setFontSize(20);
+    doc.text('Reporte Académico', 20, 25);
+    doc.setFontSize(12);
+    doc.text(`Generado: ${now.toLocaleString()}`, 20, 35);
+    doc.text(`Usuario: ${this.user?.nombre} ${this.user?.apellido}`, 20, 43);
+
+    let y = 55;
+
+    const [students, subjects, gradesCount, overallAvg] = await Promise.all([
+      this.getValue(this.studentsCount$),
+      this.getValue(this.subjectsCount$),
+      this.getValue(this.gradesCount$),
+      this.getValue(this.overallAverage$)
+    ]);
+
+    console.log('DEPURACIÓN: Estadísticas para reporte:', { students, subjects, gradesCount, overallAvg });
+
+    doc.setFontSize(14);
+    doc.text('Estadísticas', 20, y);
+    y += 10;
+
+    autoTable(doc, {
+      head: [['Métrica', 'Valor']],
+      body: [
+        ['Estudiantes', students?.toString() || '0'],
+        ['Asignaturas', subjects?.toString() || '0'],
+        ['Calificaciones', gradesCount?.toString() || '0'],
+        ['Promedio General', `${overallAvg?.toFixed(2) || '0.00'}/20`]
+      ],
+      startY: y,
+      theme: 'striped'
+    });
+    y = (doc as any).lastAutoTable.finalY + 15;
+
+    const top = await this.getValue(this.topStudents$);
+    console.log('DEPURACIÓN: Top estudiantes para reporte:', top);
+    if (top?.length) {
+      doc.setFontSize(14);
+      doc.text('Top 5 Estudiantes', 20, y);
+      y += 10;
+      autoTable(doc, {
+        head: [['Estudiante', 'Promedio']],
+        body: top.map(s => [s.estudianteNombre, s.average.toFixed(2)]),
+        startY: y,
+        theme: 'striped'
+      });
+      y = (doc as any).lastAutoTable.finalY + 15;
+    }
+
+    const grades = await this.getValue(this.filteredGrades$);
+    console.log('DEPURACIÓN: Calificaciones para reporte:', grades);
+    if (grades?.length) {
+      doc.addPage();
+      doc.setFontSize(14);
+      doc.text('Calificaciones Recientes', 20, 20);
+      autoTable(doc, {
+        head: [['Estudiante', 'Asignatura', 'Evaluación', 'Nota', 'Fecha']],
+        body: grades.slice(0, 10).map(g => [
+          g.estudianteNombre || 'N/A',
+          g.asignaturaNombre || 'N/A',
+          g.evaluacion || 'N/A',
+          Number(g.nota).toFixed(1),
+          g.fechaRegistroDate?.toLocaleDateString('es-ES') || 'N/A'
+        ]),
+        startY: 30,
+        theme: 'striped'
+      });
+    }
+
+    doc.save(`reporte-${now.toISOString().split('T')[0]}.pdf`);
+    this.isExporting = false;
+    if (!this.loggingOut) {
+      this.showSuccess('Reporte exportado');
+    }
+  }
+
+  private async getValue<T>(obs: Observable<T>): Promise<T | null> {
+    return new Promise(resolve => {
+      const sub = obs.subscribe({
+        next: v => {
+          console.log('DEPURACIÓN: Valor obtenido de observable:', v);
+          resolve(v);
+          sub.unsubscribe();
+        },
+        error: (err) => {
+          console.error('DEPURACIÓN: Error al obtener valor de observable:', err);
+          resolve(null);
+          sub.unsubscribe();
+        }
+      });
+    });
+  }
+
+  private showSuccess(msg: string) {
+    if (this.loggingOut) return;
+    console.log('DEPURACIÓN: Mostrando mensaje de éxito:', msg);
+    Swal.fire({
+      icon: 'success',
+      title: 'Éxito',
+      text: msg,
+      timer: 1500,
+      showConfirmButton: false,
+      toast: true,
+      position: 'top-end',
+      background: 'var(--card-bg)',
+      customClass: { popup: 'shadow-lg border-0' }
+    });
+  }
+
+  private showError(msg: string) {
+    if (this.loggingOut) return;
+    console.error('DEPURACIÓN: Mostrando mensaje de error:', msg);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: msg,
+      confirmButtonText: 'OK',
+      background: 'var(--card-bg)',
+      customClass: { popup: 'shadow-lg border-0' }
+    });
+  }
+
+  prepareForLogout() {
+    console.log('DEPURACIÓN: Preparando para cerrar sesión');
+    this.loggingOut = true;
+    this.subscriptions.unsubscribe();
+    [this.averagesChart, this.gradesDistributionChart, this.monthlyGradesChart, this.hardestSubjectsChart]
+      .forEach(chart => chart?.destroy());
   }
 
   renderAveragesChart(data: { asignaturaNombre: string; average: number }[]) {
+    console.log('DEPURACIÓN: Renderizando gráfico de promedios:', data);
     if (this.averagesChart) this.averagesChart.destroy();
     const ctx = this.averagesChartCanvas.nativeElement.getContext('2d')!;
     this.averagesChart = new Chart(ctx, {
@@ -385,6 +736,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   renderGradesDistributionChart(data: { range: string; count: number }[]) {
+    console.log('DEPURACIÓN: Renderizando gráfico de distribución de notas:', data);
     if (this.gradesDistributionChart) this.gradesDistributionChart.destroy();
     const ctx = this.gradesDistributionChartCanvas.nativeElement.getContext('2d')!;
     this.gradesDistributionChart = new Chart(ctx, {
@@ -417,6 +769,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   renderMonthlyGradesChart(data: { month: string; count: number }[]) {
+    console.log('DEPURACIÓN: Renderizando gráfico de notas por mes:', data);
     if (this.monthlyGradesChart) this.monthlyGradesChart.destroy();
     const ctx = this.monthlyGradesChartCanvas.nativeElement.getContext('2d')!;
     this.monthlyGradesChart = new Chart(ctx, {
@@ -445,6 +798,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   renderHardestSubjectsChart(data: { asignaturaNombre: string; average: number }[]) {
+    console.log('DEPURACIÓN: Renderizando gráfico de asignaturas más difíciles:', data);
     if (this.hardestSubjectsChart) this.hardestSubjectsChart.destroy();
     const ctx = this.hardestSubjectsChartCanvas.nativeElement.getContext('2d')!;
     this.hardestSubjectsChart = new Chart(ctx, {
@@ -466,129 +820,5 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         scales: { x: { max: 20 } }
       }
     });
-  }
-
-  async exportReport() {
-    if (this.loggingOut) return; // Skip if logging out
-    const doc = new jsPDF();
-    const now = new Date();
-
-    doc.setFontSize(20);
-    doc.text('Reporte Académico', 20, 25);
-    doc.setFontSize(12);
-    doc.text(`Generado: ${now.toLocaleString()}`, 20, 35);
-    doc.text(`Usuario: ${this.user?.nombre} ${this.user?.apellido}`, 20, 43);
-
-    let y = 55;
-
-    const [students, subjects, gradesCount, overallAvg] = await Promise.all([
-      this.getValue(this.studentsCount$),
-      this.getValue(this.subjectsCount$),
-      this.getValue(this.gradesCount$),
-      this.getValue(this.overallAverage$)
-    ]);
-
-    doc.setFontSize(14);
-    doc.text('Estadísticas', 20, y);
-    y += 10;
-
-    autoTable(doc, {
-      head: [['Métrica', 'Valor']],
-      body: [
-        ['Estudiantes', students?.toString() || '0'],
-        ['Asignaturas', subjects?.toString() || '0'],
-        ['Calificaciones', gradesCount?.toString() || '0'],
-        ['Promedio General', `${overallAvg?.toFixed(2) || '0.00'}/20`]
-      ],
-      startY: y,
-      theme: 'striped'
-    });
-    y = (doc as any).lastAutoTable.finalY + 15;
-
-    const top = await this.getValue(this.topStudents$);
-    if (top?.length) {
-      doc.setFontSize(14);
-      doc.text('Top 5 Estudiantes', 20, y);
-      y += 10;
-      autoTable(doc, {
-        head: [['Estudiante', 'Promedio']],
-        body: top.map(s => [s.estudianteNombre, s.average.toFixed(2)]),
-        startY: y,
-        theme: 'striped'
-      });
-      y = (doc as any).lastAutoTable.finalY + 15;
-    }
-
-    const grades = await this.getValue(this.filteredGrades$);
-    if (grades?.length) {
-      doc.addPage();
-      doc.setFontSize(14);
-      doc.text('Calificaciones Recientes', 20, 20);
-      autoTable(doc, {
-        head: [['Estudiante', 'Asignatura', 'Evaluación', 'Nota', 'Fecha']],
-        body: grades.slice(0, 10).map(g => [
-          g.estudianteNombre || 'N/A',
-          g.asignaturaNombre || 'N/A',
-          g.evaluacion || 'N/A',
-          g.nota.toFixed(1),
-          g.fechaRegistroDate?.toLocaleDateString('es-ES') || 'N/A'
-        ]),
-        startY: 30,
-        theme: 'striped'
-      });
-    }
-
-    doc.save(`reporte-${now.toISOString().split('T')[0]}.pdf`);
-    if (!this.loggingOut) {
-      this.showSuccess('Reporte exportado');
-    }
-  }
-
-  private async getValue<T>(obs: Observable<T>): Promise<T | null> {
-    return new Promise(resolve => {
-      const sub = obs.subscribe({
-        next: v => { resolve(v); sub.unsubscribe(); },
-        error: () => { resolve(null); sub.unsubscribe(); }
-      });
-    });
-  }
-
-  private showSuccess(msg: string) {
-    if (this.loggingOut) return; // Skip notifications during logout
-    Swal.fire({
-      icon: 'success',
-      title: 'Éxito',
-      text: msg,
-      timer: 1500,
-      showConfirmButton: false,
-      toast: true,
-      position: 'top-end',
-      background: 'var(--card-bg)',
-      customClass: { popup: 'shadow-lg border-0' }
-    });
-  }
-
-  private showError(msg: string) {
-    if (this.loggingOut) return; // Skip notifications during logout
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: msg,
-      confirmButtonText: 'OK',
-      background: 'var(--card-bg)',
-      customClass: { popup: 'shadow-lg border-0' }
-    });
-  }
-
-  // Called by layout.component.ts before logout
-  prepareForLogout() {
-    this.loggingOut = true;
-    this.subscriptions.unsubscribe(); // Cancel all data loading
-    [this.averagesChart, this.gradesDistributionChart, this.monthlyGradesChart, this.hardestSubjectsChart]
-      .forEach(chart => chart?.destroy());
-  }
-
-  ngOnDestroy() {
-    this.prepareForLogout();
   }
 }

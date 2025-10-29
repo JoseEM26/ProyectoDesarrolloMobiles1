@@ -21,6 +21,7 @@ public class CalificacionesController {
         String id = firestoreService.create("calificaciones", calificacion);
         calificacion.setId(id); // ← ASIGNA EL ID
         return ResponseEntity.ok(calificacion);
+
     }
 
     @GetMapping("/{id}")
@@ -40,6 +41,7 @@ public class CalificacionesController {
         firestoreService.update("calificaciones", id, calificacion);
         calificacion.setId(id);
         return ResponseEntity.ok(calificacion);
+
     }
 
     @DeleteMapping("/{id}")

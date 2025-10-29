@@ -3,6 +3,7 @@ package com.computronica.webapp.controller;
 import com.computronica.webapp.model.Usuario;
 import com.computronica.webapp.service.FirestoreService;
 import com.computronica.webapp.service.UsuarioService;
+
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.WriteResult;
@@ -23,6 +24,7 @@ public class UsuarioController {
     private UsuarioService usuarioService;
 
     @Autowired
+
     private Firestore firestore;
 
     // CREATE
@@ -96,6 +98,7 @@ public class UsuarioController {
         docRef.set(usuario).get();
 
         return ResponseEntity.ok(usuario); // ← DEVUELVE EL USUARIO
+
     }
 
     // DELETE
