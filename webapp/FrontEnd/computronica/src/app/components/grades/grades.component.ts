@@ -1,5 +1,5 @@
 // src/app/components/grades/grades.component.ts
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../services/AuthService';
@@ -11,7 +11,6 @@ import Swal from 'sweetalert2';
 import { Subject, combineLatest, of } from 'rxjs';
 import { takeUntil, map, catchError } from 'rxjs/operators';
 import { Modal } from 'bootstrap';
-import { TipoEvaluacion, TIPOS_EVALUACION } from '../../models/tipos-evaluacion';
 
 @Component({
   selector: 'app-grades',
@@ -20,7 +19,7 @@ import { TipoEvaluacion, TIPOS_EVALUACION } from '../../models/tipos-evaluacion'
   templateUrl: './grades.component.html',
   styleUrls: ['./grades.component.scss']
 })
-export class GradesComponent implements OnInit, OnDestroy {
+export class GradesComponent implements OnInit, OnDestroy, AfterViewInit {
   calificaciones: Calificaciones[] = [];
   filteredCalificaciones: Calificaciones[] = [];
   paginatedCalificaciones: Calificaciones[] = [];
@@ -39,15 +38,18 @@ export class GradesComponent implements OnInit, OnDestroy {
   // Modal
   calificacionForm = new FormGroup({
     id: new FormControl<string | null>(null),
-    estudianteId: new FormControl('', Validators.required),
-    asignaturaId: new FormControl('', Validators.required),
-    evaluacion: new FormControl<TipoEvaluacion | null>(null, Validators.required),
-    nota: new FormControl(0, [
+    estudianteId: new FormControl<string>('', [Validators.required]),
+    asignaturaId: new FormControl<string>('', [Validators.required]),
+    evaluacion: new FormControl<string>('', [Validators.required]),
+    nota: new FormControl<number>(1, [
       Validators.required,
       Validators.min(1),
       Validators.max(20)
     ])
   });
+
+  get f() { return this.calificacionForm.controls; }
+
   isEditMode = false;
   private modal!: Modal;
   private destroy$ = new Subject<void>();
@@ -55,7 +57,7 @@ export class GradesComponent implements OnInit, OnDestroy {
   // Listas
   estudiantes: Usuario[] = [];
   asignaturas: Asignatura[] = [];
-  tiposEvaluacion = TIPOS_EVALUACION;
+  tiposEvaluacion = ['Examen', 'Tarea', 'Proyecto', 'Parcial', 'Final'];
 
   constructor(
     private calificacionesService: CalificacionesService,
@@ -65,7 +67,6 @@ export class GradesComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.initModal();
     this.authService.user$.pipe(takeUntil(this.destroy$)).subscribe({
       next: (user) => {
         this.user = user;
@@ -73,14 +74,16 @@ export class GradesComponent implements OnInit, OnDestroy {
           this.loadData();
         } else {
           this.showError('Usuario no autenticado');
-          this.loading = false;
         }
       },
       error: (err) => {
-        this.showError('Error al cargar el usuario autenticado');
-        this.loading = false;
+        this.showError('Error al cargar usuario');
       }
     });
+  }
+
+  ngAfterViewInit() {
+    this.initModal();
   }
 
   ngOnDestroy() {
@@ -90,10 +93,14 @@ export class GradesComponent implements OnInit, OnDestroy {
 
   private initModal() {
     const el = document.getElementById('calificacionModal');
-    if (el) this.modal = new Modal(el);
+    if (el) {
+      this.modal = new Modal(el, { backdrop: 'static' });
+    } else {
+      console.error('Modal element not found');
+    }
   }
 
-  private loadData() {
+ private loadData() {
     if (!this.user) return;
 
     this.loading = true;
@@ -145,6 +152,9 @@ export class GradesComponent implements OnInit, OnDestroy {
     });
   }
 
+
+
+
   private enrichCalificaciones() {
     this.calificaciones = this.calificaciones.map(cal => ({
       ...cal,
@@ -159,21 +169,20 @@ export class GradesComponent implements OnInit, OnDestroy {
     let filtered = this.calificaciones;
     if (this.estudianteFilter && this.user?.tipo !== TipoUsuario.estudiante) {
       filtered = filtered.filter(c =>
-        c.estudianteNombre?.toLowerCase().includes(this.estudianteFilter.toLowerCase()) ||
+        (c.estudianteNombre?.toLowerCase().includes(this.estudianteFilter.toLowerCase()) || false) ||
         c.estudianteId.toLowerCase().includes(this.estudianteFilter.toLowerCase())
       );
     }
     if (this.asignaturaFilter && this.user?.tipo !== TipoUsuario.profesor) {
       filtered = filtered.filter(c =>
-        c.asignaturaNombre?.toLowerCase().includes(this.asignaturaFilter.toLowerCase()) ||
+        (c.asignaturaNombre?.toLowerCase().includes(this.asignaturaFilter.toLowerCase()) || false) ||
         c.asignaturaId.toLowerCase().includes(this.asignaturaFilter.toLowerCase())
       );
     }
     this.filteredCalificaciones = filtered;
     this.totalItems = filtered.length;
     this.totalPages = Math.ceil(this.totalItems / this.pageSize);
-    if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
-    if (this.currentPage < 1) this.currentPage = 1;
+    this.currentPage = Math.min(this.currentPage, this.totalPages || 1);
     this.updatePaginatedCalificaciones();
   }
 
@@ -190,10 +199,10 @@ export class GradesComponent implements OnInit, OnDestroy {
   }
 
   getPages(): number[] {
-    const maxPages = 5;
-    let start = Math.max(1, this.currentPage - Math.floor(maxPages / 2));
-    let end = Math.min(this.totalPages, start + maxPages - 1);
-    if (end - start < maxPages - 1) start = Math.max(1, end - maxPages + 1);
+    const max = 5;
+    let start = Math.max(1, this.currentPage - Math.floor(max / 2));
+    let end = Math.min(this.totalPages, start + max - 1);
+    if (end - start < max - 1) start = Math.max(1, end - max + 1);
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
 
@@ -208,28 +217,21 @@ export class GradesComponent implements OnInit, OnDestroy {
   }
 
   openCreateModal() {
-    if (this.user?.tipo !== TipoUsuario.administrativo) {
-      this.showError('Solo los administrativos pueden crear calificaciones');
-      return;
-    }
     this.isEditMode = false;
     this.calificacionForm.reset({
+      id: null,
       estudianteId: '',
       asignaturaId: '',
-      evaluacion: null,
-      nota: 0
+      evaluacion: '',
+      nota: 1
     });
     this.modal.show();
   }
 
   openEditModal(cal: Calificaciones) {
-    if (this.user?.tipo !== TipoUsuario.administrativo) {
-      this.showError('Solo los administrativos pueden editar calificaciones');
-      return;
-    }
     this.isEditMode = true;
     this.calificacionForm.patchValue({
-      id: cal.id,
+      id: cal.id || null,
       estudianteId: cal.estudianteId,
       asignaturaId: cal.asignaturaId,
       evaluacion: cal.evaluacion,
@@ -239,10 +241,17 @@ export class GradesComponent implements OnInit, OnDestroy {
   }
 
   saveCalificacion() {
-    if (this.calificacionForm.invalid) return;
+    if (this.calificacionForm.invalid) {
+      this.calificacionForm.markAllAsTouched();
+      return;
+    }
 
     this.isSaving = true;
-    const data = this.calificacionForm.value as Calificaciones;
+    const data: Calificaciones = {
+      ...this.calificacionForm.value,
+      id: this.isEditMode ? this.calificacionForm.value.id || undefined : undefined
+    } as Calificaciones;
+
     const action$ = this.isEditMode && data.id
       ? this.calificacionesService.update(data.id, data)
       : this.calificacionesService.create(data);
@@ -262,14 +271,9 @@ export class GradesComponent implements OnInit, OnDestroy {
   }
 
   confirmDelete(id: string) {
-    if (this.user?.tipo !== TipoUsuario.administrativo) {
-      this.showError('Solo los administrativos pueden eliminar calificaciones');
-      return;
-    }
-
     Swal.fire({
       title: '¿Eliminar?',
-      text: 'No se puede deshacer',
+      text: 'Esta acción no se puede deshacer',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Eliminar',
@@ -280,7 +284,7 @@ export class GradesComponent implements OnInit, OnDestroy {
       if (result.isConfirmed) {
         this.calificacionesService.delete(id).subscribe({
           next: () => {
-            this.showSuccess('Eliminada');
+            this.showSuccess('Calificación eliminada');
             this.loadData();
           },
           error: (err) => this.showError(err.message || 'Error al eliminar')

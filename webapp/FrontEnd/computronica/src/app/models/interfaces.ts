@@ -1,6 +1,5 @@
 // src/app/models/interfaces.ts
 import { Timestamp } from "firebase/firestore";
-import { TipoEvaluacion } from "./tipos-evaluacion";
 
 export interface Calificaciones {
   id?: string;
@@ -13,6 +12,9 @@ export interface Calificaciones {
   asignaturaNombre?: string;
   fechaRegistroDate?: Date | null; // Mantenido como en tu código
 }
+// src/app/models/tipos-evaluacion.ts
+export const TIPOS_EVALUACION = ['Examen', 'Tarea', 'Proyecto', 'Parcial', 'Final'] as const;
+export type TipoEvaluacion = typeof TIPOS_EVALUACION[number];
 export type Sede = 'Campus Central' | 'Campus Norte' | 'Campus Sur' | 'Campus Este';
 export interface Asignatura {
   id?: string;

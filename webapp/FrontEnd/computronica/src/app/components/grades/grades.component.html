@@ -9,7 +9,6 @@
       </h1>
       <p class="text-muted mb-0 small">Gestión de evaluaciones académicas</p>
     </div>
-
     <div class="d-flex flex-column flex-md-row gap-2 w-100 w-md-auto">
       <!-- FILTRO ESTUDIANTE -->
       <div class="input-group input-group-sm" style="max-width: 220px;" *ngIf="user?.tipo !== tipoUsuario.estudiante">
@@ -25,7 +24,6 @@
           aria-label="Buscar estudiante"
         />
       </div>
-
       <!-- FILTRO ASIGNATURA -->
       <div class="input-group input-group-sm" style="max-width: 220px;" *ngIf="user?.tipo !== tipoUsuario.profesor">
         <span class="input-group-text bg-white border-end-0">
@@ -40,7 +38,6 @@
           aria-label="Buscar asignatura"
         />
       </div>
-
       <!-- BOTÓN NUEVO -->
       <button
         *ngIf="user?.tipo === tipoUsuario.administrativo"
@@ -88,21 +85,18 @@
                   </div>
                 </div>
               </td>
-
               <!-- ASIGNATURA -->
               <td>
                 <span class="badge bg-light text-dark border px-3 py-2">
                   {{ cal.asignaturaNombre || cal.asignaturaId }}
                 </span>
               </td>
-
               <!-- EVALUACIÓN -->
               <td>
                 <span class="badge bg-info text-white px-3 py-2">
                   {{ cal.evaluacion }}
                 </span>
               </td>
-
               <!-- NOTA -->
               <td class="text-center">
                 <span
@@ -112,14 +106,12 @@
                   {{ cal.nota | number: '1.1-1' }}
                 </span>
               </td>
-
               <!-- FECHA -->
               <td>
                 <small class="text-muted">
                   {{ cal.fechaRegistro || '—' }}
                 </small>
               </td>
-
               <!-- ACCIONES -->
               <td class="text-end pe-4" *ngIf="user?.tipo === tipoUsuario.administrativo">
                 <div class="btn-group" role="group">
@@ -174,7 +166,6 @@
           <strong>{{ getEndIndex() }}</strong> de
           <strong>{{ totalItems }}</strong> calificaciones
         </small>
-
         <nav aria-label="Paginación">
           <ul class="pagination pagination-sm mb-0">
             <li class="page-item" [class.disabled]="currentPage === 1">
@@ -200,13 +191,14 @@
     </div>
   </div>
 
-  <!-- MODAL -->
+  <!-- MODAL (Solo para administrativos) -->
   <div
     *ngIf="user?.tipo === tipoUsuario.administrativo"
     class="modal fade"
     id="calificacionModal"
     tabindex="-1"
     aria-labelledby="calificacionModalLabel"
+    aria-hidden="true"
   >
     <div class="modal-dialog modal-lg">
       <form [formGroup]="calificacionForm" (ngSubmit)="saveCalificacion()">
@@ -216,9 +208,8 @@
               <i class="bi bi-journal-plus me-2"></i>
               {{ isEditMode ? 'Editar' : 'Nueva' }} Calificación
             </h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-
           <div class="modal-body p-4">
             <div class="row g-3">
               <!-- ESTUDIANTE -->
@@ -229,7 +220,7 @@
                 <select
                   class="form-select rounded-3"
                   formControlName="estudianteId"
-                  [class.is-invalid]="calificacionForm.get('estudianteId')?.invalid && calificacionForm.get('estudianteId')?.touched"
+                  [class.is-invalid]="f.estudianteId.invalid && f.estudianteId.touched"
                 >
                   <option value="">Seleccionar estudiante...</option>
                   <option *ngFor="let e of estudiantes" [value]="e.id">
@@ -247,7 +238,7 @@
                 <select
                   class="form-select rounded-3"
                   formControlName="asignaturaId"
-                  [class.is-invalid]="calificacionForm.get('asignaturaId')?.invalid && calificacionForm.get('asignaturaId')?.touched"
+                  [class.is-invalid]="f.asignaturaId.invalid && f.asignaturaId.touched"
                 >
                   <option value="">Seleccionar asignatura...</option>
                   <option *ngFor="let a of asignaturas" [value]="a.id">
@@ -265,7 +256,7 @@
                 <select
                   class="form-select rounded-3"
                   formControlName="evaluacion"
-                  [class.is-invalid]="calificacionForm.get('evaluacion')?.invalid && calificacionForm.get('evaluacion')?.touched"
+                  [class.is-invalid]="f.evaluacion.invalid && f.evaluacion.touched"
                 >
                   <option [ngValue]="null" disabled>Seleccionar tipo...</option>
                   <option *ngFor="let tipo of tiposEvaluacion" [ngValue]="tipo">
@@ -275,7 +266,7 @@
                 <div class="invalid-feedback">Selecciona un tipo</div>
               </div>
 
-              <!-- NOTA (1.0 - 20.0) -->
+              <!-- NOTA -->
               <div class="col-md-6">
                 <label class="form-label fw-semibold text-dark">
                   <i class="bi bi-award me-1"></i> Nota (1.0 - 20.0)
@@ -288,7 +279,7 @@
                   class="form-control rounded-3"
                   formControlName="nota"
                   placeholder="Ej: 18.5"
-                  [class.is-invalid]="calificacionForm.get('nota')?.invalid && calificacionForm.get('nota')?.touched"
+                  [class.is-invalid]="f.nota.invalid && f.nota.touched"
                 />
                 <div class="invalid-feedback">
                   La nota debe estar entre 1.0 y 20.0
@@ -296,7 +287,6 @@
               </div>
             </div>
           </div>
-
           <div class="modal-footer border-0 p-4">
             <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">
               Cancelar

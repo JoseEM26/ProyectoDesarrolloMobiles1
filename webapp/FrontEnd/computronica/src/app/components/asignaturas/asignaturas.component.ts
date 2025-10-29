@@ -1,6 +1,6 @@
 // src/app/components/asignaturas/asignaturas.component.ts
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Observable, combineLatest, of, Subject, BehaviorSubject } from 'rxjs';
+import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
+import { Observable, combineLatest, of, Subject } from 'rxjs';
 import { map, startWith, catchError, takeUntil } from 'rxjs/operators';
 import { Asignatura, Usuario, TipoUsuario } from '../../models/interfaces';
 import { FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -25,13 +25,13 @@ import { Modal } from 'bootstrap';
   templateUrl: './asignaturas.component.html',
   styleUrls: ['./asignaturas.component.scss']
 })
-export class AsignaturasComponent implements OnInit, OnDestroy {
+export class AsignaturasComponent implements OnInit, OnDestroy, AfterViewInit {
   asignaturas$!: Observable<Asignatura[]>;
   filteredAsignaturas$!: Observable<Asignatura[]>;
-  pageSize: number = 10;
-  currentPage: number = 1;
-  totalPages: number = 1;
-  totalItems: number = 0;
+  pageSize = 10;
+  currentPage = 1;
+  totalPages = 1;
+  totalItems = 0;
   pages: number[] = [];
   searchControl = new FormControl('');
   isLoading = true;
@@ -45,7 +45,7 @@ export class AsignaturasComponent implements OnInit, OnDestroy {
   currentUser: Usuario | null = null;
   tipoUsuario = TipoUsuario;
 
-  // Formulario reactivo
+  // Formulario
   asignaturaForm = new FormGroup({
     id: new FormControl<string | null>(null),
     nombre: new FormControl('', [Validators.required, Validators.minLength(3)]),
@@ -67,13 +67,11 @@ export class AsignaturasComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Subscribe to current user
     this.authService.user$.pipe(takeUntil(this.destroy$)).subscribe({
       next: (user) => {
         this.currentUser = user;
         this.loadAsignaturas();
         this.setupSearch();
-        this.initModal();
       },
       error: () => {
         this.showError('Error al cargar el usuario autenticado');
@@ -82,10 +80,17 @@ export class AsignaturasComponent implements OnInit, OnDestroy {
     });
   }
 
-  private initModal() {
-    const modalElement = document.getElementById('asignaturaModal');
-    if (modalElement) {
-      this.modal = new Modal(modalElement);
+  ngAfterViewInit(): void {
+    this.initModal();
+  }
+
+  private initModal(): void {
+    const el = document.getElementById('asignaturaModal');
+    if (el) {
+      this.modal = new Modal(el, { backdrop: 'static', keyboard: false });
+      console.log('Modal inicializado');
+    } else {
+      console.error('Modal #asignaturaModal no encontrado');
     }
   }
 
@@ -97,30 +102,26 @@ export class AsignaturasComponent implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
+
     this.asignaturas$ = this.asignaturaService.getAll().pipe(
       map(asignaturas => {
         if (!Array.isArray(asignaturas)) return [];
-        // Filter based on user role
         return asignaturas
           .filter(asig => {
-            if (!asig || typeof asig !== 'object' || !('nombre' in asig) || !('codigoAsignatura' in asig)) {
-              return false;
-            }
-            if (this.currentUser!.tipo === TipoUsuario.administrativo) {
-              return true; // Admin sees all
-            } else if (this.currentUser!.tipo === TipoUsuario.estudiante) {
+            if (!asig || typeof asig !== 'object') return false;
+            if (this.currentUser!.tipo === TipoUsuario.administrativo) return true;
+            if (this.currentUser!.tipo === TipoUsuario.estudiante) {
               return asig.estudiantes?.includes(this.currentUser!.correoInstitucional);
-            } else if (this.currentUser!.tipo === TipoUsuario.profesor) {
+            }
+            if (this.currentUser!.tipo === TipoUsuario.profesor) {
               return asig.profesores?.includes(this.currentUser!.correoInstitucional);
             }
             return false;
           })
           .sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
       }),
-      catchError(error => {
-        console.error('Error al obtener asignaturas:', error);
-        this.isLoading = false;
-        this.showError('Error al cargar las asignaturas');
+      catchError(err => {
+        this.showError(err.message || 'Error al cargar asignaturas');
         return of([]);
       })
     );
@@ -131,7 +132,6 @@ export class AsignaturasComponent implements OnInit, OnDestroy {
     ]).pipe(
       map(([asignaturas, search]) => {
         let filtered = asignaturas;
-
         if (search) {
           const term = search.toLowerCase();
           filtered = asignaturas.filter(asig =>
@@ -142,10 +142,8 @@ export class AsignaturasComponent implements OnInit, OnDestroy {
 
         this.totalItems = filtered.length;
         this.totalPages = Math.max(1, Math.ceil(filtered.length / this.pageSize));
-
         if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
         if (this.currentPage < 1) this.currentPage = 1;
-
         this.pages = this.generatePages(this.totalPages, this.currentPage);
 
         const start = (this.currentPage - 1) * this.pageSize;
@@ -158,10 +156,10 @@ export class AsignaturasComponent implements OnInit, OnDestroy {
     );
   }
 
-  private generatePages(totalPages: number, currentPage: number): number[] {
+  private generatePages(total: number, current: number): number[] {
     const max = 5;
-    let start = Math.max(1, currentPage - Math.floor(max / 2));
-    let end = Math.min(totalPages, start + max - 1);
+    let start = Math.max(1, current - Math.floor(max / 2));
+    let end = Math.min(total, start + max - 1);
     if (end - start < max - 1) start = Math.max(1, end - max + 1);
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
@@ -179,11 +177,8 @@ export class AsignaturasComponent implements OnInit, OnDestroy {
       u.correoInstitucional.toLowerCase().includes(query)
     );
 
-    if (tipo === 'profesor') {
-      this.filteredProfesores = filtered;
-    } else {
-      this.filteredEstudiantes = filtered;
-    }
+    if (tipo === 'profesor') this.filteredProfesores = filtered;
+    else this.filteredEstudiantes = filtered;
   }
 
   getEndIndex(): number {
@@ -208,17 +203,17 @@ export class AsignaturasComponent implements OnInit, OnDestroy {
 
   removeProfesor(email: string): void {
     const current = this.asignaturaForm.get('profesores')?.value || [];
-    this.asignaturaForm.get('profesores')?.setValue(current.filter((e: string) => e !== email));
+    this.asignaturaForm.get('profesores')?.setValue(current.filter(e => e !== email));
   }
 
   removeEstudiante(email: string): void {
     const current = this.asignaturaForm.get('estudiantes')?.value || [];
-    this.asignaturaForm.get('estudiantes')?.setValue(current.filter((e: string) => e !== email));
+    this.asignaturaForm.get('estudiantes')?.setValue(current.filter(e => e !== email));
   }
 
   getNombreUsuario(email: string, usuarios: Usuario[]): string {
-    const usuario = usuarios.find(u => u.correoInstitucional === email);
-    return usuario ? `${usuario.nombre} ${usuario.apellido}` : email;
+    const u = usuarios.find(u => u.correoInstitucional === email);
+    return u ? `${u.nombre} ${u.apellido}` : email;
   }
 
   private resetSuggestions(): void {
@@ -230,10 +225,9 @@ export class AsignaturasComponent implements OnInit, OnDestroy {
 
   openCreateModal(): void {
     if (this.currentUser?.tipo !== TipoUsuario.administrativo) {
-      this.showError('Solo los administrativos pueden crear asignaturas');
+      this.showError('Solo administrativos pueden crear');
       return;
     }
-
     this.isEditMode = false;
     this.asignaturaForm.reset({
       nombre: '',
@@ -250,10 +244,9 @@ export class AsignaturasComponent implements OnInit, OnDestroy {
 
   openEditModal(asignatura: Asignatura): void {
     if (this.currentUser?.tipo !== TipoUsuario.administrativo) {
-      this.showError('Solo los administrativos pueden editar asignaturas');
+      this.showError('Solo administrativos pueden editar');
       return;
     }
-
     this.isEditMode = true;
     this.asignaturaForm.patchValue({
       id: asignatura.id,
@@ -270,7 +263,10 @@ export class AsignaturasComponent implements OnInit, OnDestroy {
   }
 
   saveAsignatura(): void {
-    if (this.asignaturaForm.invalid) return;
+    if (this.asignaturaForm.invalid) {
+      this.asignaturaForm.markAllAsTouched();
+      return;
+    }
 
     this.isSaving = true;
     const data = this.asignaturaForm.value as Asignatura;
@@ -299,22 +295,15 @@ export class AsignaturasComponent implements OnInit, OnDestroy {
   }
 
   deleteAsignatura(asignatura: Asignatura): void {
-    if (this.currentUser?.tipo !== TipoUsuario.administrativo) {
-      this.showError('Solo los administrativos pueden eliminar asignaturas');
-      return;
-    }
-
-    if (!asignatura.id) return;
+    if (this.currentUser?.tipo !== TipoUsuario.administrativo || !asignatura.id) return;
 
     Swal.fire({
-      title: '¿Eliminar asignatura?',
-      text: `"${asignatura.nombre}" será eliminada permanentemente`,
+      title: '¿Eliminar?',
+      text: `"${asignatura.nombre}" será eliminada`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar',
-      background: 'var(--card-bg)',
-      customClass: { popup: 'shadow-lg' }
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar'
     }).then(result => {
       if (result.isConfirmed) {
         this.asignaturaService.delete(asignatura.id!).subscribe({
@@ -335,11 +324,11 @@ export class AsignaturasComponent implements OnInit, OnDestroy {
   }
 
   private showError(msg: string) {
-    Swal.fire({ icon: 'error', title: 'Error', text: msg, background: 'var(--card-bg)' });
+    Swal.fire({ icon: 'error', title: 'Error', text: msg });
   }
 
   private showSuccess(msg: string) {
-    Swal.fire({ icon: 'success', title: 'Éxito', text: msg, timer: 2000, background: 'var(--card-bg)' });
+    Swal.fire({ icon: 'success', title: 'Éxito', text: msg, timer: 2000, showConfirmButton: false });
   }
 
   ngOnDestroy(): void {
