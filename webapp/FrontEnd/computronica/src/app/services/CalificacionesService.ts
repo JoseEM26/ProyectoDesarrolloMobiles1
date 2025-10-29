@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { Calificaciones } from '../models/interfaces';
 
 @Injectable({
@@ -12,12 +12,18 @@ export class CalificacionesService {
 
   constructor(private http: HttpClient) {}
 
-  create(calificacion: Calificaciones): Observable<string> {
-    return this.http.post<string>(this.apiUrl, calificacion).pipe(
-      catchError(this.handleError)
-    );
-  }
 
+create(calificacion: Calificaciones): Observable<Calificaciones> {
+  return this.http.post<Calificaciones>(this.apiUrl, calificacion).pipe(
+    catchError(this.handleError)
+  );
+}
+
+update(id: string, calificacion: Calificaciones): Observable<Calificaciones> {
+  return this.http.put<Calificaciones>(`${this.apiUrl}/${id}`, calificacion).pipe(
+    catchError(this.handleError)
+  );
+}
   getById(id: string): Observable<Calificaciones> {
     return this.http.get<Calificaciones>(`${this.apiUrl}/${id}`).pipe(
       map(cal => this.transformFecha(cal)),
@@ -35,11 +41,7 @@ export class CalificacionesService {
     );
   }
 
-  update(id: string, calificacion: Calificaciones): Observable<void> {
-    return this.http.put<void>(`${this.apiUrl}/${id}`, calificacion).pipe(
-      catchError(this.handleError)
-    );
-  }
+
 
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(

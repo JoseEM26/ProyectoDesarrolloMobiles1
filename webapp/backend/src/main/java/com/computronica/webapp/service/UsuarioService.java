@@ -23,6 +23,7 @@ public class UsuarioService {
     // ====================
     // BUSCAR POR CORREO
     // ====================
+
     public Usuario findByCorreoInstitucional(String correo) {
         if (correo == null || correo.trim().isEmpty()) {
             throw new IllegalArgumentException("El correo institucional no puede ser nulo o vacío");
@@ -39,6 +40,7 @@ public class UsuarioService {
                 DocumentSnapshot doc = query.getDocuments().get(0);
                 Usuario usuario = doc.toObject(Usuario.class);
                 usuario.setId(doc.getId());
+
                 return usuario;
             }
             return null;
@@ -58,6 +60,7 @@ public class UsuarioService {
 
         try {
             DocumentSnapshot doc = db.collection(COLLECTION_NAME)
+
                     .document(id)
                     .get()
                     .get();
@@ -65,6 +68,7 @@ public class UsuarioService {
             if (doc.exists()) {
                 Usuario usuario = doc.toObject(Usuario.class);
                 usuario.setId(doc.getId());
+
                 return usuario;
             }
             return null;
@@ -77,6 +81,7 @@ public class UsuarioService {
     // ====================
     // GUARDAR / ACTUALIZAR
     // ====================
+
     public void save(Usuario usuario) {
         if (usuario == null) {
             throw new IllegalArgumentException("El usuario no puede ser nulo");
@@ -87,6 +92,7 @@ public class UsuarioService {
         if (usuario.getCorreoInstitucional() == null || usuario.getCorreoInstitucional().trim().isEmpty()) {
             throw new IllegalArgumentException("El correo institucional es obligatorio");
         }
+
 
         try {
             Timestamp now = Timestamp.now();
@@ -107,6 +113,7 @@ public class UsuarioService {
 
         } catch (InterruptedException | ExecutionException e) {
             Thread.currentThread().interrupt();
+
             throw new RuntimeException("Error al guardar usuario: " + e.getMessage(), e);
         }
     }

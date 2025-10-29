@@ -1,118 +1,317 @@
 <!-- src/app/components/grades/grades.component.html -->
-<section class="grades-page">
-  <header class="section-header">
-    <h1 class="section-title">Calificaciones</h1>
-    <div class="section-controls">
-      <input
-        type="text"
-        class="form-control"
-        placeholder="Filtrar por estudiante..."
-        [(ngModel)]="estudianteFilter"
-        (ngModelChange)="applyFilters()"
-        aria-label="Filtrar calificaciones por estudiante"
-      />
-      <input
-        type="text"
-        class="form-control"
-        placeholder="Filtrar por asignatura..."
-        [(ngModel)]="asignaturaFilter"
-        (ngModelChange)="applyFilters()"
-        aria-label="Filtrar calificaciones por asignatura"
-      />
+<section class="grades-page container-fluid py-4">
+  <!-- HEADER -->
+  <header class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div>
+      <h1 class="h3 fw-bold text-primary mb-1">
+        <i class="bi bi-journal-check me-2"></i>
+        Calificaciones
+      </h1>
+      <p class="text-muted mb-0 small">Gestión de evaluaciones académicas</p>
+    </div>
+
+    <div class="d-flex flex-column flex-md-row gap-2 w-100 w-md-auto">
+      <!-- FILTRO ESTUDIANTE -->
+      <div class="input-group input-group-sm" style="max-width: 220px;" *ngIf="user?.tipo !== tipoUsuario.estudiante">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-person text-muted"></i>
+        </span>
+        <input
+          type="text"
+          class="form-control border-start-0 ps-0"
+          placeholder="Estudiante..."
+          [(ngModel)]="estudianteFilter"
+          (ngModelChange)="applyFilters()"
+          aria-label="Buscar estudiante"
+        />
+      </div>
+
+      <!-- FILTRO ASIGNATURA -->
+      <div class="input-group input-group-sm" style="max-width: 220px;" *ngIf="user?.tipo !== tipoUsuario.profesor">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-book text-muted"></i>
+        </span>
+        <input
+          type="text"
+          class="form-control border-start-0 ps-0"
+          placeholder="Asignatura..."
+          [(ngModel)]="asignaturaFilter"
+          (ngModelChange)="applyFilters()"
+          aria-label="Buscar asignatura"
+        />
+      </div>
+
+      <!-- BOTÓN NUEVO -->
+      <button
+        *ngIf="user?.tipo === tipoUsuario.administrativo"
+        class="btn btn-primary d-flex align-items-center gap-2 shadow-sm"
+        (click)="openCreateModal()"
+      >
+        <i class="bi bi-plus-circle"></i>
+        <span class="d-none d-sm-inline">Nueva</span>
+        <span class="d-inline d-sm-none">+</span>
+      </button>
     </div>
   </header>
 
-  <div class="section-card">
-    <div class="section-body">
+  <!-- CARD PRINCIPAL -->
+  <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+    <div class="card-body p-0">
+      <!-- TABLA -->
       <div class="table-responsive">
-        <table class="grades-table" aria-label="Tabla de calificaciones">
-          <thead>
+        <table class="table table-hover align-middle mb-0">
+          <thead class="bg-light">
             <tr>
-              <th scope="col">Estudiante</th>
-              <th scope="col">Asignatura</th>
-              <th scope="col">Evaluación</th>
-              <th scope="col">Nota</th>
-              <th scope="col">Fecha</th>
-              <th scope="col" *ngIf="user?.tipo === tipoUsuario.administrativo">Acciones</th>
+              <th class="ps-4 py-3 text-dark fw-semibold">Estudiante</th>
+              <th class="py-3 text-dark fw-semibold">Asignatura</th>
+              <th class="py-3 text-dark fw-semibold">Evaluación</th>
+              <th class="py-3 text-center text-dark fw-semibold">Nota</th>
+              <th class="py-3 text-dark fw-semibold">Fecha</th>
+              <th class="text-end pe-4 py-3" *ngIf="user?.tipo === tipoUsuario.administrativo"></th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let calificacion of paginatedCalificaciones">
-              <td>{{ calificacion.estudianteNombre || calificacion.estudianteId }}</td>
-              <td>{{ calificacion.asignaturaNombre || calificacion.asignaturaId }}</td>
-              <td>{{ calificacion.evaluacion }}</td>
+            <tr
+              *ngFor="let cal of paginatedCalificaciones; let i = index"
+              class="fade-in"
+              [style.--delay]="i * 50 + 'ms'"
+            >
+              <!-- ESTUDIANTE -->
+              <td class="ps-4">
+                <div class="d-flex align-items-center">
+                  <div class="avatar avatar-sm rounded-circle bg-primary bg-opacity-10 text-primary me-3 d-flex align-items-center justify-content-center">
+                    <i class="bi bi-person"></i>
+                  </div>
+                  <div>
+                    <div class="fw-medium text-dark">{{ cal.estudianteNombre || cal.estudianteId }}</div>
+                    <small class="text-muted">{{ cal.estudianteId }}</small>
+                  </div>
+                </div>
+              </td>
+
+              <!-- ASIGNATURA -->
               <td>
-                <span
-                  class="badge"
-                  [ngClass]="{
-                    'bg-success': calificacion.nota >= 3.0,
-                    'bg-danger': calificacion.nota < 3.0
-                  }"
-                >
-                  {{ calificacion.nota | number: '1.1-1' }}
+                <span class="badge bg-light text-dark border px-3 py-2">
+                  {{ cal.asignaturaNombre || cal.asignaturaId }}
                 </span>
               </td>
-              <td>{{ calificacion.fechaRegistro || 'Sin fecha' }}</td>
-              <td *ngIf="user?.tipo === tipoUsuario.administrativo">
-                <button
-                  class="btn btn-outline-secondary btn-sm me-2"
-                  (click)="editCalificacion(calificacion)"
-                  aria-label="Editar calificación"
+
+              <!-- EVALUACIÓN -->
+              <td>
+                <span class="badge bg-info text-white px-3 py-2">
+                  {{ cal.evaluacion }}
+                </span>
+              </td>
+
+              <!-- NOTA -->
+              <td class="text-center">
+                <span
+                  class="badge fs-6 px-3 py-2 fw-bold text-white"
+                  [ngClass]="getNotaBadgeClass(cal.nota)"
                 >
-                  <i class="bi bi-pencil-fill"></i>
-                </button>
-                <button
-                  class="btn btn-outline-danger btn-sm"
-                  (click)="confirmDelete(calificacion.id!)"
-                  aria-label="Eliminar calificación"
-                >
-                  <i class="bi bi-trash-fill"></i>
-                </button>
+                  {{ cal.nota | number: '1.1-1' }}
+                </span>
+              </td>
+
+              <!-- FECHA -->
+              <td>
+                <small class="text-muted">
+                  {{ cal.fechaRegistro || '—' }}
+                </small>
+              </td>
+
+              <!-- ACCIONES -->
+              <td class="text-end pe-4" *ngIf="user?.tipo === tipoUsuario.administrativo">
+                <div class="btn-group" role="group">
+                  <button
+                    class="btn btn-outline-primary btn-sm rounded-start"
+                    (click)="openEditModal(cal)"
+                    title="Editar"
+                  >
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button
+                    class="btn btn-outline-danger btn-sm rounded-end"
+                    (click)="confirmDelete(cal.id!)"
+                    title="Eliminar"
+                  >
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <div class="loading text-center" *ngIf="loading">
-        <div class="spinner"></div>
-        <p>Cargando calificaciones...</p>
+      <!-- LOADING -->
+      <div class="p-5 text-center" *ngIf="loading">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-3 text-muted fs-5">Cargando calificaciones...</p>
       </div>
 
-      <div class="empty text-center" *ngIf="!loading && calificaciones.length === 0">
-        <i class="bi bi-file-earmark-text"></i>
-        <p>No se encontraron calificaciones.</p>
+      <!-- EMPTY STATE -->
+      <div class="p-5 text-center" *ngIf="!loading && calificaciones.length === 0">
+        <i class="bi bi-inbox display-1 text-muted opacity-50"></i>
+        <p class="mt-3 text-muted h5">No hay calificaciones registradas</p>
+        <button
+          *ngIf="user?.tipo === tipoUsuario.administrativo"
+          class="btn btn-outline-primary mt-2"
+          (click)="openCreateModal()"
+        >
+          <i class="bi bi-plus-circle"></i> Crear primera calificación
+        </button>
       </div>
     </div>
 
-    <footer class="section-footer" *ngIf="calificaciones.length > 0">
-      <span class="pagination-info">
-        Mostrando {{ (currentPage - 1) * pageSize + 1 }}-{{
-          Math.min(currentPage * pageSize, totalItems)
-        }}
-        de {{ totalItems }} calificaciones
-      </span>
-      <nav aria-label="Paginación de calificaciones">
-        <ul class="pagination">
-          <li class="page-item" [ngClass]="{ disabled: currentPage === 1 }">
-            <button class="page-link" (click)="changePage(currentPage - 1)" aria-label="Página anterior">
-              <i class="bi bi-chevron-left"></i>
+    <!-- FOOTER PAGINACIÓN -->
+    <div class="card-footer bg-light border-0 px-4 py-3" *ngIf="calificaciones.length > 0">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+        <small class="text-muted">
+          Mostrando <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> -
+          <strong>{{ getEndIndex() }}</strong> de
+          <strong>{{ totalItems }}</strong> calificaciones
+        </small>
+
+        <nav aria-label="Paginación">
+          <ul class="pagination pagination-sm mb-0">
+            <li class="page-item" [class.disabled]="currentPage === 1">
+              <button class="page-link rounded-start" (click)="changePage(currentPage - 1)">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+            </li>
+            <li
+              class="page-item"
+              *ngFor="let page of getPages()"
+              [class.active]="page === currentPage"
+            >
+              <button class="page-link" (click)="changePage(page)">{{ page }}</button>
+            </li>
+            <li class="page-item" [class.disabled]="currentPage === totalPages">
+              <button class="page-link rounded-end" (click)="changePage(currentPage + 1)">
+                <i class="bi bi-chevron-right"></i>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div
+    *ngIf="user?.tipo === tipoUsuario.administrativo"
+    class="modal fade"
+    id="calificacionModal"
+    tabindex="-1"
+    aria-labelledby="calificacionModalLabel"
+  >
+    <div class="modal-dialog modal-lg">
+      <form [formGroup]="calificacionForm" (ngSubmit)="saveCalificacion()">
+        <div class="modal-content border-0 shadow-lg rounded-3">
+          <div class="modal-header bg-gradient-primary text-white border-0 rounded-top">
+            <h5 class="modal-title fw-bold" id="calificacionModalLabel">
+              <i class="bi bi-journal-plus me-2"></i>
+              {{ isEditMode ? 'Editar' : 'Nueva' }} Calificación
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+
+          <div class="modal-body p-4">
+            <div class="row g-3">
+              <!-- ESTUDIANTE -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">
+                  <i class="bi bi-person me-1"></i> Estudiante
+                </label>
+                <select
+                  class="form-select rounded-3"
+                  formControlName="estudianteId"
+                  [class.is-invalid]="calificacionForm.get('estudianteId')?.invalid && calificacionForm.get('estudianteId')?.touched"
+                >
+                  <option value="">Seleccionar estudiante...</option>
+                  <option *ngFor="let e of estudiantes" [value]="e.id">
+                    {{ e.nombre }} {{ e.apellido }}
+                  </option>
+                </select>
+                <div class="invalid-feedback">Selecciona un estudiante</div>
+              </div>
+
+              <!-- ASIGNATURA -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">
+                  <i class="bi bi-book me-1"></i> Asignatura
+                </label>
+                <select
+                  class="form-select rounded-3"
+                  formControlName="asignaturaId"
+                  [class.is-invalid]="calificacionForm.get('asignaturaId')?.invalid && calificacionForm.get('asignaturaId')?.touched"
+                >
+                  <option value="">Seleccionar asignatura...</option>
+                  <option *ngFor="let a of asignaturas" [value]="a.id">
+                    {{ a.nombre }}
+                  </option>
+                </select>
+                <div class="invalid-feedback">Selecciona una asignatura</div>
+              </div>
+
+              <!-- TIPO EVALUACIÓN -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">
+                  <i class="bi bi-card-checklist me-1"></i> Tipo de Evaluación
+                </label>
+                <select
+                  class="form-select rounded-3"
+                  formControlName="evaluacion"
+                  [class.is-invalid]="calificacionForm.get('evaluacion')?.invalid && calificacionForm.get('evaluacion')?.touched"
+                >
+                  <option [ngValue]="null" disabled>Seleccionar tipo...</option>
+                  <option *ngFor="let tipo of tiposEvaluacion" [ngValue]="tipo">
+                    {{ tipo }}
+                  </option>
+                </select>
+                <div class="invalid-feedback">Selecciona un tipo</div>
+              </div>
+
+              <!-- NOTA (1.0 - 20.0) -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">
+                  <i class="bi bi-award me-1"></i> Nota (1.0 - 20.0)
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="1"
+                  max="20"
+                  class="form-control rounded-3"
+                  formControlName="nota"
+                  placeholder="Ej: 18.5"
+                  [class.is-invalid]="calificacionForm.get('nota')?.invalid && calificacionForm.get('nota')?.touched"
+                />
+                <div class="invalid-feedback">
+                  La nota debe estar entre 1.0 y 20.0
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer border-0 p-4">
+            <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">
+              Cancelar
             </button>
-          </li>
-          <li
-            class="page-item"
-            *ngFor="let page of getPages()"
-            [ngClass]="{ active: page === currentPage }"
-          >
-            <button class="page-link" (click)="changePage(page)">{{ page }}</button>
-          </li>
-          <li class="page-item" [ngClass]="{ disabled: currentPage === totalPages }">
-            <button class="page-link" (click)="changePage(currentPage + 1)" aria-label="Página siguiente">
-              <i class="bi bi-chevron-right"></i>
+            <button
+              type="submit"
+              class="btn btn-primary rounded-3 d-flex align-items-center gap-2"
+              [disabled]="calificacionForm.invalid || isSaving"
+            >
+              <span class="spinner-border spinner-border-sm" *ngIf="isSaving"></span>
+              {{ isEditMode ? 'Actualizar' : 'Crear' }}
             </button>
-          </li>
-        </ul>
-      </nav>
-    </footer>
+          </div>
+        </div>
+      </form>
+    </div>
   </div>
 </section>

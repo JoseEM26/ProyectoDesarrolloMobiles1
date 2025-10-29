@@ -1,70 +1,171 @@
 <!-- src/app/components/asignaturas/asignaturas.component.html -->
-<div class="asignaturas-page">
+<section class="asignaturas-page container-fluid py-4">
   <!-- HEADER -->
-  <div class="section-header mb-4">
-    <h1 class="section-title">
-      <i class="bi bi-book-fill me-3"></i>
-      Gestión de Asignaturas
-    </h1>
-    <div class="section-controls d-flex gap-3 align-items-center">
-      <input
-        [formControl]="searchControl"
-        class="form-control"
-        placeholder="Buscar por nombre o código..."
-        aria-label="Buscar asignaturas"
+  <header class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div>
+      <h1 class="h3 fw-bold text-primary mb-1">
+        <i class="bi bi-book-fill me-2"></i>
+        Gestión de Asignaturas
+      </h1>
+      <p class="text-muted mb-0 small">Administración completa de materias académicas</p>
+    </div>
+
+    <div class="d-flex flex-column flex-md-row gap-2 w-100 w-md-auto">
+      <!-- BUSCADOR -->
+      <div class="input-group input-group-sm" style="max-width: 280px;">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input
+          [formControl]="searchControl"
+          type="text"
+          class="form-control border-start-0 ps-0"
+          placeholder="Buscar por nombre o código..."
+          aria-label="Buscar asignaturas"
+        />
+      </div>
+
+      <!-- BOTÓN NUEVO -->
+      <button
+        *ngIf="currentUser?.tipo === tipoUsuario.administrativo"
+        class="btn btn-primary d-flex align-items-center gap-2 shadow-sm"
+        (click)="openCreateModal()"
       >
+        <i class="bi bi-plus-circle"></i>
+        <span class="d-none d-sm-inline">Nueva</span>
+        <span class="d-inline d-sm-none">+</span>
+      </button>
     </div>
-  </div>
+  </header>
 
-  <!-- CONTENEDOR PARA ASYNC -->
+  <!-- CONTENEDOR PRINCIPAL -->
   <ng-container *ngIf="filteredAsignaturas$ | async as asignaturas">
-    <!-- LOADING -->
-    <div *ngIf="isLoading" class="loading text-center my-5">
-      <div class="spinner"></div>
-      <p>Cargando asignaturas...</p>
-    </div>
+    <!-- CARD PRINCIPAL -->
+    <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+      <div class="card-body p-0">
+        <!-- LOADING -->
+        <div class="p-5 text-center" *ngIf="isLoading">
+          <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+          <p class="mt-3 text-muted fs-5">Cargando asignaturas...</p>
+        </div>
 
-    <!-- SIN DATOS -->
-    <div *ngIf="!isLoading && asignaturas.length === 0" class="empty text-center my-5">
-      <i class="bi bi-inbox display-1 text-muted"></i>
-      <p>No se encontraron asignaturas</p>
-    </div>
+        <!-- EMPTY STATE -->
+        <div class="p-5 text-center" *ngIf="!isLoading && asignaturas.length === 0">
+          <i class="bi bi-inbox display-1 text-muted opacity-50"></i>
+          <p class="mt-3 text-muted h5">No se encontraron asignaturas</p>
+          <button
+            *ngIf="currentUser?.tipo === tipoUsuario.administrativo"
+            class="btn btn-outline-primary mt-2"
+            (click)="openCreateModal()"
+          >
+            <i class="bi bi-plus-circle"></i> Crear primera asignatura
+          </button>
+        </div>
 
-    <!-- TABLA -->
-    <div class="section-card" *ngIf="!isLoading && asignaturas.length > 0" data-aos="fade-up">
-      <div class="section-body">
-        <div class="table-responsive">
-          <table class="asignaturas-table">
-            <thead>
+        <!-- TABLA -->
+        <div class="table-responsive" *ngIf="!isLoading && asignaturas.length > 0">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
               <tr>
-                <th><i class="bi bi-book me-2"></i>Nombre</th>
-                <th><i class="bi bi-hash me-2"></i>Código</th>
-                <th><i class="bi bi-file-text me-2"></i>Créditos</th>
-                <th><i class="bi bi-person-fill me-2"></i>Profesores</th>
-                <th><i class="bi bi-people-fill me-2"></i>Estudiantes</th>
+                <th class="ps-4 py-3 text-dark fw-semibold">Nombre</th>
+                <th class="py-3 text-dark fw-semibold">Código</th>
+                <th class="py-3 text-center text-dark fw-semibold">Créditos</th>
+                <th class="py-3 text-dark fw-semibold">Profesores</th>
+                <th class="py-3 text-dark fw-semibold">Estudiantes</th>
+                <th class="text-end pe-4 py-3"></th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let asignatura of asignaturas; let i = index"
-                  [attr.data-aos]="'fade-up'" [attr.data-aos-delay]="i * 80">
-                <td>{{ asignatura.nombre }}</td>
-                <td>{{ asignatura.codigoAsignatura }}</td>
-                <td>{{ asignatura.creditos }}</td>
-                <td>
-                  <ng-container *ngIf="asignatura.profesores?.length; else noProfesores">
-                    <span class="badge bg-success me-1" *ngFor="let prof of asignatura.profesores">{{ prof }}</span>
-                  </ng-container>
-                  <ng-template #noProfesores>
-                    <span class="text-muted">Sin profesores</span>
-                  </ng-template>
+              <tr
+                *ngFor="let asignatura of asignaturas; let i = index"
+                class="animate__animated animate__fadeIn"
+                [style.animation-delay.ms]="i * 60"
+              >
+                <!-- NOMBRE -->
+                <td class="ps-4">
+                  <div class="d-flex align-items-center">
+                    <div class="avatar avatar-sm rounded-circle bg-primary bg-opacity-10 text-primary me-3 d-flex align-items-center justify-content-center">
+                      <i class="bi bi-book"></i>
+                    </div>
+                    <div>
+                      <div class="fw-medium text-dark">{{ asignatura.nombre }}</div>
+                      <small class="text-muted">{{ asignatura.descripcion || 'Sin descripción' }}</small>
+                    </div>
+                  </div>
                 </td>
+
+                <!-- CÓDIGO -->
                 <td>
-                  <ng-container *ngIf="asignatura.estudiantes?.length; else noEstudiantes">
-                    <span class="badge bg-info me-1" *ngFor="let est of asignatura.estudiantes">{{ est }}</span>
-                  </ng-container>
-                  <ng-template #noEstudiantes>
-                    <span class="text-muted">Sin estudiantes</span>
-                  </ng-template>
+                  <span class="badge bg-secondary text-white px-3 py-2">
+                    {{ asignatura.codigoAsignatura }}
+                  </span>
+                </td>
+
+                <!-- CRÉDITOS -->
+                <td class="text-center">
+                  <span class="badge bg-warning text-dark px-3 py-2 fw-bold">
+                    {{ asignatura.creditos }}
+                  </span>
+                </td>
+
+                <!-- PROFESORES -->
+                <td>
+                  <div class="d-flex flex-wrap gap-1">
+                    <ng-container *ngIf="asignatura.profesores?.length; else noProfesores">
+                      <span
+                        class="badge bg-success text-white px-2 py-1"
+                        *ngFor="let prof of asignatura.profesores"
+                      >
+                        {{ prof }}
+                      </span>
+                    </ng-container>
+                    <ng-template #noProfesores>
+                      <span class="text-muted small">Sin profesores</span>
+                    </ng-template>
+                  </div>
+                </td>
+
+                <!-- ESTUDIANTES -->
+                <td>
+                  <div class="d-flex flex-wrap gap-1">
+                    <ng-container *ngIf="asignatura.estudiantes?.length; else noEstudiantes">
+                      <span
+                        class="badge bg-info text-white px-2 py-1"
+                        *ngFor="let est of asignatura.estudiantes"
+                      >
+                        {{ est }}
+                      </span>
+                    </ng-container>
+                    <ng-template #noEstudiantes>
+                      <span class="text-muted small">Sin estudiantes</span>
+                    </ng-template>
+                  </div>
+                </td>
+
+                <!-- ACCIONES -->
+                <td class="text-end pe-4">
+                  <div
+                    *ngIf="currentUser?.tipo === tipoUsuario.administrativo"
+                    class="btn-group"
+                    role="group"
+                  >
+                    <button
+                      class="btn btn-outline-primary btn-sm rounded-start"
+                      (click)="openEditModal(asignatura)"
+                      title="Editar"
+                    >
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button
+                      class="btn btn-outline-danger btn-sm rounded-end"
+                      (click)="deleteAsignatura(asignatura)"
+                      title="Eliminar"
+                    >
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -72,32 +173,222 @@
         </div>
       </div>
 
-      <!-- PAGINACIÓN -->
-      <div class="section-footer mt-4 d-flex justify-content-between align-items-center">
-        <div class="pagination-info">
-          Mostrando {{ (currentPage - 1) * pageSize + 1 }} -
-          {{ (currentPage * pageSize) > asignaturas.length ? asignaturas.length : (currentPage * pageSize) }}
-          de {{ asignaturas.length }} asignaturas
+      <!-- FOOTER PAGINACIÓN -->
+      <div class="card-footer bg-light border-0 px-4 py-3" *ngIf="asignaturas.length > 0">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+          <small class="text-muted">
+            Mostrando <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> -
+            <strong>{{ getEndIndex() }}</strong> de
+            <strong>{{ totalItems }}</strong> asignaturas
+          </small>
+
+          <nav aria-label="Paginación">
+            <ul class="pagination pagination-sm mb-0">
+              <li class="page-item" [class.disabled]="currentPage === 1">
+                <button class="page-link rounded-start" (click)="changePage(currentPage - 1)">
+                  <i class="bi bi-chevron-left"></i>
+                </button>
+              </li>
+              <li
+                class="page-item"
+                *ngFor="let page of pages"
+                [class.active]="page === currentPage"
+              >
+                <button class="page-link" (click)="changePage(page)">{{ page }}</button>
+              </li>
+              <li class="page-item" [class.disabled]="currentPage === totalPages">
+                <button class="page-link rounded-end" (click)="changePage(currentPage + 1)">
+                  <i class="bi bi-chevron-right"></i>
+                </button>
+              </li>
+            </ul>
+          </nav>
         </div>
-        <nav aria-label="Paginación de asignaturas">
-          <ul class="pagination">
-            <li class="page-item" [class.disabled]="currentPage === 1">
-              <button class="page-link" (click)="changePage(currentPage - 1)" aria-label="Página anterior">
-                <i class="bi bi-chevron-left"></i>
-              </button>
-            </li>
-            <li class="page-item" *ngFor="let page of pages"
-                [class.active]="page === currentPage">
-              <button class="page-link" (click)="changePage(page)">{{ page }}</button>
-            </li>
-            <li class="page-item" [class.disabled]="currentPage === totalPages">
-              <button class="page-link" (click)="changePage(currentPage + 1)" aria-label="Página siguiente">
-                <i class="bi bi-chevron-right"></i>
-              </button>
-            </li>
-          </ul>
-        </nav>
       </div>
     </div>
   </ng-container>
-</div>
+
+  <!-- MODAL -->
+  <div
+    *ngIf="currentUser?.tipo === tipoUsuario.administrativo"
+    class="modal fade"
+    id="asignaturaModal"
+    tabindex="-1"
+    aria-labelledby="asignaturaModalLabel"
+  >
+    <div class="modal-dialog modal-lg">
+      <form [formGroup]="asignaturaForm" (ngSubmit)="saveAsignatura()">
+        <div class="modal-content border-0 shadow-lg rounded-3">
+          <div class="modal-header bg-gradient-primary text-white border-0 rounded-top">
+            <h5 class="modal-title fw-bold" id="asignaturaModalLabel">
+              <i class="bi bi-book-plus me-2"></i>
+              {{ isEditMode ? 'Editar Asignatura' : 'Nueva Asignatura' }}
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+
+          <div class="modal-body p-4">
+            <div class="row g-3">
+              <!-- NOMBRE -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">
+                  <i class="bi bi-tag me-1"></i> Nombre
+                </label>
+                <input
+                  type="text"
+                  class="form-control rounded-3"
+                  formControlName="nombre"
+                  placeholder="Ej: Matemáticas I"
+                  [class.is-invalid]="asignaturaForm.get('nombre')?.invalid && asignaturaForm.get('nombre')?.touched"
+                />
+                <div class="invalid-feedback">El nombre es obligatorio</div>
+              </div>
+
+              <!-- CÓDIGO -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">
+                  <i class="bi bi-hash me-1"></i> Código
+                </label>
+                <input
+                  type="text"
+                  class="form-control rounded-3"
+                  formControlName="codigoAsignatura"
+                  placeholder="Ej: MAT-101"
+                  [class.is-invalid]="asignaturaForm.get('codigoAsignatura')?.invalid && asignaturaForm.get('codigoAsignatura')?.touched"
+                />
+                <div class="invalid-feedback">El código es obligatorio</div>
+              </div>
+
+              <!-- DESCRIPCIÓN -->
+              <div class="col-12">
+                <label class="form-label fw-semibold text-dark">
+                  <i class="bi bi-file-text me-1"></i> Descripción
+                </label>
+                <textarea
+                  class="form-control rounded-3"
+                  rows="3"
+                  formControlName="descripcion"
+                  placeholder="Descripción opcional de la asignatura..."
+                ></textarea>
+              </div>
+
+              <!-- CRÉDITOS -->
+              <div class="col-md-4">
+                <label class="form-label fw-semibold text-dark">
+                  <i class="bi bi-award me-1"></i> Créditos
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  class="form-control rounded-3"
+                  formControlName="creditos"
+                  placeholder="Ej: 3"
+                  [class.is-invalid]="asignaturaForm.get('creditos')?.invalid && asignaturaForm.get('creditos')?.touched"
+                />
+                <div class="invalid-feedback">Mínimo 1 crédito</div>
+              </div>
+
+              <!-- ESTUDIANTES -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">
+                  <i class="bi bi-people me-1"></i> Estudiantes
+                </label>
+                <ng-container *ngIf="estudiantes$ | async as estudiantes; else loading">
+                  <div class="chip-list">
+                    <div
+                      class="chip"
+                      *ngFor="let email of asignaturaForm.get('estudiantes')?.value"
+                      (click)="removeEstudiante(email)"
+                    >
+                      {{ getNombreUsuario(email, estudiantes) }}
+                      <i class="bi bi-x"></i>
+                    </div>
+                    <input
+                      #estInput
+                      type="text"
+                      placeholder="Buscar estudiante..."
+                      class="chip-input"
+                      (input)="filter($event, estudiantes, 'estudiante')"
+                      (focus)="showEstudianteSuggestions = true"
+                    />
+                    <div class="suggestions" *ngIf="showEstudianteSuggestions && filteredEstudiantes.length">
+                      <div
+                        class="suggestion"
+                        *ngFor="let e of filteredEstudiantes"
+                        (mousedown)="selectEstudiante(e.correoInstitucional); estInput.value = ''"
+                      >
+                        {{ e.nombre }} {{ e.apellido }}
+                        <small class="text-muted d-block">{{ e.correoInstitucional }}</small>
+                      </div>
+                    </div>
+                  </div>
+                </ng-container>
+              </div>
+
+              <!-- PROFESORES -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold text-dark">
+                  <i class="bi bi-person-badge me-1"></i> Profesores
+                </label>
+                <ng-container *ngIf="profesores$ | async as profesores; else loading">
+                  <div class="chip-list">
+                    <div
+                      class="chip"
+                      *ngFor="let email of asignaturaForm.get('profesores')?.value"
+                      (click)="removeProfesor(email)"
+                    >
+                      {{ getNombreUsuario(email, profesores) }}
+                      <i class="bi bi-x"></i>
+                    </div>
+                    <input
+                      #profInput
+                      type="text"
+                      placeholder="Buscar profesor..."
+                      class="chip-input"
+                      (input)="filter($event, profesores, 'profesor')"
+                      (focus)="showProfesorSuggestions = true"
+                    />
+                    <div class="suggestions" *ngIf="showProfesorSuggestions && filteredProfesores.length">
+                      <div
+                        class="suggestion"
+                        *ngFor="let p of filteredProfesores"
+                        (mousedown)="selectProfesor(p.correoInstitucional); profInput.value = ''"
+                      >
+                        {{ p.nombre }} {{ p.apellido }}
+                        <small class="text-muted d-block">{{ p.correoInstitucional }}</small>
+                      </div>
+                    </div>
+                  </div>
+                </ng-container>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer border-0 p-4">
+            <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary rounded-3 d-flex align-items-center gap-2"
+              [disabled]="asignaturaForm.invalid || isSaving"
+            >
+              <span class="spinner-border spinner-border-sm" *ngIf="isSaving"></span>
+              {{ isEditMode ? 'Actualizar' : 'Crear' }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TEMPLATE LOADING -->
+  <ng-template #loading>
+    <div class="text-center py-3">
+      <div class="spinner-border spinner-border-sm text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <small class="text-muted d-block mt-1">Cargando usuarios...</small>
+    </div>
+  </ng-template>
+</section>

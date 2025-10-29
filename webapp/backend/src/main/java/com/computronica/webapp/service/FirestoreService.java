@@ -1,11 +1,13 @@
 // src/main/java/com/computronica/webapp/service/FirestoreService.java
 
+
 package com.computronica.webapp.service;
 
 import com.google.api.core.ApiFuture;
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.*;
 import com.google.cloud.firestore.SetOptions;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -83,11 +85,13 @@ public class FirestoreService {
     }
 
     // DELETE: ya está bien
+
     public void delete(String collection, String id) throws Exception {
         firestore.collection(collection).document(id).delete().get();
     }
 
     // === UTILIDADES (no tocar) ===
+
     private <T> void setDefaultStringDates(T entity) throws Exception {
         if (entity == null) return;
 
@@ -100,6 +104,7 @@ public class FirestoreService {
                 field.setAccessible(true);
                 if (field.get(entity) == null) {
                     System.out.println("Setting fechaRegistro to " + currentDate + " for entity: " + entity);
+
                     field.set(entity, currentDate);
                 }
             }
@@ -121,12 +126,14 @@ public class FirestoreService {
     }
 
     // fixFechaField → no tocar, está bien
+
     public void fixFechaField(String collection) throws Exception {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         String currentDate = dateFormat.format(new Date());
 
         List<QueryDocumentSnapshot> docs = firestore.collection(collection).get().get().getDocuments();
         for (QueryDocumentSnapshot doc : docs) {
+
             if (doc.contains("fecha")) {
                 Object fecha = doc.get("fecha");
                 String fechaString = fecha instanceof Timestamp
@@ -135,6 +142,7 @@ public class FirestoreService {
                 doc.getReference().update("fechaRegistro", fechaString).get();
                 doc.getReference().update("fecha", FieldValue.delete()).get();
             }
+
             if (doc.contains("fechaRegistro")) {
                 Object fechaRegistroObj = doc.get("fechaRegistro");
                 if (!(fechaRegistroObj instanceof String)) {
@@ -146,6 +154,7 @@ public class FirestoreService {
                     String fechaString = (String) fechaRegistroObj;
                     try {
                         dateFormat.parse(fechaString);
+
                     } catch (Exception e) {
                         System.out.println("Invalid fechaRegistro format for doc " + doc.getId() + ": " + fechaString);
                         doc.getReference().update("fechaRegistro", currentDate).get();
@@ -156,5 +165,6 @@ public class FirestoreService {
             }
         }
         System.out.println("Fixed fecha fields in collection: " + collection);
+
     }
 }

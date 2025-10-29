@@ -1,95 +1,186 @@
 <!-- src/app/components/users/users.component.html -->
-<div class="users-page">
+<section class="users-page container-fluid py-4">
   <!-- HEADER -->
-  <div class="section-header mb-4">
-    <h1 class="section-title">
-      <i class="bi bi-people-fill me-3"></i>
-      Gestión de Usuarios
-    </h1>
-    <div class="section-controls d-flex gap-3 align-items-center">
-      <input
-        [formControl]="searchControl"
-        class="form-control"
-        placeholder="Buscar por nombre, apellido o correo..."
-        aria-label="Buscar usuarios"
+  <header class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div>
+      <h1 class="h3 fw-bold text-primary mb-1">
+        <i class="bi bi-people-fill me-2"></i>
+        Gestión de Usuarios
+      </h1>
+      <p class="text-muted mb-0 small">Administración completa de cuentas</p>
+    </div>
+
+    <div class="d-flex flex-column flex-md-row gap-2 w-100 w-md-auto">
+      <!-- BUSCADOR -->
+      <div class="input-group input-group-sm" style="max-width: 220px;">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input
+          [formControl]="searchControl"
+          type="text"
+          class="form-control border-start-0 ps-0"
+          placeholder="Buscar usuario..."
+          aria-label="Buscar usuarios"
+        />
+      </div>
+
+      <!-- FILTRO TIPO -->
+      <div class="input-group input-group-sm" style="max-width: 180px;">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-funnel text-muted"></i>
+        </span>
+        <select
+          [formControl]="tipoFilter"
+          class="form-select border-start-0 ps-0"
+        >
+          <option value="all">Todos</option>
+          <option value="estudiante">Estudiantes</option>
+          <option value="profesor">Profesores</option>
+          <option value="administrativo">Administrativos</option>
+        </select>
+      </div>
+
+      <!-- BOTÓN NUEVO -->
+      <button
+        class="btn btn-primary d-flex align-items-center gap-2 shadow-sm"
+        (click)="openCreateModal()"
       >
-      <select [formControl]="tipoFilter" class="form-select" aria-label="Filtrar por tipo de usuario">
-        <option value="all">Todos los tipos</option>
-        <option value="estudiante">Estudiantes</option>
-        <option value="profesor">Profesores</option>
-        <option value="administrativo">Administrativos</option>
-      </select>
+        <i class="bi bi-person-plus-fill"></i>
+        <span class="d-none d-sm-inline">Nuevo</span>
+        <span class="d-inline d-sm-none">+</span>
+      </button>
     </div>
-  </div>
+  </header>
 
-  <!-- CONTENEDOR PARA ASYNC -->
+  <!-- CONTENEDOR PRINCIPAL -->
   <ng-container *ngIf="filteredUsers$ | async as users">
-    <!-- LOADING -->
-    <div *ngIf="isLoading" class="loading text-center my-5">
-      <div class="spinner"></div>
-      <p>Cargando usuarios...</p>
-    </div>
+    <!-- CARD PRINCIPAL -->
+    <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+      <div class="card-body p-0">
+        <!-- LOADING -->
+        <div class="p-5 text-center" *ngIf="isLoading">
+          <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+          <p class="mt-3 text-muted fs-5">Cargando usuarios...</p>
+        </div>
 
-    <!-- SIN DATOS -->
-    <div *ngIf="!isLoading && users.length === 0" class="empty text-center my-5">
-      <i class="bi bi-inbox display-1 text-muted"></i>
-      <p>No se encontraron usuarios</p>
-    </div>
+        <!-- EMPTY STATE -->
+        <div class="p-5 text-center" *ngIf="!isLoading && users.length === 0">
+          <i class="bi bi-inbox display-1 text-muted opacity-50"></i>
+          <p class="mt-3 text-muted h5">No se encontraron usuarios</p>
+          <button class="btn btn-outline-primary mt-2" (click)="openCreateModal()">
+            <i class="bi bi-person-plus-fill"></i> Crear primer usuario
+          </button>
+        </div>
 
-    <!-- TABLA -->
-    <div class="section-card" *ngIf="!isLoading && users.length > 0" data-aos="fade-up">
-      <div class="section-body">
-        <div class="table-responsive">
-          <table class="users-table">
-            <thead>
+        <!-- TABLA -->
+        <div class="table-responsive" *ngIf="!isLoading && users.length > 0">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
               <tr>
-                <th><i class="bi bi-person-circle me-2"></i>Usuario</th>
-                <th><i class="bi bi-hash me-2"></i>Código</th>
-                <th><i class="bi bi-envelope me-2"></i>Correo</th>
-                <th><i class="bi bi-person-vcard me-2"></i>Tipo</th>
-                <th><i class="bi bi-building me-2"></i>Sede</th>
-                <th><i class="bi bi-toggle-on me-2"></i>Estado</th>
-                <th class="text-end"><i class="bi bi-calendar-event me-2"></i>Creación</th>
+                <th class="ps-4 py-3 text-dark fw-semibold">Usuario</th>
+                <th class="py-3 text-dark fw-semibold">Código</th>
+                <th class="py-3 text-dark fw-semibold">Correo</th>
+                <th class="py-3 text-dark fw-semibold">Tipo</th>
+                <th class="py-3 text-dark fw-semibold">Sede</th>
+                <th class="py-3 text-center text-dark fw-semibold">Estado</th>
+                <th class="py-3 text-dark fw-semibold">Creación</th>
+                <th class="text-end pe-4 py-3"></th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let user of users; let i = index"
-                  [attr.data-aos]="'fade-up'" [attr.data-aos-delay]="i * 80">
-                <td class="user-cell">
-                  <div class="user-info d-flex align-items-center">
-                    <div class="avatar me-2">
-                      <i [ngClass]="getAvatarIcon(user.id || 'default')"
-                         [style.color]="getAvatarColor(user.id || 'default')"></i>
+              <tr
+                *ngFor="let user of users; let i = index"
+                class="animate__animated animate__fadeIn"
+                [style.animation-delay.ms]="i * 60"
+              >
+                <!-- USUARIO -->
+                <td class="ps-4">
+                  <div class="d-flex align-items-center">
+                    <div
+                      class="avatar avatar-sm rounded-circle me-3 d-flex align-items-center justify-content-center text-white fw-bold"
+                      [style.background-color]="getAvatarColor(user.id!)"
+                    >
+                      {{ getInitials(user) }}
                     </div>
                     <div>
-                      <div class="name">{{ user.nombre }} {{ user.apellido }}</div>
-                      <small class="id text-muted">{{ user.id }}</small>
+                      <div class="fw-medium text-dark">{{ user.nombre }} {{ user.apellido }}</div>
+                      <small class="text-muted">{{ user.id }}</small>
                     </div>
                   </div>
                 </td>
-                <td>{{ user.codigoInstitucional }}</td>
-                <td>{{ user.correoInstitucional }}</td>
+
+                <!-- CÓDIGO -->
                 <td>
-                  <span class="badge"
-                        [ngClass]="{
-                          'bg-primary': user.tipo === tipoUsuario.estudiante,
-                          'bg-success': user.tipo === tipoUsuario.profesor,
-                          'bg-info': user.tipo === tipoUsuario.administrativo
-                        }">
+                  <code class="bg-light px-2 py-1 rounded">{{ user.codigoInstitucional }}</code>
+                </td>
+
+                <!-- CORREO -->
+                <td>
+                  <a [href]="'mailto:' + user.correoInstitucional" class="text-decoration-none">
+                    {{ user.correoInstitucional }}
+                  </a>
+                </td>
+
+                <!-- TIPO -->
+                <td>
+                  <span
+                    class="badge px-3 py-2 text-white"
+                    [ngClass]="{
+                      'bg-info': user.tipo === 'estudiante',
+                      'bg-success': user.tipo === 'profesor',
+                      'bg-warning': user.tipo === 'administrativo'
+                    }"
+                  >
                     {{ user.tipo | titlecase }}
                   </span>
                 </td>
-                <td>{{ user.sede }}</td>
+
+                <!-- SEDE -->
                 <td>
-                  <i class="bi" [ngClass]="user.estado ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"
-                     [class]="getStatusClass(user.estado)"></i>
-                  {{ user.estado ? 'Activo' : 'Inactivo' }}
+                  <span class="badge bg-secondary text-white px-3 py-2">
+                    {{ user.sede }}
+                  </span>
                 </td>
-                <td class="text-end">
-                  <ng-container *ngIf="getCreatedAtDate(user)">
-                    {{ getCreatedAtDate(user) | date:'dd MMM, yyyy' : 'es-ES' }}
-                  </ng-container>
-                  <ng-container *ngIf="!getCreatedAtDate(user)">N/A</ng-container>
+
+                <!-- ESTADO -->
+                <td class="text-center">
+                  <i
+                    class="bi fs-5"
+                    [ngClass]="user.estado ? 'bi-check-circle-fill text-success' : 'bi-x-circle-fill text-danger'"
+                  ></i>
+                  <span class="ms-1 small fw-medium">
+                    {{ user.estado ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+
+                <!-- CREACIÓN -->
+                <td>
+                  <small class="text-muted">
+                    {{ getCreatedAtDate(user) | date:'dd MMM yyyy' }}
+                  </small>
+                </td>
+
+                <!-- ACCIONES -->
+                <td class="text-end pe-4">
+                  <div class="btn-group" role="group">
+                    <button
+                      class="btn btn-outline-primary btn-sm rounded-start"
+                      (click)="openEditModal(user)"
+                      title="Editar"
+                    >
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button
+                      class="btn btn-outline-warning btn-sm rounded-end"
+                      (click)="toggleUserStatus(user)"
+                      [title]="user.estado ? 'Desactivar' : 'Activar'"
+                    >
+                      <i [ngClass]="user.estado ? 'bi-toggle-on' : 'bi-toggle-off'"></i>
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -97,32 +188,180 @@
         </div>
       </div>
 
-      <!-- PAGINACIÓN -->
-      <div class="section-footer mt-4 d-flex justify-content-between align-items-center">
-        <div class="pagination-info">
-          Mostrando {{ (currentPage - 1) * pageSize + 1 }} -
-          {{ (currentPage * pageSize) > users.length ? users.length : (currentPage * pageSize) }}
-          de {{ users.length }} usuarios
+      <!-- FOOTER PAGINACIÓN -->
+      <div class="card-footer bg-light border-0 px-4 py-3" *ngIf="users.length > 0">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+          <small class="text-muted">
+            Mostrando <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> -
+            <strong>{{ getEndIndex() }}</strong> de
+            <strong>{{ totalFilteredUsers }}</strong> usuarios
+          </small>
+
+          <nav aria-label="Paginación">
+            <ul class="pagination pagination-sm mb-0">
+              <li class="page-item" [class.disabled]="currentPage === 1">
+                <button class="page-link rounded-start" (click)="changePage(currentPage - 1)">
+                  Previous
+                </button>
+              </li>
+              <li
+                class="page-item"
+                *ngFor="let p of pages"
+                [class.active]="p === currentPage"
+              >
+                <button class="page-link" (click)="changePage(p)">{{ p }}</button>
+              </li>
+              <li class="page-item" [class.disabled]="currentPage === totalPages">
+                <button class="page-link rounded-end" (click)="changePage(currentPage + 1)">
+                  Next
+                </button>
+              </li>
+            </ul>
+          </nav>
         </div>
-        <nav aria-label="Paginación de usuarios">
-          <ul class="pagination">
-            <li class="page-item" [class.disabled]="currentPage === 1">
-              <button class="page-link" (click)="changePage(currentPage - 1)" aria-label="Página anterior">
-                <i class="bi bi-chevron-left"></i>
-              </button>
-            </li>
-            <li class="page-item" *ngFor="let page of pages"
-                [class.active]="page === currentPage">
-              <button class="page-link" (click)="changePage(page)">{{ page }}</button>
-            </li>
-            <li class="page-item" [class.disabled]="currentPage === totalPages">
-              <button class="page-link" (click)="changePage(currentPage + 1)" aria-label="Página siguiente">
-                <i class="bi bi-chevron-right"></i>
-              </button>
-            </li>
-          </ul>
-        </nav>
       </div>
     </div>
   </ng-container>
-</div>
+
+  <!-- MODAL -->
+  <ng-template #userModal let-modal>
+    <div class="modal-content border-0 shadow-lg rounded-3">
+      <div class="modal-header bg-gradient-primary text-white border-0 rounded-top">
+        <h5 class="modal-title fw-bold">
+          <i class="bi me-2" [ngClass]="isEditMode ? 'bi-pencil' : 'bi-person-plus-fill'"></i>
+          {{ isEditMode ? 'Editar Usuario' : 'Crear Usuario' }}
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="modal.dismiss()"></button>
+      </div>
+
+      <div class="modal-body p-4">
+        <form [formGroup]="userForm" (ngSubmit)="saveUser()">
+          <div class="row g-3">
+            <!-- NOMBRE -->
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">
+                <i class="bi bi-person me-1"></i> Nombre
+              </label>
+              <input
+                type="text"
+                class="form-control rounded-3"
+                formControlName="nombre"
+                placeholder="Juan"
+                [class.is-invalid]="userForm.get('nombre')?.invalid && userForm.get('nombre')?.touched"
+              />
+              <div class="invalid-feedback">Nombre requerido</div>
+            </div>
+
+            <!-- APELLIDO -->
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">
+                <i class="bi bi-person-badge me-1"></i> Apellido
+              </label>
+              <input
+                type="text"
+                class="form-control rounded-3"
+                formControlName="apellido"
+                placeholder="Pérez"
+                [class.is-invalid]="userForm.get('apellido')?.invalid && userForm.get('apellido')?.touched"
+              />
+              <div class="invalid-feedback">Apellido requerido</div>
+            </div>
+
+            <!-- CÓDIGO -->
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">
+                <i class="bi bi-hash me-1"></i> Código
+              </label>
+              <input
+                type="text"
+                class="form-control rounded-3"
+                formControlName="codigoInstitucional"
+                placeholder="Ej: 2023001"
+                [class.is-invalid]="userForm.get('codigoInstitucional')?.invalid && userForm.get('codigoInstitucional')?.touched"
+              />
+              <div class="invalid-feedback">Mínimo 3 caracteres</div>
+            </div>
+
+            <!-- SEDE -->
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">
+                <i class="bi bi-geo-alt me-1"></i> Sede
+              </label>
+              <select
+                class="form-select rounded-3"
+                formControlName="sede"
+                [class.is-invalid]="userForm.get('sede')?.invalid && userForm.get('sede')?.touched"
+              >
+                <option value="" disabled>Seleccionar sede...</option>
+                <option *ngFor="let s of sedes" [value]="s">{{ s }}</option>
+              </select>
+              <div class="invalid-feedback">Selecciona una sede</div>
+            </div>
+
+            <!-- CORREO -->
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">
+                <i class="bi bi-envelope me-1"></i> Correo Institucional
+              </label>
+              <input
+                type="email"
+                class="form-control rounded-3"
+                formControlName="correoInstitucional"
+                placeholder="juan@inst.edu.co"
+                [readonly]="isEditMode"
+                [class.is-invalid]="userForm.get('correoInstitucional')?.invalid && userForm.get('correoInstitucional')?.touched"
+              />
+              <div class="invalid-feedback">Correo válido requerido</div>
+            </div>
+
+            <!-- CONTRASEÑA (solo creación) -->
+            <div class="col-md-6" *ngIf="!isEditMode">
+              <label class="form-label fw-semibold text-dark">
+                <i class="bi bi-lock me-1"></i> Contraseña
+              </label>
+              <input
+                type="password"
+                class="form-control rounded-3"
+                formControlName="contrasena"
+                placeholder="Mínimo 6 caracteres"
+                [class.is-invalid]="userForm.get('contrasena')?.invalid && userForm.get('contrasena')?.touched"
+              />
+              <div class="invalid-feedback">Mínimo 6 caracteres</div>
+            </div>
+
+            <!-- TIPO -->
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">
+                <i class="bi bi-person-gear me-1"></i> Tipo de Usuario
+              </label>
+              <select class="form-select rounded-3" formControlName="tipo">
+                <option [ngValue]="tipoUsuario.estudiante">Estudiante</option>
+                <option [ngValue]="tipoUsuario.profesor">Profesor</option>
+                <option [ngValue]="tipoUsuario.administrativo">Administrativo</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-footer border-0 p-4 pt-3">
+            <button
+              type="button"
+              class="btn btn-outline-secondary rounded-3"
+              (click)="modal.dismiss()"
+              [disabled]="isSaving"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary rounded-3 d-flex align-items-center gap-2"
+              [disabled]="userForm.invalid || isSaving"
+            >
+              <span class="spinner-border spinner-border-sm" *ngIf="isSaving"></span>
+              {{ isSaving ? 'Guardando...' : 'Guardar' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </ng-template>
+</section>
