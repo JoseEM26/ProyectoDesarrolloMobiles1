@@ -7,7 +7,7 @@
 
 ---
 
-🚀 Proyecto Full Stack desarrollado con **Angular 20**, **Spring Boot**, **Firebase**, y **Android Jetpack Compose**,  
+🚀 Proyecto Full Stack desarrollado con **Angular 20**, **Spring Boot**, **Firebase** y **Android Jetpack Compose**,  
 orientado a la gestión académica, administrativa y de comunicación del Instituto Computrónica.
 
 </div>
@@ -35,7 +35,7 @@ orientado a la gestión académica, administrativa y de comunicación del Instit
 
 ## 🏫 Sobre el proyecto
 
-**Computrónica** es un ecosistema digital educativo que permite:
+**Computrónica** es un ecosistema digital educativo que permite:  
 - 📋 Gestionar estudiantes, docentes y administrativos.  
 - 🎫 Controlar calificaciones, asignaturas y matrículas.  
 - 🧾 Emitir boletas digitales y reportes académicos.  
@@ -48,3 +48,71 @@ orientado a la gestión académica, administrativa y de comunicación del Instit
 
 ## 🧱 Arquitectura del Sistema
 
+┌──────────────────────────────┐
+│ Angular 20 (Web) │
+│ - RxJS / Standalone / AOS │
+│ - Bootstrap / SCSS / Pipes │
+└──────────────┬───────────────┘
+│ REST API
+┌──────────────┴───────────────┐
+│ Spring Boot 3 API │
+│ - Spring Security / JWT │
+│ - Service / Controller / DTO│
+└──────────────┬───────────────┘
+│
+┌──────────────┴───────────────┐
+│ Firebase Cloud │
+│ Firestore | Auth | Storage │
+└───────────────────────────────┘
+│
+┌──────────────┴───────────────┐
+│ Android (Compose App) │
+│ - Kotlin / Material 3 / MVVM│
+└───────────────────────────────┘
+
+---
+
+## 🌟 Características destacadas
+
+- 🎨 **UI/UX moderna y responsiva** con Angular Standalone y Bootstrap 5.  
+- 🔄 **Integración completa con Firebase** (Auth, Firestore, Storage).  
+- 🔐 **Seguridad avanzada** con Spring Security + JWT Tokens.  
+- ⚙️ **API REST escalable** con arquitectura MVC.  
+- 📱 **App móvil sincronizada** (Android Jetpack Compose).  
+- 🤖 **IA integrada** con TensorFlow Token.  
+- 📈 **Dashboard interactivo** con estadísticas y filtros dinámicos.  
+- 🧾 **Módulos**: Usuarios, Calificaciones, Asignaturas, Reportes, etc.
+
+---
+
+## 🖼️ Capturas de pantalla
+
+<div align="center">
+
+| 🖥️ Web | 📱 Móvil |
+|--------|----------|
+| <img src="assets/dashboard-web.png" width="450"> | <img src="assets/app-home.png" width="300"> |
+| <img src="assets/usuarios-list.png" width="450"> | <img src="assets/app-login.png" width="300"> |
+
+</div>
+
+> 📌 *Las imágenes son representativas del diseño implementado en Angular y Android Studio.*
+
+---
+
+## ⚡ Estructura del repositorio
+
+📦 computronica/
+┣ 📁 backend/
+┃ ┣ 📁 src/main/java/com/computronica/webapp/
+┃ ┣ 📁 resources/
+┃ ┗ 📄 pom.xml
+┣ 📁 frontend/
+┃ ┣ 📁 src/app/
+┃ ┣ 📁 src/assets/
+┃ ┗ 📄 angular.json
+┣ 📁 mobile/
+┃ ┣ 📁 app/src/main/
+┃ ┗ 📄 build.gradle
+┣ 📄 README.md
+┗ 📄 package.json
