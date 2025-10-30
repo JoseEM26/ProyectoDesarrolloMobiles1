@@ -7,7 +7,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.computronica.Model.Asignatura
-import com.example.computronica.Model.Calificaciones
+import com.example.computronica.Model.Calificacion
 import com.example.computronica.R
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class AsignaturasNotasAdapter(
-    private val notasPorAsignatura: Map<String, List<Calificaciones>>
+    private val notasPorAsignatura: Map<String, List<Calificacion>>
 ) : RecyclerView.Adapter<AsignaturasNotasAdapter.ViewHolder>() {
 
     private val asignaturaIds = notasPorAsignatura.keys.toList()

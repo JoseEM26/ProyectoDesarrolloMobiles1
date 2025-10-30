@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.computronica.Adapter.ListaEstudiantesAdapter
 import com.example.computronica.Model.Asignatura
-import com.example.computronica.Model.Calificaciones
+import com.example.computronica.Model.Calificacion
 import com.example.computronica.Model.Usuario
 import com.example.computronica.databinding.FragmentListaEstudiantesNotasBinding
 import com.google.firebase.firestore.FirebaseFirestore
@@ -100,7 +100,7 @@ class ListaEstudiantesNotasFragment : Fragment() {
                                 .await()
 
                             val notas = notasSnapshot.documents.mapNotNull { doc ->
-                                doc.toObject(Calificaciones::class.java)
+                                doc.toObject(Calificacion::class.java)
                             }
 
                             // Calcular promedio
@@ -166,7 +166,7 @@ class ListaEstudiantesNotasFragment : Fragment() {
     // Data class para manejar estudiantes con sus notas
     data class EstudianteConNotas(
         val estudiante: Usuario,
-        val notas: List<Calificaciones>,
+        val notas: List<Calificacion>,
         val promedio: Double
     )
 }

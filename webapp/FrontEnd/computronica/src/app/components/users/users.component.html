@@ -173,13 +173,15 @@
                     >
                       <i class="bi bi-pencil"></i>
                     </button>
-                    <button
-                      class="btn btn-outline-warning btn-sm rounded-end"
-                      (click)="toggleUserStatus(user)"
-                      [title]="user.estado ? 'Desactivar' : 'Activar'"
-                    >
-                      <i [ngClass]="user.estado ? 'bi-toggle-on' : 'bi-toggle-off'"></i>
-                    </button>
+                 <button
+  class="btn btn-sm rounded-end"
+  [class.btn-outline-success]="!user.estado"
+  [class.btn-outline-danger]="user.estado"
+  (click)="toggleUserStatus(user)"
+  [title]="user.estado ? 'Desactivar usuario' : 'Activar usuario'"
+>
+  <i [ngClass]="user.estado ? 'bi-toggle-on' : 'bi-toggle-off'"></i>
+</button>
                   </div>
                 </td>
               </tr>

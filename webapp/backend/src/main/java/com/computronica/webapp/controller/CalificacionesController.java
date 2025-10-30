@@ -17,13 +17,50 @@ public class CalificacionesController {
     private FirestoreService firestoreService;
 
     @PostMapping
-    public ResponseEntity<Calificaciones> create(@RequestBody Calificaciones calificacion) throws Exception {
-        String id = firestoreService.create("calificaciones", calificacion);
-        calificacion.setId(id); // ← ASIGNA EL ID
-        return ResponseEntity.ok(calificacion);
+    public ResponseEntity<Calificaciones> create(@RequestBody Calificaciones calificacion) {
+        try {
+            System.out.println("=== [CREATE CALIFICACIÓN] Recibido ===");
+            System.out.println("Entrada: " + calificacion);
 
+            if (calificacion == null) {
+                System.err.println("ERROR: Calificación es null");
+                return ResponseEntity.badRequest().body(null);
+            }
+
+            // VALIDACIONES
+            if (calificacion.getAsignaturaId() == null || calificacion.getAsignaturaId().trim().isEmpty()) {
+                System.err.println("ERROR: asignaturaId requerido");
+                return ResponseEntity.badRequest().body(null);
+            }
+            if (calificacion.getEstudianteId() == null || calificacion.getEstudianteId().trim().isEmpty()) {
+                System.err.println("ERROR: estudianteId requerido");
+                return ResponseEntity.badRequest().body(null);
+            }
+            if (calificacion.getEvaluacion() == null || calificacion.getEvaluacion().trim().isEmpty()) {
+                System.err.println("ERROR: evaluacion requerida");
+                return ResponseEntity.badRequest().body(null);
+            }
+
+            // NO TOQUES EL ID AQUÍ
+            // calificacion.setId(null); // ← ¡NO HAGAS ESTO!
+
+            System.out.println("Llamando a FirestoreService.create()...");
+            String generatedId = firestoreService.create("calificaciones", calificacion);
+
+            // ASIGNAR SOLO PARA LA RESPUESTA
+            calificacion.setId(generatedId);
+
+            System.out.println("=== [ÉXITO] ID generado: " + generatedId);
+            System.out.println("Objeto final: " + calificacion);
+
+            return ResponseEntity.ok(calificacion);
+
+        } catch (Exception e) {
+            System.err.println("=== [ERROR] Fallo al crear calificación ===");
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(null);
+        }
     }
-
     @GetMapping("/{id}")
     public ResponseEntity<Calificaciones> getById(@PathVariable String id) throws Exception {
         Calificaciones calificacion = firestoreService.getById("calificaciones", id, Calificaciones.class);

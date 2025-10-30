@@ -8,12 +8,12 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.computronica.Model.Calificaciones
+import com.example.computronica.Model.Calificacion
 import com.example.computronica.R
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class NotasEstudianteAdapter : ListAdapter<Calificaciones, NotasEstudianteAdapter.ViewHolder>(DiffCallback) {
+class NotasEstudianteAdapter : ListAdapter<Calificacion, NotasEstudianteAdapter.ViewHolder>(DiffCallback) {
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val txtEvaluacion: TextView = itemView.findViewById(R.id.txtEvaluacion)
@@ -51,12 +51,12 @@ class NotasEstudianteAdapter : ListAdapter<Calificaciones, NotasEstudianteAdapte
         holder.txtNota.setTextColor(color)
     }
 
-    companion object DiffCallback : DiffUtil.ItemCallback<Calificaciones>() {
-        override fun areItemsTheSame(oldItem: Calificaciones, newItem: Calificaciones): Boolean {
+    companion object DiffCallback : DiffUtil.ItemCallback<Calificacion>() {
+        override fun areItemsTheSame(oldItem: Calificacion, newItem: Calificacion): Boolean {
             return oldItem.id == newItem.id
         }
 
-        override fun areContentsTheSame(oldItem: Calificaciones, newItem: Calificaciones): Boolean {
+        override fun areContentsTheSame(oldItem: Calificacion, newItem: Calificacion): Boolean {
             return oldItem == newItem
         }
     }

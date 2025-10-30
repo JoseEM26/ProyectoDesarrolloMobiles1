@@ -22,5 +22,6 @@
         <color name="gris_claro_night">#90A4AE</color>
         <color name="gris_oscuro_night">#78909C</color>
         <color name="BackGround_night">#212121</color>
-
+    <color name="azul_claro">#2196F3</color>
+    <color name="verde_promedio">#4CAF50</color>
 </resources>

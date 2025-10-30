@@ -8,12 +8,11 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.computronica.Adapter.NotasEstudianteAdapter
 import com.example.computronica.Model.Asignatura
-import com.example.computronica.Model.Calificaciones
+import com.example.computronica.Model.Calificacion
 import com.example.computronica.Model.Usuario
 import com.example.computronica.databinding.FragmentDetalleNotasEstudianteBinding
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
-import java.text.DecimalFormat
 
 class DetalleNotasEstudianteProfesorFragment : Fragment() {
 
@@ -91,7 +90,7 @@ class DetalleNotasEstudianteProfesorFragment : Fragment() {
 
             if (snapshot != null && !snapshot.isEmpty) {
                 val notas = snapshot.documents.mapNotNull { doc ->
-                    doc.toObject(Calificaciones::class.java)?.copy(id = doc.id)
+                    doc.toObject(Calificacion::class.java)?.copy(id = doc.id)
                 }.sortedBy { it.fecha }
 
                 if (notas.isNotEmpty()) {

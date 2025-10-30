@@ -25,12 +25,15 @@ export interface Asignatura {
   profesores: string[];
   estudiantes: string[];
 }
-
 export interface Tema {
   id?: string;
   asignaturaId: string;
   nombre: string;
+  descripcion?: string;
+  estado?: boolean;
+  fechaCreacion?: Date | any;
 }
+
 
 export enum TipoUsuario {
   estudiante = 'estudiante',

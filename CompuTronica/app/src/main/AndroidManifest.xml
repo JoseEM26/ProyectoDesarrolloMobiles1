@@ -16,6 +16,9 @@
         android:theme="@style/Theme.CompuTronica"
         tools:targetApi="31">
         <activity
+            android:name=".NotasActivity"
+            android:exported="false" />
+        <activity
             android:name=".TemaActivity"
             android:exported="false" />
         <activity

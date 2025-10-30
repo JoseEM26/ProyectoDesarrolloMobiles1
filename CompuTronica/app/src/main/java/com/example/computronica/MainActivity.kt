@@ -7,6 +7,8 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.example.computronica.Model.TipoUsuario
+import com.example.computronica.Model.Usuario
 import com.example.computronica.databinding.ActivityMainBinding
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
@@ -25,7 +27,7 @@ class MainActivity : AppCompatActivity() {
     private var isLoading = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Check user session
+        // Verificar sesión
         val usuario = SessionManager.currentUser
         val firebaseUser = FirebaseAuth.getInstance().currentUser
         if (usuario == null || firebaseUser == null) {
@@ -41,56 +43,81 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbarMain)
         supportActionBar?.setDisplayHomeAsUpEnabled(false)
 
-        // Configure toolbar
-        updateToolbar("Dashboard", "Bienvenido a Computrónica")
+        // Configurar navegación según el tipo de usuario
+        setupBottomNavigation(usuario)
 
-        // Set up bottom navigation with debouncing
-        binding.bottomNav.setOnItemSelectedListener { item ->
-            val currentTime = System.currentTimeMillis()
-            if (isLoading) {
-                Log.d("MainActivity", "Navigation blocked due to loading")
-                false
-            } else if (currentTime - lastClickTime > debounceDelay) {
-                lastClickTime = currentTime
-                when (item.itemId) {
-                    R.id.nav_inicio -> {
-                        if (currentFragment !is DashBoardActivity) {
-                            changeFrame(DashBoardActivity())
-                            updateToolbar("Dashboard", "Bienvenido a Computrónica")
-                        }
-                        true
-                    }
-                    R.id.nav_asignatura -> {
-                        if (currentFragment !is AsignaturaActivity) {
-                            changeFrame(AsignaturaActivity())
-                            updateToolbar("Asignaturas", "Gestión de cursos y docentes")
-                        }
-                        true
-                    }
-                    R.id.nav_calificaoiones -> {
-                        if (currentFragment !is MisNotasFragment) {
-                            changeFrame(MisNotasFragment())
-                            updateToolbar("Calificaciones", "Mis calificaciones")
-                        }
-                        true
-                    }
-                    R.id.nav_more -> {
-                        if (currentFragment !is MoreMenuNavActivity) {
-                            changeFrame(MoreMenuNavActivity())
-                            updateToolbar("Más opciones", "Configuraciones y soporte")
-                        }
-                        true
-                    }
-                    else -> false
-                }
-            } else {
-                false
+        // Fragmento por defecto
+        if (savedInstanceState == null) {
+            binding.bottomNav.selectedItemId = R.id.nav_inicio
+            changeFrame(DashBoardActivity())
+            updateToolbar("Dashboard", "Bienvenido a Computrónica")
+        }
+    }
+
+    private fun setupBottomNavigation(usuario: Usuario) {
+        // Limpiar menú actual
+        binding.bottomNav.menu.clear()
+
+        // Inflar menú base (común)
+        when (usuario.tipo) {
+            TipoUsuario.administrativo -> {
+                binding.bottomNav.inflateMenu(R.menu.bottom_nav_admin)
+            }
+            TipoUsuario.estudiante, TipoUsuario.profesor -> {
+                binding.bottomNav.inflateMenu(R.menu.bottom_nav_student_teacher)
             }
         }
 
-        // Set default fragment
-        if (savedInstanceState == null) {
-            binding.bottomNav.selectedItemId = R.id.nav_inicio
+        // Configurar listener
+        binding.bottomNav.setOnItemSelectedListener { item ->
+            val currentTime = System.currentTimeMillis()
+            if (isLoading) {
+                Log.d("MainActivity", "Navegación bloqueada por carga")
+                return@setOnItemSelectedListener false
+            }
+            if (currentTime - lastClickTime <= debounceDelay) {
+                return@setOnItemSelectedListener false
+            }
+            lastClickTime = currentTime
+
+            when (item.itemId) {
+                R.id.nav_inicio -> {
+                    if (currentFragment !is DashBoardActivity) {
+                        changeFrame(DashBoardActivity())
+                        updateToolbar("Dashboard", "Bienvenido a Computrónica")
+                    }
+                    true
+                }
+                R.id.nav_asignatura -> {
+                    if (currentFragment !is AsignaturaActivity) {
+                        changeFrame(AsignaturaActivity())
+                        updateToolbar("Asignaturas", "Gestión de cursos y docentes")
+                    }
+                    true
+                }
+                R.id.nav_calificaoiones -> {
+                    if (currentFragment !is MisNotasFragment) {
+                        changeFrame(MisNotasFragment())
+                        updateToolbar("Calificaciones", "Mis calificaciones")
+                    }
+                    true
+                }
+                R.id.nav_chat -> {
+                    if (currentFragment !is ChatFragment) {
+                        changeFrame(ChatFragment())
+                        updateToolbar("Chat", "Mensajes con docentes")
+                    }
+                    true
+                }
+                R.id.nav_more -> {
+                    if (currentFragment !is MoreMenuNavActivity) {
+                        changeFrame(MoreMenuNavActivity())
+                        updateToolbar("Más opciones", "Configuraciones y soporte")
+                    }
+                    true
+                }
+                else -> false
+            }
         }
     }
 
@@ -107,17 +134,14 @@ class MainActivity : AppCompatActivity() {
                 if (!isFinishing && !supportFragmentManager.isStateSaved) {
                     supportFragmentManager.beginTransaction()
                         .replace(R.id.frameLayout, fragment)
-                        .commit()
+                        .commitAllowingStateLoss() // Más seguro
                     currentFragment = fragment
-                    // Hide loading when changing to a non-DashBoardFragment
                     if (fragment !is DashBoardActivity) {
                         setLoading(false)
                     }
-                } else {
-                    Log.w("MainActivity", "Cannot commit fragment transaction: Activity is finishing or state saved")
                 }
             } catch (e: Exception) {
-                Log.e("MainActivity", "Error in fragment transaction: ${e.message}")
+                Log.e("MainActivity", "Error en transacción de fragmento: ${e.message}")
             }
         }
     }

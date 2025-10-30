@@ -15,6 +15,7 @@ import com.example.computronica.MainActivity
 import com.example.computronica.Model.Asignatura
 import com.example.computronica.Model.TipoUsuario
 import com.example.computronica.Model.Usuario
+import com.example.computronica.NotasActivity
 import com.example.computronica.R
 import com.example.computronica.SessionManager
 import com.example.computronica.TemaActivity
@@ -100,7 +101,7 @@ class AsignaturasAdapter(
 
     private fun showPopupMenu(view: View, asignatura: Asignatura, usuario: Usuario, context: android.content.Context) {
         val popup = PopupMenu(context, view)
-        popup.menuInflater.inflate(R.menu.menu_usuario, popup.menu)
+        popup.menuInflater.inflate(R.menu.menu_asignatura, popup.menu)
 
         when (usuario.tipo) {
             TipoUsuario.estudiante -> {
@@ -134,7 +135,7 @@ class AsignaturasAdapter(
                         onEdit(asignatura)
                         true
                     } else {
-                        Toast.makeText(context, "❌ No tienes permiso para editar", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "No tienes permiso para editar", Toast.LENGTH_SHORT).show()
                         false
                     }
                 }
@@ -143,7 +144,28 @@ class AsignaturasAdapter(
                         showDeleteConfirmation(asignatura, context)
                         true
                     } else {
-                        Toast.makeText(context, "❌ Solo los administradores pueden eliminar asignaturas", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Solo los administradores pueden eliminar asignaturas", Toast.LENGTH_SHORT).show()
+                        false
+                    }
+                }
+                R.id.action_notas -> {
+                    // Permitir solo a profesores y administrativos
+                    if (usuario.tipo == TipoUsuario.profesor || usuario.tipo == TipoUsuario.administrativo) {
+                        val fragment = NotasActivity().apply {
+                            arguments = Bundle().apply {
+                                putSerializable("asignatura", asignatura)
+                            }
+                        }
+                        // Asegúrate de que el contexto sea MainActivity
+                        val mainActivity = context as? MainActivity
+                        if (mainActivity != null) {
+                            mainActivity.changeFrame(fragment)
+                        } else {
+                            Toast.makeText(context, "Error al abrir notas", Toast.LENGTH_SHORT).show()
+                        }
+                        true
+                    } else {
+                        Toast.makeText(context, "Solo profesores pueden gestionar notas", Toast.LENGTH_SHORT).show()
                         false
                     }
                 }

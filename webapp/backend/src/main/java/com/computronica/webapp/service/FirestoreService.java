@@ -22,17 +22,26 @@ public class FirestoreService {
     @Autowired
     private Firestore firestore;
 
-    // CREATE: devuelve ID y lo asigna al objeto
+    // CREATE: genera ID, lo asigna al objeto y lo guarda en Firestore
     public <T> String create(String collection, T entity) throws Exception {
         setDefaultStringDates(entity);
+
+        // 1. Crear el documento → Firestore genera el ID
         ApiFuture<DocumentReference> future = firestore.collection(collection).add(entity);
         DocumentReference docRef = future.get();
-        String id = docRef.getId();
+        String generatedId = docRef.getId();
 
-        // Asignar ID al objeto usando reflexión
-        assignIdToEntity(entity, id);
+        // 2. Asignar el ID al objeto
+        assignIdToEntity(entity, generatedId);
 
-        return id;
+        // 3. ACTUALIZAR el documento en Firestore con el campo 'id'
+        firestore.collection(collection)
+                .document(generatedId)
+                .update("id", generatedId)
+                .get(); // ← ¡AQUÍ SE GUARDA EL ID EN FIRESTORE!
+
+        System.out.println("ID generado y asignado: " + generatedId);
+        return generatedId;
     }
 
     // UPDATE: usa merge para no borrar campos

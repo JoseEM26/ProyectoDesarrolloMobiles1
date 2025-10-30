@@ -36,7 +36,38 @@ export class UsuarioService {
       catchError(() => of([]))
     );
   }
+// NUEVO: TOGGLE ESTADO
+  toggleEstado(id: string): Observable<Usuario> {
+    return this.http.patch<Usuario>(
+      `${this.apiUrl}/${id}/toggle-estado`,
+      {},
+      { headers: this.getHeaders() }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
 
+  // NUEVO: INHABILITAR
+  inhabilitar(id: string): Observable<void> {
+    return this.http.patch<void>(
+      `${this.apiUrl}/${id}/inhabilitar`,
+      {},
+      { headers: this.getHeaders() }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  // NUEVO: HABILITAR
+  habilitar(id: string): Observable<void> {
+    return this.http.patch<void>(
+      `${this.apiUrl}/${id}/habilitar`,
+      {},
+      { headers: this.getHeaders() }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
   // OBTENER POR ID
   getById(id: string): Observable<Usuario> {
     return this.http.get<Usuario>(`${this.apiUrl}/${id}`).pipe(
