@@ -10,7 +10,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.example.computronica.Model.Calificaciones
+import com.example.computronica.Model.Calificacion
 import com.example.computronica.Model.TipoUsuario
 import com.example.computronica.Model.Usuario
 import com.example.computronica.databinding.ActivityDashBoardBinding
@@ -291,7 +291,7 @@ class DashBoardActivity : Fragment() {
             val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
             for (doc in snapshot.documents) {
-                val calificacion = doc.toObject(Calificaciones::class.java) ?: continue
+                val calificacion = doc.toObject(Calificacion::class.java) ?: continue
                 val asignaturaDoc = db.collection("asignaturas")
                     .document(calificacion.asignaturaId).get().await()
                 val asignaturaNombre = asignaturaDoc.getString("nombre") ?: "Desconocida"

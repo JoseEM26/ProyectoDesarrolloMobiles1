@@ -17,7 +17,7 @@
     <string name="hint_CorreoInsti">Correo Institucional</string>
     <string name="hint_Constrasena">Contraseña</string>
     <string name="hint_codigoInsti">Codigo Institucional</string>
-
+    <string name="tab_chat">Chat</string>
     <string name="btn_crear_nuevo_usuario">Crear usuario</string>
     <string name="btn_agregar_usuario">Crear usuario</string>
     <string name="btn_agregar_asignatura">Crear asignatura</string>

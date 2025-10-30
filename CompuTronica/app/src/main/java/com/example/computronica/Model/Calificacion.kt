@@ -2,7 +2,7 @@ package com.example.computronica.Model
 
 import com.google.firebase.Timestamp
 
-data class Calificaciones(
+data class Calificacion(
     var id: String = "",
     val estudianteId: String = "",
     val asignaturaId: String = "",

@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.computronica.Adapter.NotasEstudianteAdapter
 import com.example.computronica.Model.Asignatura
-import com.example.computronica.Model.Calificaciones
+import com.example.computronica.Model.Calificacion
 import com.example.computronica.databinding.FragmentDetalleNotasEstudianteBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -89,7 +89,7 @@ class DetalleNotasEstudianteFragment : Fragment() {
 
             if (snapshot != null && !snapshot.isEmpty) {
                 val notas = snapshot.documents.mapNotNull { doc ->
-                    doc.toObject(Calificaciones::class.java)?.copy(id = doc.id)
+                    doc.toObject(Calificacion::class.java)?.copy(id = doc.id)
                 }.sortedBy { it.fecha }
 
                 if (notas.isNotEmpty()) {
@@ -109,7 +109,7 @@ class DetalleNotasEstudianteFragment : Fragment() {
         }
     }
 
-    private fun calcularYMostrarPromedio(notas: List<Calificaciones>) {
+    private fun calcularYMostrarPromedio(notas: List<Calificacion>) {
         if (notas.isEmpty()) {
             binding.layoutPromedio.visibility = View.GONE
             return

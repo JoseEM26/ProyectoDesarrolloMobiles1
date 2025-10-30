@@ -8,4 +8,8 @@
         android:id="@+id/action_eliminar"
         android:icon="@drawable/baseline_delete_24"
         android:title="Eliminar" />
+    <item
+        android:id="@+id/action_notas"
+        android:icon="@drawable/ic_grades"
+        android:title="Notas" />
 </menu>

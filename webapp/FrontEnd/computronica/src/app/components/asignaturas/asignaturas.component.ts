@@ -2,15 +2,18 @@
 import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { Observable, combineLatest, of, Subject, BehaviorSubject } from 'rxjs';
 import { map, startWith, catchError, takeUntil, finalize } from 'rxjs/operators';
-import { Asignatura, Usuario, TipoUsuario } from '../../models/interfaces';
+import { Asignatura, Usuario, TipoUsuario, Calificaciones, TipoEvaluacion, Tema } from '../../models/interfaces';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CommonModule, AsyncPipe, NgFor, NgIf } from '@angular/common';
+import { CommonModule, AsyncPipe, NgFor, NgIf, KeyValuePipe } from '@angular/common';
 import Swal from 'sweetalert2';
 import { AsignaturaService } from '../../services/AsignaturaService';
 import { UsuarioService } from '../../services/UsuarioService';
 import { AuthService } from '../../services/AuthService';
+import { CalificacionesService } from '../../services/CalificacionesService';
 import { Modal } from 'bootstrap';
-import { RouterLink } from '@angular/router';
+import { TIPOS_EVALUACION } from '../../models/tipos-evaluacion';
+import { RouterLink } from "@angular/router";
+import { TemaService } from '../../services/TemaService';
 
 @Component({
   selector: 'app-asignaturas',
@@ -20,9 +23,10 @@ import { RouterLink } from '@angular/router';
     AsyncPipe,
     NgFor,
     NgIf,
-    RouterLink,
-    ReactiveFormsModule
-  ],
+    ReactiveFormsModule,
+    KeyValuePipe,
+    RouterLink
+],
   templateUrl: './asignaturas.component.html',
   styleUrls: ['./asignaturas.component.scss']
 })
@@ -37,8 +41,10 @@ export class AsignaturasComponent implements OnInit, OnDestroy, AfterViewInit {
   searchControl = new FormControl('');
   currentUser: Usuario | null = null;
   tipoUsuario = TipoUsuario;
+// En la clase del componente
+estudiantesMapa: { [email: string]: Usuario } = {};
 
-  // Formulario
+  // Formulario de asignatura
   asignaturaForm = new FormGroup({
     id: new FormControl<string | null>(null),
     nombre: new FormControl('', [Validators.required, Validators.minLength(3)]),
@@ -61,10 +67,32 @@ export class AsignaturasComponent implements OnInit, OnDestroy, AfterViewInit {
   showProfesorSuggestions = false;
   showEstudianteSuggestions = false;
 
+  // --- NUEVO: DETALLE DE ASIGNATURA ---
+  selectedAsignatura: Asignatura | null = null;
+  calificaciones: Calificaciones[] = [];
+  isLoadingCalificaciones = false;
+ calificacionForm = new FormGroup({
+  id: new FormControl<string | null>(null),
+  estudianteId: new FormControl<string>('', [Validators.required]),
+  evaluacion: new FormControl<TipoEvaluacion>('Tarea', [Validators.required]),
+  nota: new FormControl<number>(0, [Validators.required, Validators.min(0), Validators.max(20)]),
+  fechaRegistro: new FormControl<string>(
+    new Date().toLocaleDateString('es-ES'), // ← ¡Formato correcto desde el inicio!
+    [Validators.required]
+  )
+});
+  editingCalificacion: Calificaciones | null = null;
+  showCalificacionModal = false;
+  private calificacionModal!: Modal;
+  promedios: { [estudianteEmail: string]: { promedio: number; estado: string } } = {};
+  TIPOS_EVALUACION = TIPOS_EVALUACION;
+
   constructor(
     private asignaturaService: AsignaturaService,
     private usuarioService: UsuarioService,
-    private authService: AuthService
+    private authService: AuthService,
+    private calificacionesService: CalificacionesService,
+    private temaService:TemaService
   ) {}
 
   ngOnInit(): void {
@@ -91,42 +119,86 @@ export class AsignaturasComponent implements OnInit, OnDestroy, AfterViewInit {
       this.modal = new Modal(el, { backdrop: 'static', keyboard: false });
     }
   }
-// Añade estos métodos en la clase
 
-getIniciales(nombre: string): string {
-  if (!nombre) return '??';
-  return nombre
-    .split(' ')
-    .map(word => word[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
-}
-
-getColor(nombre: string): string {
-  const colors = [
-    '#1D4E89', '#4A90E2', '#00A6A6', '#2E8B57', '#8B5A2B',
-    '#6A5ACD', '#C71585', '#DC143C', '#FF8C00', '#32CD32'
-  ];
-  let hash = 0;
-  for (let i = 0; i < nombre.length; i++) {
-    hash = nombre.charCodeAt(i) + ((hash << 5) - hash);
+  getIniciales(nombre: string): string {
+    if (!nombre) return '??';
+    return nombre
+      .split(' ')
+      .map(word => word[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
   }
-  return colors[Math.abs(hash % colors.length)];
-}
 
-getGradient(nombre: string): string {
-  const base = this.getColor(nombre);
-  return `linear-gradient(135deg, ${base}, ${this.lighten(base, 20)})`;
-}
+  getColor(nombre: string): string {
+    const colors = [
+      '#1D4E89', '#4A90E2', '#00A6A6', '#2E8B57', '#8B5A2B',
+      '#6A5ACD', '#C71585', '#DC143C', '#FF8C00', '#32CD32'
+    ];
+    let hash = 0;
+    for (let i = 0; i < nombre.length; i++) {
+      hash = nombre.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return colors[Math.abs(hash % colors.length)];
+  }
 
-lighten(color: string, percent: number): string {
-  const num = parseInt(color.replace('#', ''), 16);
-  const amt = Math.round(2.55 * percent);
-  const R = (num >> 16) + amt;
-  const G = (num >> 8 & 0x00FF) + amt;
-  const B = (num & 0x0000FF) + amt;
-  return '#' + (0x1000000 + (R < 255 ? R : 255) * 0x10000 + (G < 255 ? G : 255) * 0x100 + (B < 255 ? B : 255)).toString(16).slice(1);
+  getGradient(nombre: string): string {
+    const base = this.getColor(nombre);
+    return `linear-gradient(135deg, ${base}, ${this.lighten(base, 20)})`;
+  }
+
+  lighten(color: string, percent: number): string {
+    const num = parseInt(color.replace('#', ''), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = (num >> 16) + amt;
+    const G = (num >> 8 & 0x00FF) + amt;
+    const B = (num & 0x0000FF) + amt;
+    return '#' + (0x1000000 + (R < 255 ? R : 255) * 0x10000 + (G < 255 ? G : 255) * 0x100 + (B < 255 ? B : 255)).toString(16).slice(1);
+  }
+  // === ABRIR MODAL DE NOTAS DESDE LA LISTA ===
+openCalificacionModalForAsignatura(asignatura: Asignatura): void {
+  this.selectedAsignatura = asignatura;
+  this.loadCalificaciones(asignatura.id!);
+  this.loadEstudiantesDeAsignatura(asignatura.estudiantes || []);
+  this.openCalificacionModal(); // ← abre el modal
+}
+// === NUEVO: CREAR TEMA DESDE LISTA ===
+openCreateTemaModal(asignaturaId: string): void {
+  if (this.currentUser?.tipo !== TipoUsuario.administrativo) return;
+
+  Swal.fire({
+    title: 'Nuevo Tema',
+    html: `
+      <input id="nombre" class="swal2-input" placeholder="Nombre del tema" required>
+      <textarea id="descripcion" class="swal2-textarea" placeholder="Descripción (opcional)"></textarea>
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'Crear',
+    preConfirm: () => {
+     const nombre = (document.getElementById('nombre') as HTMLInputElement).value.trim();
+      const descripcion = (document.getElementById('descripcion') as HTMLTextAreaElement).value.trim();
+      if (!nombre) {
+        Swal.showValidationMessage('El nombre es obligatorio');
+        return false;
+      }
+      return { nombre, descripcion };
+    }
+  }).then(result => {
+    if (result.isConfirmed) {
+      const tema: Omit<Tema, 'id' | 'estado' | 'fechaCreacion'> = {
+        asignaturaId,
+        nombre: result.value.nombre,
+        descripcion: result.value.descripcion
+      };
+      this.temaService.create(tema).subscribe({
+        next: () => {
+          Swal.fire('¡Creado!', 'Tema agregado.', 'success');
+          // Opcional: recargar asignaturas si necesitas ver cambios
+        },
+        error: () => Swal.fire('Error', 'No se pudo crear el tema', 'error')
+      });
+    }
+  });
 }
   loadAsignaturas(): void {
     if (!this.currentUser) {
@@ -163,7 +235,6 @@ lighten(color: string, percent: number): string {
       this.asignaturasSubject.next(filtered);
     });
 
-    // Filtrado reactivo
     combineLatest([
       this.asignaturasSubject.asObservable(),
       this.searchControl.valueChanges.pipe(startWith(''))
@@ -183,9 +254,7 @@ lighten(color: string, percent: number): string {
   }
 
   setupSearch(): void {
-    this.searchControl.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      // Reactivo
-    });
+    this.searchControl.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {});
   }
 
   filter(event: any, usuarios: Usuario[], tipo: 'profesor' | 'estudiante'): void {
@@ -226,7 +295,7 @@ lighten(color: string, percent: number): string {
 
   getNombreUsuario(email: string, usuarios: Usuario[]): string {
     const u = usuarios.find(u => u.correoInstitucional === email);
-    return u ? `${u.nombre} ${u.apellido}` : email;
+    return u ? `${u.nombre} ${u.apellido}` : email.split('@')[0];
   }
 
   private resetSuggestions(): void {
@@ -315,6 +384,186 @@ lighten(color: string, percent: number): string {
         });
       }
     });
+  }
+
+  // --- NUEVOS MÉTODOS PARA CALIFICACIONES ---
+
+ openAsignaturaDetail(asignatura: Asignatura): void {
+  this.selectedAsignatura = asignatura;
+  this.loadCalificaciones(asignatura.id!);
+  this.loadEstudiantesDeAsignatura(asignatura.estudiantes || []);
+  this.initCalificacionModal();
+}
+
+private loadEstudiantesDeAsignatura(emails: string[]): void {
+  this.estudiantesMapa = {};
+  if (emails.length === 0) return;
+
+  this.usuarioService.getEstudiantes().subscribe({
+    next: (usuarios) => {
+      usuarios
+        .filter(u => emails.includes(u.correoInstitucional))
+        .forEach(u => {
+          this.estudiantesMapa[u.correoInstitucional] = u;
+        });
+    },
+    error: (err) => this.showError('Error al cargar nombres de estudiantes')
+  });
+}
+
+  private initCalificacionModal(): void {
+    const el = document.getElementById('calificacionModal');
+    if (el) {
+      this.calificacionModal = new Modal(el, { backdrop: 'static' });
+    }
+  }
+
+  loadCalificaciones(asignaturaId: string): void {
+    this.isLoadingCalificaciones = true;
+    this.calificacionesService.filterByAsignatura(asignaturaId).pipe(
+      finalize(() => this.isLoadingCalificaciones = false)
+    ).subscribe({
+      next: (califs) => {
+        this.calificaciones = califs;
+        this.calcularPromedios();
+      },
+      error: (err) => this.showError(err.message || 'Error al cargar calificaciones')
+    });
+  }
+
+  calcularPromedios(): void {
+    const porEstudiante: { [email: string]: number[] } = {};
+
+    this.calificaciones.forEach(cal => {
+      if (!porEstudiante[cal.estudianteId]) {
+        porEstudiante[cal.estudianteId] = [];
+      }
+      porEstudiante[cal.estudianteId].push(cal.nota);
+    });
+
+    this.promedios = {};
+    for (const [email, notas] of Object.entries(porEstudiante)) {
+      const promedio = notas.reduce((a, b) => a + b, 0) / notas.length;
+      const estado = promedio >= 17 ? 'Sobresaliente' : promedio >= 13 ? 'Aprobado' : 'Reprobado';
+      this.promedios[email] = { promedio: +promedio.toFixed(2), estado };
+    }
+  }
+
+  canEditCalificaciones(): boolean {
+    return this.currentUser?.tipo === TipoUsuario.administrativo ||
+           this.currentUser?.tipo === TipoUsuario.profesor;
+  }
+
+ openCalificacionModal(cal?: Calificaciones): void {
+  if (!this.canEditCalificaciones()) return;
+
+  this.editingCalificacion = cal || null;
+
+  if (cal) {
+    this.calificacionForm.patchValue({
+      id: cal.id,
+      estudianteId: cal.estudianteId,
+      evaluacion: cal.evaluacion,
+      nota: cal.nota,
+      fechaRegistro: cal.fechaRegistro
+    });
+  } else {
+    // Al crear: reset completo, id = null
+    this.calificacionForm.reset({
+      estudianteId: '',
+      evaluacion: 'Tarea',
+      nota: 0,
+      fechaRegistro: new Date().toLocaleDateString('es-ES')
+    });
+  }
+
+  this.calificacionModal?.show();
+}
+  private formatFecha(fecha: any): string {
+  if (!fecha) return new Date().toLocaleDateString('es-ES');
+
+  let date: Date;
+
+  // Si es string como "30/10/2025"
+  if (typeof fecha === 'string' && fecha.includes('/')) {
+    const [d, m, y] = fecha.split('/');
+    date = new Date(+y, +m - 1, +d);
+  }
+  // Si es Date o timestamp
+  else if (fecha instanceof Date) {
+    date = fecha;
+  }
+  else if (typeof fecha === 'number') {
+    date = new Date(fecha);
+  }
+  else {
+    date = new Date(); // fallback
+  }
+
+  return date.toLocaleDateString('es-ES'); // → "30/10/2025"
+}
+saveCalificacion(): void {
+  if (this.calificacionForm.invalid || !this.selectedAsignatura) return;
+
+  const fechaRaw = this.calificacionForm.get('fechaRegistro')?.value;
+  const fechaFormateada = this.formatFecha(fechaRaw);
+
+  // Extraemos los valores del formulario
+  const formValue = this.calificacionForm.value;
+
+  // Creamos el objeto base
+  const data: Calificaciones = {
+    estudianteId: formValue.estudianteId!,
+    evaluacion: formValue.evaluacion!,
+    nota: formValue.nota!,
+    fechaRegistro: fechaFormateada,
+    asignaturaId: this.selectedAsignatura.id!,
+  } as Calificaciones;
+
+  // Solo agregamos 'id' si estamos editando
+  if (this.editingCalificacion?.id) {
+    (data as any).id = this.editingCalificacion.id;
+  }
+
+  const action$ = this.editingCalificacion
+    ? this.calificacionesService.update(this.editingCalificacion.id!, data)
+    : this.calificacionesService.create(data);  // ← SIN id
+
+  action$.subscribe({
+    next: () => {
+      this.showSuccess(this.editingCalificacion ? 'Nota actualizada' : 'Nota creada');
+      this.loadCalificaciones(this.selectedAsignatura!.id!);
+      this.closeCalificacionModal();
+    },
+    error: (err) => this.showError(err.message || 'Error al guardar nota')
+  });
+}
+
+  deleteCalificacion(cal: Calificaciones): void {
+    if (!this.canEditCalificaciones()) return;
+
+    Swal.fire({
+      title: '¿Eliminar nota?',
+      text: 'Esta acción no se puede deshacer',
+      icon: 'warning',
+      showCancelButton: true
+    }).then(result => {
+      if (result.isConfirmed && cal.id) {
+        this.calificacionesService.delete(cal.id).subscribe({
+          next: () => {
+            this.showSuccess('Nota eliminada');
+            this.loadCalificaciones(this.selectedAsignatura!.id!);
+          },
+          error: (err) => this.showError(err.message)
+        });
+      }
+    });
+  }
+
+  closeCalificacionModal(): void {
+    this.showCalificacionModal = false;
+    this.calificacionModal?.hide();
+    this.editingCalificacion = null;
   }
 
   private showError(msg: string) {

@@ -11,7 +11,6 @@
     </div>
 
     <div class="d-flex flex-column flex-md-row gap-2 w-100 w-md-auto">
-      <!-- BUSCADOR -->
       <div class="input-group input-group-sm" style="max-width: 300px;">
         <span class="input-group-text bg-white border-end-0">
           <i class="bi bi-search text-muted"></i>
@@ -24,7 +23,6 @@
         />
       </div>
 
-      <!-- NUEVA ASIGNATURA -->
       <button
         *ngIf="currentUser?.tipo === tipoUsuario.administrativo"
         class="btn btn-primary d-flex align-items-center gap-2 shadow-sm"
@@ -33,6 +31,7 @@
         <i class="bi bi-plus-circle"></i>
         <span class="d-none d-sm-inline">Nueva</span>
       </button>
+
     </div>
   </header>
 
@@ -57,112 +56,200 @@
     </button>
   </div>
 
-  <!-- GRID DE ASIGNATURAS -->
-  <div class="row g-4" *ngIf="!isLoading && asignaturasFiltradas.length > 0">
+ <div class="col-sm-6 col-lg-4 col-xl-3" *ngFor="let asignatura of asignaturasFiltradas">
+  <div
+    class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden curso-card position-relative"
+    [routerLink]="['/subjects', asignatura.id]"
+    style="cursor: pointer;"
+  >
+    <!-- HEADER: CLIC → DETALLE (CREAR TEMAS) -->
     <div
-      class="col-sm-6 col-lg-4 col-xl-3"
-      *ngFor="let asignatura of asignaturasFiltradas"
+      class="card-header text-white py-4 px-4 d-flex align-items-center gap-3"
+      [style.background]="getGradient(asignatura.nombre)"
     >
       <div
-        class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden curso-card position-relative"
-        [routerLink]="['/subjects', asignatura.id]"
-        style="cursor: pointer;"
+        class="avatar-lg rounded-circle d-flex align-items-center justify-content-center text-white fw-bold fs-5"
+        [style.background-color]="getColor(asignatura.nombre)"
       >
-        <!-- HEADER CON INICIALES -->
-        <div
-          class="card-header text-white py-4 px-4 d-flex align-items-center gap-3"
-          [style.background]="getGradient(asignatura.nombre)"
-        >
-          <div
-            class="avatar-lg rounded-circle d-flex align-items-center justify-content-center text-white fw-bold fs-5"
-            [style.background-color]="getColor(asignatura.nombre)"
+        {{ getIniciales(asignatura.nombre) }}
+      </div>
+      <h6 class="mb-0 fw-bold fs-6 text-white">{{ asignatura.nombre }}</h6>
+    </div>
+
+    <!-- BODY: NO CLICABLE (solo botones) -->
+    <div class="card-body p-4" (click)="$event.stopPropagation()">
+      <!-- INFO -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="badge bg-secondary text-white px-3 py-2 small rounded-pill">
+          {{ asignatura.codigoAsignatura }}
+        </span>
+        <span class="badge bg-success text-white px-3 py-2 small rounded-pill">
+          {{ asignatura.creditos }} crédito{{ asignatura.creditos === 1 ? '' : 's' }}
+        </span>
+      </div>
+
+      <p class="text-muted small mb-3 line-clamp-2">
+        {{ asignatura.descripcion || 'Sin descripción disponible' }}
+      </p>
+
+      <!-- PROFESORES -->
+      <div class="mb-3">
+        <small class="text-muted fw-medium d-block mb-1">
+          Profesores
+        </small>
+        <div class="d-flex flex-wrap gap-1">
+          <span
+            *ngFor="let p of asignatura.profesores"
+            class="badge bg-primary bg-opacity-10 text-primary px-2 py-1 small rounded-pill"
+            [title]="p"
           >
-            {{ getIniciales(asignatura.nombre) }}
-          </div>
-          <h6 class="mb-0 fw-bold fs-6 text-white">{{ asignatura.nombre }}</h6>
+            {{ p.split('@')[0] }}
+          </span>
+          <span *ngIf="!(asignatura.profesores?.length)" class="text-muted small">—</span>
         </div>
+      </div>
 
-        <div class="card-body p-4">
-          <!-- CÓDIGO + CRÉDITOS -->
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <span class="badge bg-secondary text-white px-3 py-2 small rounded-pill">
-              {{ asignatura.codigoAsignatura }}
-            </span>
-            <span class="badge bg-success text-white px-3 py-2 small rounded-pill">
-              {{ asignatura.creditos }} crédito{{ asignatura.creditos === 1 ? '' : 's' }}
-            </span>
-          </div>
+      <!-- ESTUDIANTES -->
+      <div class="mb-3">
+        <small class="text-muted fw-medium d-block mb-1">
+          Estudiantes
+        </small>
+        <div class="text-primary fw-semibold small">
+          {{ (asignatura.estudiantes.length || 0) }} matriculado{{ (asignatura.estudiantes.length || 0) === 1 ? '' : 's' }}
+        </div>
+      </div>
 
-          <!-- DESCRIPCIÓN -->
-          <p class="text-muted small mb-3 line-clamp-2">
-            {{ asignatura.descripcion || 'Sin descripción disponible' }}
-          </p>
+      <!-- BOTONES INFERIORES -->
+      <div class="d-flex gap-2 mt-3">
+        <!-- BOTÓN: AGREGAR NOTAS (MODAL) -->
+        <button
+          *ngIf="canEditCalificaciones()"
+          class="btn btn-primary btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-1"
+          (click)="openCalificacionModalForAsignatura(asignatura)"
+          title="Agregar nota"
+        >
+          <i class="bi bi-journal-plus"></i>
+          <span class="d-none d-md-inline">Notas</span>
+        </button>
 
-          <!-- PROFESORES -->
-          <div class="mb-3">
-            <small class="text-muted fw-medium d-block mb-1">
-              <i class="bi bi-person-badge me-1"></i>
-              Profesor{{ (asignatura.profesores.length ) !== 1 ? 'es' : '' }}
-            </small>
-            <div class="d-flex flex-wrap gap-1">
-              <span
-                *ngFor="let p of asignatura.profesores"
-                class="badge bg-primary bg-opacity-10 text-primary px-2 py-1 small rounded-pill"
-                [title]="p"
-              >
-                {{ p.split('@')[0] }}
-              </span>
-              <span *ngIf="!(asignatura.profesores?.length)" class="text-muted small">—</span>
-            </div>
-          </div>
-
-          <!-- ESTUDIANTES -->
-          <div class="mb-3">
-            <small class="text-muted fw-medium d-block mb-1">
-              <i class="bi bi-people me-1"></i> Estudiantes
-            </small>
-            <div class="text-primary fw-semibold small">
-              {{ (asignatura.estudiantes.length || 0) }} matriculado{{ (asignatura.estudiantes.length || 0) === 1 ? '' : 's' }}
-            </div>
-          </div>
-
-          <!-- BOTONES ADMIN -->
-          <div
-            *ngIf="currentUser?.tipo === tipoUsuario.administrativo"
-            class="position-absolute top-0 end-0 p-2 d-flex gap-1"
-            (click)="$event.stopPropagation()"
+        <!-- BOTONES ADMIN: EDITAR / ELIMINAR -->
+        <div *ngIf="currentUser?.tipo === tipoUsuario.administrativo" class="d-flex gap-1">
+          <button
+            class="btn btn-outline-primary btn-sm rounded-circle p-2"
+            (click)="openEditModal(asignatura)"
+            title="Editar"
           >
-            <button
-              class="btn btn-outline-primary btn-sm rounded-circle p-2"
-              (click)="openEditModal(asignatura)"
-              title="Editar"
-            >
-              <i class="bi bi-pencil"></i>
-            </button>
-            <button
-              class="btn btn-outline-danger btn-sm rounded-circle p-2"
-              (click)="deleteAsignatura(asignatura)"
-              title="Eliminar"
-            >
-              <i class="bi bi-trash"></i>
-            </button>
-          </div>
+            <i class="bi bi-pencil"></i>
+          </button>
+          <button
+            class="btn btn-outline-danger btn-sm rounded-circle p-2"
+            (click)="deleteAsignatura(asignatura)"
+            title="Eliminar"
+          >
+            <i class="bi bi-trash"></i>
+          </button>
         </div>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- MODAL -->
+  <!-- DETALLE DE ASIGNATURA -->
+  <div *ngIf="selectedAsignatura" class="mt-5 p-4 border rounded-3 bg-light">
+    <div class="d-flex justify-content-between align-items-start mb-4">
+      <div>
+        <h3 class="h4 fw-bold">{{ selectedAsignatura.nombre }}</h3>
+        <p class="text-muted small">
+          {{ selectedAsignatura.codigoAsignatura }} • {{ selectedAsignatura.creditos }} crédito{{ selectedAsignatura.creditos === 1 ? '' : 's' }}
+        </p>
+      </div>
+      <button class="btn btn-outline-secondary btn-sm" (click)="selectedAsignatura = null">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div class="mb-3" *ngIf="canEditCalificaciones()">
+      <button class="btn btn-success btn-sm" (click)="openCalificacionModal()">
+        <i class="bi bi-plus-circle"></i> Agregar Nota
+      </button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-sm table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Estudiante</th>
+            <th>Tipo</th>
+            <th>Nota</th>
+            <th>Fecha</th>
+            <th *ngIf="canEditCalificaciones()">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cal of calificaciones">
+            <td>
+              <strong>{{ getNombreUsuario(cal.estudianteId, []) }}</strong>
+              <br>
+              <small class="text-muted" *ngIf="promedios[cal.estudianteId]">
+                Promedio: <strong [class.text-success]="promedios[cal.estudianteId].promedio >= 17"
+                                  [class.text-warning]="promedios[cal.estudianteId].promedio >= 13 && promedios[cal.estudianteId].promedio < 17"
+                                  [class.text-danger]="promedios[cal.estudianteId].promedio < 13">
+                  {{ promedios[cal.estudianteId].promedio }} → {{ promedios[cal.estudianteId].estado }}
+                </strong>
+              </small>
+            </td>
+            <td><span class="badge bg-info text-dark">{{ cal.evaluacion }}</span></td>
+            <td>
+              <span class="badge fs-6"
+                    [class.bg-success]="cal.nota >= 17"
+                    [class.bg-warning]="cal.nota >= 13 && cal.nota < 17"
+                    [class.bg-danger]="cal.nota < 13">
+                {{ cal.nota }}
+              </span>
+            </td>
+            <td>{{ cal.fechaRegistro }}</td>
+            <td *ngIf="canEditCalificaciones()">
+              <button class="btn btn-outline-primary btn-sm" (click)="openCalificacionModal(cal)" title="Editar">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-outline-danger btn-sm ms-1" (click)="deleteCalificacion(cal)" title="Eliminar">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+ <!-- PROMEDIOS GENERALES -->
+<div class="mt-4" *ngIf="(promedios | keyvalue).length > 0">
+  <h5>Promedios por estudiante</h5>
+  <div class="row g-3">
+    <div class="col-md-4" *ngFor="let entry of promedios | keyvalue">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body py-3">
+          <small class="text-muted">{{ getNombreUsuario(entry.key, []) }}</small>
+          <div class="fs-4 fw-bold"
+               [class.text-success]="entry.value.promedio >= 17"
+               [class.text-warning]="entry.value.promedio >= 13 && entry.value.promedio < 17"
+               [class.text-danger]="entry.value.promedio < 13">
+            {{ entry.value.promedio }}
+          </div>
+          <small [class.text-success]="entry.value.estado === 'Sobresaliente'"
+                 [class.text-warning]="entry.value.estado === 'Aprobado'"
+                 [class.text-danger]="entry.value.estado === 'Reprobado'">
+            {{ entry.value.estado }}
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  </div>
+
+  <!-- MODAL ASIGNATURA -->
   <div *ngIf="currentUser?.tipo === tipoUsuario.administrativo">
-    <div
-      class="modal fade"
-      id="asignaturaModal"
-      tabindex="-1"
-      aria-labelledby="asignaturaModalLabel"
-      aria-hidden="true"
-      data-bs-backdrop="static"
-      data-bs-keyboard="false"
-    >
+    <div class="modal fade" id="asignaturaModal" tabindex="-1" aria-labelledby="asignaturaModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
       <div class="modal-dialog modal-lg">
         <form [formGroup]="asignaturaForm" (ngSubmit)="saveAsignatura()">
           <div class="modal-content border-0 shadow-lg rounded-3">
@@ -173,40 +260,30 @@
               </h5>
               <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-
             <div class="modal-body p-4">
               <div class="row g-3">
-                <!-- NOMBRE -->
                 <div class="col-md-6">
                   <label class="form-label fw-semibold text-dark"><i class="bi bi-tag me-1"></i> Nombre</label>
                   <input type="text" class="form-control rounded-3" formControlName="nombre" placeholder="Ej: Matemáticas I"
                     [class.is-invalid]="asignaturaForm.get('nombre')?.invalid && asignaturaForm.get('nombre')?.touched" />
                   <div class="invalid-feedback">Nombre obligatorio (mín. 3 caracteres)</div>
                 </div>
-
-                <!-- CÓDIGO -->
                 <div class="col-md-6">
                   <label class="form-label fw-semibold text-dark"><i class="bi bi-hash me-1"></i> Código</label>
                   <input type="text" class="form-control rounded-3" formControlName="codigoAsignatura" placeholder="Ej: MAT-101"
                     [class.is-invalid]="asignaturaForm.get('codigoAsignatura')?.invalid && asignaturaForm.get('codigoAsignatura')?.touched" />
                   <div class="invalid-feedback">Código obligatorio</div>
                 </div>
-
-                <!-- DESCRIPCIÓN -->
                 <div class="col-12">
                   <label class="form-label fw-semibold text-dark"><i class="bi bi-file-text me-1"></i> Descripción</label>
                   <textarea class="form-control rounded-3" rows="3" formControlName="descripcion" placeholder="Opcional..."></textarea>
                 </div>
-
-                <!-- CRÉDITOS -->
                 <div class="col-md-4">
                   <label class="form-label fw-semibold text-dark"><i class="bi bi-award me-1"></i> Créditos</label>
                   <input type="number" min="1" class="form-control rounded-3" formControlName="creditos" placeholder="3"
                     [class.is-invalid]="asignaturaForm.get('creditos')?.invalid && asignaturaForm.get('creditos')?.touched" />
                   <div class="invalid-feedback">Mínimo 1 crédito</div>
                 </div>
-
-                <!-- ESTUDIANTES -->
                 <div class="col-md-6">
                   <label class="form-label fw-semibold text-dark"><i class="bi bi-people me-1"></i> Estudiantes</label>
                   <ng-container *ngIf="estudiantes$ | async as estudiantes; else loading">
@@ -226,8 +303,6 @@
                     </div>
                   </ng-container>
                 </div>
-
-                <!-- PROFESORES -->
                 <div class="col-md-6">
                   <label class="form-label fw-semibold text-dark"><i class="bi bi-person-badge me-1"></i> Profesores</label>
                   <ng-container *ngIf="profesores$ | async as profesores; else loading">
@@ -249,7 +324,6 @@
                 </div>
               </div>
             </div>
-
             <div class="modal-footer border-0 p-4">
               <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Cancelar</button>
               <button type="submit" class="btn btn-primary rounded-3 d-flex align-items-center gap-2"
@@ -264,7 +338,57 @@
     </div>
   </div>
 
-  <!-- LOADING TEMPLATE -->
+  <!-- MODAL CALIFICACIÓN -->
+  <div class="modal fade" id="calificacionModal" tabindex="-1">
+    <div class="modal-dialog modal-md">
+      <form [formGroup]="calificacionForm" (ngSubmit)="saveCalificacion()">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              {{ editingCalificacion ? 'Editar' : 'Nueva' }} Nota
+            </h5>
+            <button type="button" class="btn-close" (click)="closeCalificacionModal()"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Estudiante</label>
+              <select class="form-select" formControlName="estudianteId" [required]="true">
+                <option value="">Seleccionar...</option>
+                <option *ngFor="let est of selectedAsignatura?.estudiantes" [value]="est">
+                  {{ getNombreUsuario(est, []) }}
+                </option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Tipo de Evaluación</label>
+              <select class="form-select" formControlName="evaluacion">
+                <option *ngFor="let tipo of TIPOS_EVALUACION" [value]="tipo">{{ tipo }}</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Nota (0-20)</label>
+              <input type="number" class="form-control" formControlName="nota" min="0" max="20" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Fecha</label>
+<input
+  type="text"
+  class="form-control"
+  formControlName="fechaRegistro"
+  placeholder="DD/MM/AAAA"
+/>            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeCalificacionModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="calificacionForm.invalid">
+              Guardar
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <ng-template #loading>
     <div class="text-center py-3">
       <div class="spinner-border spinner-border-sm text-primary" role="status">
