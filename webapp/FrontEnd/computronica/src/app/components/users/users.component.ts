@@ -158,26 +158,49 @@ getInitials(user: any): string {
     }
   }
 
-  toggleUserStatus(user: Usuario): void {
-    Swal.fire({
-      title: user.estado ? 'Desactivar usuario' : 'Activar usuario',
-      text: `¿${user.estado ? 'desactivar' : 'activar'} a ${user.nombre}?`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: user.estado ? 'Desactivar' : 'Activar',
-      cancelButtonText: 'Cancelar'
-    }).then(result => {
-      if (result.isConfirmed && user.id) {
-        this.usuarioService.update(user.id, { estado: !user.estado }).pipe(
-          finalize(() => this.loadUsers())
-        ).subscribe({
-          next: () => this.showToast('success', `Usuario ${!user.estado ? 'activado' : 'desactivado'}`),
-          error: () => this.showToast('error', 'Error al cambiar estado')
-        });
-      }
-    });
-  }
+ // users.component.ts
 
+toggleUserStatus(user: Usuario): void {
+  if (!user.id) return;
+
+  const nuevoEstado = !user.estado;
+  const accion = nuevoEstado ? 'activar' : 'desactivar';
+  const titulo = nuevoEstado ? 'Activar usuario' : 'Desactivar usuario';
+  const texto = `¿Estás seguro de que deseas ${accion} a <strong>${user.nombre} ${user.apellido}</strong>?`;
+
+  Swal.fire({
+    title: titulo,
+    html: texto,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: nuevoEstado ? 'Activar' : 'Desactivar',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: nuevoEstado ? '#28a745' : '#dc3545',
+    reverseButtons: true
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.usuarioService.toggleEstado(user.id!).subscribe({
+        next: (usuarioActualizado) => {
+          // Actualizar solo el usuario en la lista (sin recargar todo)
+          this.updateUserInList(usuarioActualizado);
+          this.showToast('success', `Usuario ${nuevoEstado ? 'activado' : 'desactivado'} correctamente`);
+        },
+        error: (err) => {
+          this.showToast('error', err.message || 'Error al cambiar el estado');
+        }
+      });
+    }
+  });
+}
+private updateUserInList(updatedUser: Usuario): void {
+  this.users$ = this.users$.pipe(
+    map(users => users.map(u => u.id === updatedUser.id ? { ...u, ...updatedUser } : u))
+  );
+
+  this.filteredUsers$ = this.filteredUsers$.pipe(
+    map(users => users.map(u => u.id === updatedUser.id ? { ...u, ...updatedUser } : u))
+  );
+}
   loadUsers(): void {
     this.isLoading = true;
     this.users$ = this.usuarioService.getAll().pipe(

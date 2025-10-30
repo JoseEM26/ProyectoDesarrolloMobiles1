@@ -1,18 +1,18 @@
 <!-- src/app/components/asignaturas/asignaturas.component.html -->
-<section class="asignaturas-page container-fluid py-4">
+<section class="asignaturas-page container-fluid py-5">
   <!-- HEADER -->
-  <header class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+  <header class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-5">
     <div>
       <h1 class="h3 fw-bold text-primary mb-1">
-        <i class="bi bi-book-fill me-2"></i>
-        Gestión de Asignaturas
+        <i class="bi bi-journal-text me-2"></i>
+        Mis Asignaturas
       </h1>
-      <p class="text-muted mb-0 small">Administración completa de materias académicas</p>
+      <p class="text-muted small mb-0">Cursos activos del semestre</p>
     </div>
 
     <div class="d-flex flex-column flex-md-row gap-2 w-100 w-md-auto">
       <!-- BUSCADOR -->
-      <div class="input-group input-group-sm" style="max-width: 280px;">
+      <div class="input-group input-group-sm" style="max-width: 300px;">
         <span class="input-group-text bg-white border-end-0">
           <i class="bi bi-search text-muted"></i>
         </span>
@@ -20,11 +20,11 @@
           [formControl]="searchControl"
           type="text"
           class="form-control border-start-0 ps-0"
-          placeholder="Buscar por nombre o código..."
+          placeholder="Buscar..."
         />
       </div>
 
-      <!-- BOTÓN NUEVO -->
+      <!-- NUEVA ASIGNATURA -->
       <button
         *ngIf="currentUser?.tipo === tipoUsuario.administrativo"
         class="btn btn-primary d-flex align-items-center gap-2 shadow-sm"
@@ -32,138 +32,127 @@
       >
         <i class="bi bi-plus-circle"></i>
         <span class="d-none d-sm-inline">Nueva</span>
-        <span class="d-inline d-sm-none">+</span>
       </button>
     </div>
   </header>
 
-  <!-- CONTENEDOR PRINCIPAL -->
-  <ng-container *ngIf="filteredAsignaturas$ | async as asignaturas">
-    <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
-      <div class="card-body p-0">
-        <!-- LOADING -->
-        <div class="p-5 text-center" *ngIf="isLoading">
-          <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-            <span class="visually-hidden">Cargando...</span>
-          </div>
-          <p class="mt-3 text-muted fs-5">Cargando asignaturas...</p>
-        </div>
+  <!-- LOADING -->
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-3 text-muted fs-5">Cargando asignaturas...</p>
+  </div>
 
-        <!-- EMPTY STATE -->
-        <div class="p-5 text-center" *ngIf="!isLoading && asignaturas.length === 0">
-          <i class="bi bi-inbox display-1 text-muted opacity-50"></i>
-          <p class="mt-3 text-muted h5">No se encontraron asignaturas</p>
-          <button
-            *ngIf="currentUser?.tipo === tipoUsuario.administrativo"
-            class="btn btn-outline-primary mt-2"
-            (click)="openCreateModal()"
+  <!-- EMPTY STATE -->
+  <div *ngIf="!isLoading && asignaturasFiltradas.length === 0" class="text-center py-5">
+    <i class="bi bi-journal-x display-1 text-muted opacity-50"></i>
+    <p class="mt-3 text-muted h5">No tienes asignaturas inscritas</p>
+    <button
+      *ngIf="currentUser?.tipo === tipoUsuario.administrativo"
+      class="btn btn-outline-primary mt-2"
+      (click)="openCreateModal()"
+    >
+      <i class="bi bi-plus-circle"></i> Crear primera asignatura
+    </button>
+  </div>
+
+  <!-- GRID DE ASIGNATURAS -->
+  <div class="row g-4" *ngIf="!isLoading && asignaturasFiltradas.length > 0">
+    <div
+      class="col-sm-6 col-lg-4 col-xl-3"
+      *ngFor="let asignatura of asignaturasFiltradas"
+    >
+      <div
+        class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden curso-card position-relative"
+        [routerLink]="['/subjects', asignatura.id]"
+        style="cursor: pointer;"
+      >
+        <!-- HEADER CON INICIALES -->
+        <div
+          class="card-header text-white py-4 px-4 d-flex align-items-center gap-3"
+          [style.background]="getGradient(asignatura.nombre)"
+        >
+          <div
+            class="avatar-lg rounded-circle d-flex align-items-center justify-content-center text-white fw-bold fs-5"
+            [style.background-color]="getColor(asignatura.nombre)"
           >
-            <i class="bi bi-plus-circle"></i> Crear primera asignatura
-          </button>
+            {{ getIniciales(asignatura.nombre) }}
+          </div>
+          <h6 class="mb-0 fw-bold fs-6 text-white">{{ asignatura.nombre }}</h6>
         </div>
 
-        <!-- TABLA -->
-        <div class="table-responsive" *ngIf="!isLoading && asignaturas.length > 0">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="bg-light">
-              <tr>
-                <th class="ps-4 py-3 text-dark fw-semibold">Nombre</th>
-                <th class="py-3 text-dark fw-semibold">Código</th>
-                <th class="py-3 text-center text-dark fw-semibold">Créditos</th>
-                <th class="py-3 text-dark fw-semibold">Profesores</th>
-                <th class="py-3 text-dark fw-semibold">Estudiantes</th>
-                <th class="text-end pe-4 py-3"></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let asignatura of asignaturas; let i = index">
-                <td class="ps-4">
-                  <div class="d-flex align-items-center">
-                    <div class="avatar avatar-sm rounded-circle bg-primary bg-opacity-10 text-primary me-3 d-flex align-items-center justify-content-center">
-                      <i class="bi bi-book"></i>
-                    </div>
-                    <div>
-                      <div class="fw-medium text-dark">{{ asignatura.nombre }}</div>
-                      <small class="text-muted">{{ asignatura.descripcion || 'Sin descripción' }}</small>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <span class="badge bg-secondary text-white px-3 py-2">
-                    {{ asignatura.codigoAsignatura }}
-                  </span>
-                </td>
-                <td class="text-center">
-                  <span class="badge bg-warning text-dark px-3 py-2 fw-bold">
-                    {{ asignatura.creditos }}
-                  </span>
-                </td>
-                <td>
-                  <div class="d-flex flex-wrap gap-1">
-                    <ng-container *ngIf="asignatura.profesores?.length; else noProf">
-                      <span class="badge bg-success text-white px-2 py-1" *ngFor="let p of asignatura.profesores">
-                        {{ p }}
-                      </span>
-                    </ng-container>
-                    <ng-template #noProf><span class="text-muted small">Sin profesores</span></ng-template>
-                  </div>
-                </td>
-                <td>
-                  <div class="d-flex flex-wrap gap-1">
-                    <ng-container *ngIf="asignatura.estudiantes?.length; else noEst">
-                      <span class="badge bg-info text-white px-2 py-1" *ngFor="let e of asignatura.estudiantes">
-                        {{ e }}
-                      </span>
-                    </ng-container>
-                    <ng-template #noEst><span class="text-muted small">Sin estudiantes</span></ng-template>
-                  </div>
-                </td>
-                <td class="text-end pe-4">
-                  <div *ngIf="currentUser?.tipo === tipoUsuario.administrativo" class="btn-group">
-                    <button class="btn btn-outline-primary btn-sm rounded-start" (click)="openEditModal(asignatura)" title="Editar">
-                      <i class="bi bi-pencil"></i>
-                    </button>
-                    <button class="btn btn-outline-danger btn-sm rounded-end" (click)="deleteAsignatura(asignatura)" title="Eliminar">
-                      <i class="bi bi-trash"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+        <div class="card-body p-4">
+          <!-- CÓDIGO + CRÉDITOS -->
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="badge bg-secondary text-white px-3 py-2 small rounded-pill">
+              {{ asignatura.codigoAsignatura }}
+            </span>
+            <span class="badge bg-success text-white px-3 py-2 small rounded-pill">
+              {{ asignatura.creditos }} crédito{{ asignatura.creditos === 1 ? '' : 's' }}
+            </span>
+          </div>
 
-      <!-- PAGINACIÓN -->
-      <div class="card-footer bg-light border-0 px-4 py-3" *ngIf="asignaturas.length > 0">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-          <small class="text-muted">
-            Mostrando <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> -
-            <strong>{{ getEndIndex() }}</strong> de <strong>{{ totalItems }}</strong> asignaturas
-          </small>
-          <nav>
-            <ul class="pagination pagination-sm mb-0">
-              <li class="page-item" [class.disabled]="currentPage === 1">
-                <button class="page-link rounded-start" (click)="changePage(currentPage - 1)">
-                  <i class="bi bi-chevron-left"></i>
-                </button>
-              </li>
-              <li class="page-item" *ngFor="let page of pages" [class.active]="page === currentPage">
-                <button class="page-link" (click)="changePage(page)">{{ page }}</button>
-              </li>
-              <li class="page-item" [class.disabled]="currentPage === totalPages">
-                <button class="page-link rounded-end" (click)="changePage(currentPage + 1)">
-                  <i class="bi bi-chevron-right"></i>
-                </button>
-              </li>
-            </ul>
-          </nav>
+          <!-- DESCRIPCIÓN -->
+          <p class="text-muted small mb-3 line-clamp-2">
+            {{ asignatura.descripcion || 'Sin descripción disponible' }}
+          </p>
+
+          <!-- PROFESORES -->
+          <div class="mb-3">
+            <small class="text-muted fw-medium d-block mb-1">
+              <i class="bi bi-person-badge me-1"></i>
+              Profesor{{ (asignatura.profesores.length ) !== 1 ? 'es' : '' }}
+            </small>
+            <div class="d-flex flex-wrap gap-1">
+              <span
+                *ngFor="let p of asignatura.profesores"
+                class="badge bg-primary bg-opacity-10 text-primary px-2 py-1 small rounded-pill"
+                [title]="p"
+              >
+                {{ p.split('@')[0] }}
+              </span>
+              <span *ngIf="!(asignatura.profesores?.length)" class="text-muted small">—</span>
+            </div>
+          </div>
+
+          <!-- ESTUDIANTES -->
+          <div class="mb-3">
+            <small class="text-muted fw-medium d-block mb-1">
+              <i class="bi bi-people me-1"></i> Estudiantes
+            </small>
+            <div class="text-primary fw-semibold small">
+              {{ (asignatura.estudiantes.length || 0) }} matriculado{{ (asignatura.estudiantes.length || 0) === 1 ? '' : 's' }}
+            </div>
+          </div>
+
+          <!-- BOTONES ADMIN -->
+          <div
+            *ngIf="currentUser?.tipo === tipoUsuario.administrativo"
+            class="position-absolute top-0 end-0 p-2 d-flex gap-1"
+            (click)="$event.stopPropagation()"
+          >
+            <button
+              class="btn btn-outline-primary btn-sm rounded-circle p-2"
+              (click)="openEditModal(asignatura)"
+              title="Editar"
+            >
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button
+              class="btn btn-outline-danger btn-sm rounded-circle p-2"
+              (click)="deleteAsignatura(asignatura)"
+              title="Eliminar"
+            >
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </ng-container>
+  </div>
 
-  <!-- MODAL (CORREGIDO: *ngIf fuera del <div class="modal">) -->
+  <!-- MODAL -->
   <div *ngIf="currentUser?.tipo === tipoUsuario.administrativo">
     <div
       class="modal fade"

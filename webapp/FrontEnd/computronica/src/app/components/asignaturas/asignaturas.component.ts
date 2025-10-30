@@ -1,15 +1,16 @@
 // src/app/components/asignaturas/asignaturas.component.ts
 import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
-import { Observable, combineLatest, of, Subject } from 'rxjs';
-import { map, startWith, catchError, takeUntil } from 'rxjs/operators';
+import { Observable, combineLatest, of, Subject, BehaviorSubject } from 'rxjs';
+import { map, startWith, catchError, takeUntil, finalize } from 'rxjs/operators';
 import { Asignatura, Usuario, TipoUsuario } from '../../models/interfaces';
-import { FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { AsyncPipe, NgFor, NgIf, CommonModule } from '@angular/common';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { CommonModule, AsyncPipe, NgFor, NgIf } from '@angular/common';
 import Swal from 'sweetalert2';
 import { AsignaturaService } from '../../services/AsignaturaService';
 import { UsuarioService } from '../../services/UsuarioService';
 import { AuthService } from '../../services/AuthService';
 import { Modal } from 'bootstrap';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-asignaturas',
@@ -19,29 +20,21 @@ import { Modal } from 'bootstrap';
     AsyncPipe,
     NgFor,
     NgIf,
-    FormsModule,
+    RouterLink,
     ReactiveFormsModule
   ],
   templateUrl: './asignaturas.component.html',
   styleUrls: ['./asignaturas.component.scss']
 })
 export class AsignaturasComponent implements OnInit, OnDestroy, AfterViewInit {
-  asignaturas$!: Observable<Asignatura[]>;
-  filteredAsignaturas$!: Observable<Asignatura[]>;
-  pageSize = 10;
-  currentPage = 1;
-  totalPages = 1;
-  totalItems = 0;
-  pages: number[] = [];
-  searchControl = new FormControl('');
+  // Datos reactivos
+  asignaturasFiltradas: Asignatura[] = [];
+  private asignaturasSubject = new BehaviorSubject<Asignatura[]>([]);
+
+  // Estados
   isLoading = true;
   isSaving = false;
-  estudiantes$!: Observable<Usuario[]>;
-  profesores$!: Observable<Usuario[]>;
-  filteredProfesores: Usuario[] = [];
-  filteredEstudiantes: Usuario[] = [];
-  showProfesorSuggestions = false;
-  showEstudianteSuggestions = false;
+  searchControl = new FormControl('');
   currentUser: Usuario | null = null;
   tipoUsuario = TipoUsuario;
 
@@ -60,6 +53,14 @@ export class AsignaturasComponent implements OnInit, OnDestroy, AfterViewInit {
   private destroy$ = new Subject<void>();
   private modal!: Modal;
 
+  // Modal
+  estudiantes$!: Observable<Usuario[]>;
+  profesores$!: Observable<Usuario[]>;
+  filteredProfesores: Usuario[] = [];
+  filteredEstudiantes: Usuario[] = [];
+  showProfesorSuggestions = false;
+  showEstudianteSuggestions = false;
+
   constructor(
     private asignaturaService: AsignaturaService,
     private usuarioService: UsuarioService,
@@ -74,7 +75,7 @@ export class AsignaturasComponent implements OnInit, OnDestroy, AfterViewInit {
         this.setupSearch();
       },
       error: () => {
-        this.showError('Error al cargar el usuario autenticado');
+        this.showError('Error al cargar el usuario');
         this.isLoading = false;
       }
     });
@@ -88,12 +89,45 @@ export class AsignaturasComponent implements OnInit, OnDestroy, AfterViewInit {
     const el = document.getElementById('asignaturaModal');
     if (el) {
       this.modal = new Modal(el, { backdrop: 'static', keyboard: false });
-      console.log('Modal inicializado');
-    } else {
-      console.error('Modal #asignaturaModal no encontrado');
     }
   }
+// Añade estos métodos en la clase
 
+getIniciales(nombre: string): string {
+  if (!nombre) return '??';
+  return nombre
+    .split(' ')
+    .map(word => word[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+}
+
+getColor(nombre: string): string {
+  const colors = [
+    '#1D4E89', '#4A90E2', '#00A6A6', '#2E8B57', '#8B5A2B',
+    '#6A5ACD', '#C71585', '#DC143C', '#FF8C00', '#32CD32'
+  ];
+  let hash = 0;
+  for (let i = 0; i < nombre.length; i++) {
+    hash = nombre.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash % colors.length)];
+}
+
+getGradient(nombre: string): string {
+  const base = this.getColor(nombre);
+  return `linear-gradient(135deg, ${base}, ${this.lighten(base, 20)})`;
+}
+
+lighten(color: string, percent: number): string {
+  const num = parseInt(color.replace('#', ''), 16);
+  const amt = Math.round(2.55 * percent);
+  const R = (num >> 16) + amt;
+  const G = (num >> 8 & 0x00FF) + amt;
+  const B = (num & 0x0000FF) + amt;
+  return '#' + (0x1000000 + (R < 255 ? R : 255) * 0x10000 + (G < 255 ? G : 255) * 0x100 + (B < 255 ? B : 255)).toString(16).slice(1);
+}
   loadAsignaturas(): void {
     if (!this.currentUser) {
       this.showError('Usuario no autenticado');
@@ -103,7 +137,7 @@ export class AsignaturasComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.isLoading = true;
 
-    this.asignaturas$ = this.asignaturaService.getAll().pipe(
+    this.asignaturaService.getAll().pipe(
       map(asignaturas => {
         if (!Array.isArray(asignaturas)) return [];
         return asignaturas
@@ -123,50 +157,34 @@ export class AsignaturasComponent implements OnInit, OnDestroy, AfterViewInit {
       catchError(err => {
         this.showError(err.message || 'Error al cargar asignaturas');
         return of([]);
-      })
-    );
+      }),
+      finalize(() => this.isLoading = false)
+    ).subscribe(filtered => {
+      this.asignaturasSubject.next(filtered);
+    });
 
-    this.filteredAsignaturas$ = combineLatest([
-      this.asignaturas$,
+    // Filtrado reactivo
+    combineLatest([
+      this.asignaturasSubject.asObservable(),
       this.searchControl.valueChanges.pipe(startWith(''))
     ]).pipe(
       map(([asignaturas, search]) => {
-        let filtered = asignaturas;
-        if (search) {
-          const term = search.toLowerCase();
-          filtered = asignaturas.filter(asig =>
-            (asig.nombre?.toLowerCase().includes(term)) ||
-            (asig.codigoAsignatura?.toLowerCase().includes(term))
-          );
-        }
-
-        this.totalItems = filtered.length;
-        this.totalPages = Math.max(1, Math.ceil(filtered.length / this.pageSize));
-        if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
-        if (this.currentPage < 1) this.currentPage = 1;
-        this.pages = this.generatePages(this.totalPages, this.currentPage);
-
-        const start = (this.currentPage - 1) * this.pageSize;
-        return filtered.slice(start, start + this.pageSize);
+        if (!search) return asignaturas;
+        const term = search.toLowerCase();
+        return asignaturas.filter(asig =>
+          (asig.nombre?.toLowerCase().includes(term)) ||
+          (asig.codigoAsignatura?.toLowerCase().includes(term))
+        );
       }),
-      map(asignaturas => {
-        this.isLoading = false;
-        return asignaturas;
-      })
-    );
-  }
-
-  private generatePages(total: number, current: number): number[] {
-    const max = 5;
-    let start = Math.max(1, current - Math.floor(max / 2));
-    let end = Math.min(total, start + max - 1);
-    if (end - start < max - 1) start = Math.max(1, end - max + 1);
-    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+      takeUntil(this.destroy$)
+    ).subscribe(filtered => {
+      this.asignaturasFiltradas = filtered;
+    });
   }
 
   setupSearch(): void {
     this.searchControl.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.currentPage = 1;
+      // Reactivo
     });
   }
 
@@ -176,13 +194,8 @@ export class AsignaturasComponent implements OnInit, OnDestroy, AfterViewInit {
       `${u.nombre} ${u.apellido}`.toLowerCase().includes(query) ||
       u.correoInstitucional.toLowerCase().includes(query)
     );
-
     if (tipo === 'profesor') this.filteredProfesores = filtered;
     else this.filteredEstudiantes = filtered;
-  }
-
-  getEndIndex(): number {
-    return Math.min(this.currentPage * this.pageSize, this.totalItems);
   }
 
   selectProfesor(email: string): void {
@@ -224,29 +237,16 @@ export class AsignaturasComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   openCreateModal(): void {
-    if (this.currentUser?.tipo !== TipoUsuario.administrativo) {
-      this.showError('Solo administrativos pueden crear');
-      return;
-    }
+    if (this.currentUser?.tipo !== TipoUsuario.administrativo) return;
     this.isEditMode = false;
-    this.asignaturaForm.reset({
-      nombre: '',
-      codigoAsignatura: '',
-      descripcion: '',
-      creditos: 1,
-      profesores: [],
-      estudiantes: []
-    });
+    this.asignaturaForm.reset({ nombre: '', codigoAsignatura: '', descripcion: '', creditos: 1, profesores: [], estudiantes: [] });
     this.loadUsuarios();
     this.resetSuggestions();
     this.modal.show();
   }
 
   openEditModal(asignatura: Asignatura): void {
-    if (this.currentUser?.tipo !== TipoUsuario.administrativo) {
-      this.showError('Solo administrativos pueden editar');
-      return;
-    }
+    if (this.currentUser?.tipo !== TipoUsuario.administrativo) return;
     this.isEditMode = true;
     this.asignaturaForm.patchValue({
       id: asignatura.id,
@@ -315,12 +315,6 @@ export class AsignaturasComponent implements OnInit, OnDestroy, AfterViewInit {
         });
       }
     });
-  }
-
-  changePage(page: number): void {
-    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
-      this.currentPage = page;
-    }
   }
 
   private showError(msg: string) {

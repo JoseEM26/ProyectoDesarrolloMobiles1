@@ -12,6 +12,7 @@ import { PresentationComponentComponent } from './components/presentation-compon
 import { ChatComponentComponent } from './components/chat-component/chat-component.component';
 import { UsersComponent } from './components/users/users.component';
 import { AuthGuard } from './services/auth.guard';
+import { AsignaturaDetalleComponent } from './components/asignatura-detalle/asignatura-detalle.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -27,6 +28,7 @@ export const routes: Routes = [
       { path: 'grades', component: GradesComponent },
       { path: 'users', component: UsersComponent },
       { path: 'profile', component: UserProfileComponent },
+    { path: 'subjects/:id', component: AsignaturaDetalleComponent },
       { path: 'subjects', component: AsignaturasComponent },
       { path: 'chat', component: ChatComponentComponent },
       { path: 'presentation', component: PresentationComponentComponent }

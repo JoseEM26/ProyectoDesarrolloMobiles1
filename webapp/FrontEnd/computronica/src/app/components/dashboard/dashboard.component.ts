@@ -796,6 +796,22 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
   }
+getAvatarColor(id: string): string {
+  const colors = ['#4361ee', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash % colors.length)];
+}
+
+getAvatarIcon(id: string): string {
+  const icons = ['bi-person', 'bi-person-fill', 'bi-person-check', 'bi-person-plus', 'bi-person-x'];
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  return icons[Math.abs(hash % icons.length)];
+}
+
+
+
 
   renderHardestSubjectsChart(data: { asignaturaNombre: string; average: number }[]) {
     console.log('DEPURACIÓN: Renderizando gráfico de asignaturas más difíciles:', data);
